@@ -1,6 +1,6 @@
 # Ubuntu Sticky Notes
 
-Simple sticky notes application built with PyQt5 for Ubuntu.
+Simple sticky notes application built with Python and PyQt5 for Ubuntu.
 
 Version: 1.0.0
 _______________
