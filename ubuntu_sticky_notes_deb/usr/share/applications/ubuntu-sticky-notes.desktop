@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Ubuntu Sticky Notes
+Comment=Simple sticky notes application
+Exec=/usr/local/bin/ubuntu-sticky-notes
+Icon=/usr/share/ubuntu-sticky-notes/resources/gnomestickynotes.png
+Terminal=false
+Type=Application
+Categories=Utility;
+StartupNotify=true
