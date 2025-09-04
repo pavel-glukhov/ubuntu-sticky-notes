@@ -1,0 +1,49 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environment
+venv/
+.env/
+env/
+.venv/
+
+# VLC-specific
+*.vlc
+*.lua
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.cache
+
+# Testing
+.coverage
+coverage.xml
+*.cover
+*.pytest_cache/
+
+# Miscellaneous
+*.bak
+*.swp
+*~
+
+# DB
+stickies.db
