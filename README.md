@@ -13,12 +13,8 @@ _______________
 ```bash
 # Update the package list:
 sudo apt update
-Install Python3 PyQt5:
+# Install Python3 PyQt5:
 sudo apt install python3-pyqt5
-```
-
-
-```bash
 # Install the application package:
 sudo dpkg -i ubuntu_sticky-notes-1.0.0.deb
 ```
