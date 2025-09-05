@@ -6,7 +6,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 APP_INFO = {
     "name": "Ubuntu Sticky Notes",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "author": "Pavel Glukhov",
     "email": "glukhov.p@gmail.com",
     "website": "https://github.com/pavel-glukhov/ubuntu_sticky_notes",
@@ -28,8 +28,7 @@ COLOR_MAP = {"Yellow": "#FFF59D", "Green": "#C8E6C9", "Blue": "#BBDEFB", "Pink":
 
 
 class NotesDB:
-    """SQLite database handler for sticky notes. Supports add, update, delete, restore and query operations.
-       Also stores simple key/value settings (например: always_on_top)."""
+    """SQLite database handler for sticky notes. Supports add, update, delete, restore and query operations."""
 
     def __init__(self, path=DB_PATH):
         """Initialize database connection and create the notes table if it does not exist."""
@@ -43,7 +42,7 @@ class NotesDB:
         """Create the notes table schema and settings table if missing."""
         with self.conn:
             self.conn.execute("""
-                CREATE TABLE IF NOT EXISTS notes (
+                    CREATE TABLE IF NOT EXISTS notes (
                     id INTEGER PRIMARY KEY,
                     content TEXT,
                     x INTEGER,
@@ -52,8 +51,11 @@ class NotesDB:
                     h INTEGER,
                     color TEXT DEFAULT '#FFF59D',
                     deleted INTEGER DEFAULT 0,
-                    deleted_at TEXT
+                    deleted_at TEXT,
+                    always_on_top INTEGER DEFAULT 0,
+                    is_open INTEGER DEFAULT 0
                 )
+
             """)
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS settings (
@@ -62,22 +64,21 @@ class NotesDB:
                 )
             """)
 
-    def add(self, content="", x=300, y=200, w=260, h=200, color="#FFF59D"):
-        """Insert a new note and return its ID."""
+    def add(self, content="", x=300, y=200, w=260, h=200, color="#FFF59D", always_on_top=0):
         with self.conn:
             cur = self.conn.execute(
-                "INSERT INTO notes(content, x, y, w, h, color) VALUES (?, ?, ?, ?, ?, ?)",
-                (content, x, y, w, h, color)
+                "INSERT INTO notes(content, x, y, w, h, color, always_on_top) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (content, x, y, w, h, color, always_on_top)
             )
             return cur.lastrowid
 
-    def update(self, note_id, content, x, y, w, h, color):
-        """Update an existing note with new content, geometry and color."""
+    def update(self, note_id, content, x, y, w, h, color, always_on_top=0):
         with self.conn:
             self.conn.execute(
-                "UPDATE notes SET content=?, x=?, y=?, w=?, h=?, color=? WHERE id=?",
-                (content, x, y, w, h, color, note_id)
+                "UPDATE notes SET content=?, x=?, y=?, w=?, h=?, color=?, always_on_top=? WHERE id=?",
+                (content, x, y, w, h, color, always_on_top, note_id)
             )
+
 
     def get(self, note_id):
         """Retrieve a note by ID."""
@@ -110,7 +111,6 @@ class NotesDB:
         with self.conn:
             self.conn.execute("DELETE FROM notes WHERE id=?", (note_id,))
 
-    # New: settings operations
     def get_setting(self, key):
         """Return setting value for key or None if missing."""
         cur = self.conn.execute("SELECT value FROM settings WHERE key=?", (key,))
@@ -121,6 +121,17 @@ class NotesDB:
         """Set or update a setting."""
         with self.conn:
             self.conn.execute("INSERT INTO settings(key, value) VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (key, value))
+
+    def set_open_state(self, note_id, state: int):
+        """Saves whether the sticker is open (1) or closed (0)."""
+        with self.conn:
+            self.conn.execute("UPDATE notes SET is_open=? WHERE id=?", (state, note_id))
+
+    def get_open_notes(self):
+        """Returns all notes that were opened during the last session."""
+        cur = self.conn.execute("SELECT id FROM notes WHERE is_open=1 AND deleted=0")
+        return [row["id"] for row in cur.fetchall()]
+
 
 
 class StickyWindow(QtWidgets.QWidget):
@@ -235,7 +246,7 @@ class StickyWindow(QtWidgets.QWidget):
         elif action == top_action:
             self.set_always_on_top(not self._always_on_top)
         elif action == close_action:
-            self.hide()
+            self.close()
 
     def change_color(self, color):
         """Change sticky note background color and save it."""
@@ -342,38 +353,47 @@ class StickyWindow(QtWidgets.QWidget):
         if self.note_id:
             row = self.db.get(self.note_id)
             if row:
-                self.text_edit.setHtml(row["content"])  # загрузить HTML
+                self.text_edit.setHtml(row["content"])
                 self.color = row["color"] or self.color
                 self.setGeometry(row["x"] or 300, row["y"] or 200, row["w"] or 260, row["h"] or 200)
+                self.set_always_on_top(bool(row["always_on_top"] or 0))
+
 
 
     def showEvent(self, event):
-        """Load state from DB when note is shown."""
         super().showEvent(event)
         self._loading = True
         self.load_from_db()
+        if self.note_id:
+            self.db.set_open_state(self.note_id, 1)
         self._loading = False
 
     def save(self):
         x, y, w, h = self.x(), self.y(), self.width(), self.height()
-        content = self.text_edit.toHtml()  # сохранить HTML
-        if self._last_geo == (x, y, w, h) and self._last_content == content and self._last_color == self.color:
+        content = self.text_edit.toHtml()
+        always_on_top_int = 1 if self._always_on_top else 0
+        if self._last_geo == (x, y, w, h) and self._last_content == content \
+        and self._last_color == self.color and self._last_always_on_top == always_on_top_int:
             return
         self._last_geo = (x, y, w, h)
         self._last_content = content
         self._last_color = self.color
+        self._last_always_on_top = always_on_top_int
         if self.note_id:
-            self.db.update(self.note_id, content, x, y, w, h, self.color)
+            self.db.update(self.note_id, content, x, y, w, h, self.color, always_on_top_int)
         else:
-            self.note_id = self.db.add(content, x, y, w, h, self.color)
+            self.note_id = self.db.add(content, x, y, w, h, self.color, always_on_top_int)
+
 
     def closeEvent(self, event):
         """Intercept close event, save note and hide window instead."""
         self.save()
+        if self.note_id:
+            self.db.set_open_state(self.note_id, 0)
+            self.closed.emit(self.note_id)
         event.ignore()
         self.hide()
-        if self.note_id:
-            self.closed.emit(self.note_id)
+
 
 
 class TrashWindow(QtWidgets.QWidget):
@@ -397,12 +417,17 @@ class TrashWindow(QtWidgets.QWidget):
         """Refresh trash list from database."""
         self.list_widget.clear()
         for note in self.db.all_trash():
-            snippet = note["content"][:15].replace("\n", " ")
+            doc = QtGui.QTextDocument()
+            doc.setHtml(note["content"])
+            plain_text = doc.toPlainText()
+            snippet = plain_text[:15].replace("\n", " ")
+
             item = QtWidgets.QListWidgetItem(f"{snippet}... ({note['deleted_at']})")
             item.setData(QtCore.Qt.UserRole, note["id"])
             item.setData(QtCore.Qt.UserRole + 1, note["content"])
             item.setData(QtCore.Qt.UserRole + 2, note["color"])
             item.setData(QtCore.Qt.UserRole + 3, note["deleted_at"])
+
             pixmap = QtGui.QPixmap(16, 16)
             pixmap.fill(QtCore.Qt.transparent)
             painter = QtGui.QPainter(pixmap)
@@ -411,7 +436,9 @@ class TrashWindow(QtWidgets.QWidget):
             painter.drawEllipse(0, 0, 15, 15)
             painter.end()
             item.setIcon(QtGui.QIcon(pixmap))
+
             self.list_widget.addItem(item)
+
 
     def show_context_menu(self, pos):
         """Show context menu for trash items."""
@@ -497,7 +524,6 @@ class MainWindow(QtWidgets.QMainWindow):
         h = QtWidgets.QHBoxLayout(widget)
         h.setContentsMargins(4, 2, 4, 2)
 
-        # left color circle
         color_label = QtWidgets.QLabel()
         pixmap = QtGui.QPixmap(16, 16)
         pixmap.fill(QtCore.Qt.transparent)
@@ -515,7 +541,7 @@ class MainWindow(QtWidgets.QMainWindow):
         h.addWidget(text_label)
 
         check_label = QtWidgets.QLabel("✓")
-        check_label.setVisible(False)  # всегда скрыт
+        check_label.setVisible(False)
         h.addWidget(check_label)
 
         widget._text_label = text_label
@@ -527,25 +553,20 @@ class MainWindow(QtWidgets.QMainWindow):
         """Refresh active notes list from database."""
         self.list_widget.clear()
         for note_id, content, color in self.db.all_notes():
-            snippet = content[:15].replace("\n", " ")
+            doc = QtGui.QTextDocument()
+            doc.setHtml(content)
+            plain_text = doc.toPlainText()
+            snippet = plain_text[:15].replace("\n", " ")
+            
             item = QtWidgets.QListWidgetItem()
             item.setData(QtCore.Qt.UserRole, note_id)
             item.setData(QtCore.Qt.UserRole + 1, content)
             item.setData(QtCore.Qt.UserRole + 2, color)
-            # create custom widget
+
             visual = self._create_list_item_widget(f"{snippet}...", color)
             self.list_widget.addItem(item)
             self.list_widget.setItemWidget(item, visual)
         self.filter_list()
-
-    def filter_list(self):
-        """Filter notes list based on search query."""
-        query = self.search_bar.text().lower()
-        for i in range(self.list_widget.count()):
-            item = self.list_widget.item(i)
-            full_text = item.data(QtCore.Qt.UserRole + 1).lower()
-            hidden = query not in full_text
-            item.setHidden(hidden)
 
     def create_note(self):
         """Create and open a new sticky note."""
@@ -558,6 +579,14 @@ class MainWindow(QtWidgets.QMainWindow):
         sticky.show()
         self.refresh_list()
 
+    def filter_list(self):
+        """Filter notes list based on search query."""
+        query = self.search_bar.text().lower()
+        for i in range(self.list_widget.count()):
+            item = self.list_widget.item(i)
+            full_text = item.data(QtCore.Qt.UserRole + 1).lower()
+            hidden = query not in full_text
+            item.setHidden(hidden)
 
     def open_note(self, item_or_id):
         """Open a note window by list item or ID."""
@@ -583,7 +612,11 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in range(self.list_widget.count()):
             item = self.list_widget.item(i)
             if item.data(QtCore.Qt.UserRole) == note_id:
-                snippet = content[:15].replace("\n", " ")
+                doc = QtGui.QTextDocument()
+                doc.setHtml(content)
+                plain_text = doc.toPlainText()
+                snippet = plain_text[:15].replace("\n", " ")
+                
                 item.setData(QtCore.Qt.UserRole + 1, content)
                 widget = self.list_widget.itemWidget(item)
                 if widget and hasattr(widget, "_text_label"):
@@ -735,6 +768,25 @@ def main():
             for sticky in window.stickies.values():
                 sticky.hide()
 
+        def open_previous_state():
+            for note_id in window.db.get_open_notes():
+
+                if note_id in window.stickies:
+                    sticky = window.stickies[note_id]
+                    if sticky.isVisible():
+                        continue
+                else:
+                    sticky = StickyWindow(window.db, note_id)
+                    sticky.closed.connect(window.refresh_list)
+                    sticky.textChanged.connect(window.on_sticky_text_changed)
+                    sticky.colorChanged.connect(window.on_sticky_color_changed)
+                    window.stickies[note_id] = sticky
+                sticky.load_from_db()
+                sticky.show()
+                sticky.raise_()
+                sticky.activateWindow()
+
+        tray_menu.addAction("Open Previous State", open_previous_state)
         tray_menu.addAction("Open All Stickers", open_all_stickies)
         tray_menu.addAction("Hide All Stickers", hide_all_stickies)
         tray_menu.addSeparator()
