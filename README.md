@@ -20,7 +20,7 @@ sudo apt update
 # Install Python3 PyQt5:
 sudo apt install python3-pyqt5
 # Install the application package:
-sudo dpkg -i ubuntu_sticky-notes-1.0.0.deb
+sudo dpkg -i ubuntu_sticky-notes-1.1.0.deb
 ```
 ## Usage
 Run the application after installation to start creating and managing sticky notes.
