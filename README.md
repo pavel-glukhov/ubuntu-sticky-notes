@@ -2,7 +2,7 @@
 
 Simple sticky notes application built with Python and PyQt5 for Ubuntu.
 
-Version: 1.2.1
+Version: 1.2.2
 _______________
 
 ![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/example_1.2.0.png)
@@ -41,7 +41,7 @@ https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/tag/1.2.1
 ```bash
     sudo apt update
     sudo apt install -y python3-pyqt5
-    curl -L -o ubuntu-sticky-notes.deb https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/download/1.2.1/ubuntu-sticky-notes-1.2.1.deb \
+    curl -L -o ubuntu-sticky-notes.deb https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/download/1.2.2/ubuntu-sticky-notes-1.2.2.deb \
         && sudo apt install ./ubuntu-sticky-notes.deb -y
 ```
 ## Usage
