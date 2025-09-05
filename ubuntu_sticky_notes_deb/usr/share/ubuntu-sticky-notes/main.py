@@ -339,13 +339,13 @@ class StickyWindow(QtWidgets.QWidget):
         super().mouseReleaseEvent(event)
 
     def load_from_db(self):
-        """Load sticky note state from database."""
         if self.note_id:
             row = self.db.get(self.note_id)
             if row:
-                self.text_edit.setText(row["content"])
+                self.text_edit.setHtml(row["content"])  # загрузить HTML
                 self.color = row["color"] or self.color
                 self.setGeometry(row["x"] or 300, row["y"] or 200, row["w"] or 260, row["h"] or 200)
+
 
     def showEvent(self, event):
         """Load state from DB when note is shown."""
@@ -355,9 +355,8 @@ class StickyWindow(QtWidgets.QWidget):
         self._loading = False
 
     def save(self):
-        """Save note content and geometry into database."""
         x, y, w, h = self.x(), self.y(), self.width(), self.height()
-        content = self.text_edit.toPlainText()
+        content = self.text_edit.toHtml()  # сохранить HTML
         if self._last_geo == (x, y, w, h) and self._last_content == content and self._last_color == self.color:
             return
         self._last_geo = (x, y, w, h)
