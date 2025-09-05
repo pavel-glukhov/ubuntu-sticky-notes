@@ -2,10 +2,14 @@
 
 Simple sticky notes application built with Python and PyQt5 for Ubuntu.
 
-Version: 1.0.0
+Version: 1.1.0
 _______________
 
-![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/example_1.0.0.png)
+![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/example_1.1.0.png)
+
+## Download:
+You can download deb packet here:
+https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/tag/1.0.0
 
 ## Installation:
 
