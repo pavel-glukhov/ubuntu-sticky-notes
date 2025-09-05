@@ -33,7 +33,7 @@ _______________
 
 ## Download:
 You can download deb packet here:
-https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/tag/1.2.1
+https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/tag/1.2.2
 
 ## Installation:
 
