@@ -9,7 +9,7 @@ _______________
 
 ## Download:
 You can download deb packet here:
-https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/tag/1.0.0
+https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/tag/1.1.0
 
 ## Installation:
 
