@@ -6,7 +6,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 APP_INFO = {
     "name": "Ubuntu Sticky Notes",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "author": "Pavel Glukhov",
     "email": "glukhov.p@gmail.com",
     "website": "https://github.com/pavel-glukhov/ubuntu_sticky_notes",
@@ -714,7 +714,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def open_trash(self):
         """Open trash window."""
         self.trash_window.refresh_list()
-        self.trash_window.show()
+        self.trash_window.showNormal()
 
     def open_all_stickies(self):
         """Open all saved sticky notes at once."""
@@ -757,6 +757,7 @@ def main():
         tray_icon = QtWidgets.QSystemTrayIcon(
             QtGui.QIcon(ICON_PATH) if os.path.exists(ICON_PATH) else QtGui.QIcon.fromTheme("note"), app
         )
+
         tray_menu = QtWidgets.QMenu()
 
         def open_all_stickies():
@@ -770,7 +771,6 @@ def main():
 
         def open_previous_state():
             for note_id in window.db.get_open_notes():
-
                 if note_id in window.stickies:
                     sticky = window.stickies[note_id]
                     if sticky.isVisible():
@@ -786,11 +786,15 @@ def main():
                 sticky.raise_()
                 sticky.activateWindow()
 
+        def open_new_sticker():
+            window.create_note()
+
         tray_menu.addAction("Open Previous State", open_previous_state)
         tray_menu.addAction("Open All Stickers", open_all_stickies)
         tray_menu.addAction("Hide All Stickers", hide_all_stickies)
         tray_menu.addSeparator()
         tray_menu.addAction("Show Notes List", window.showNormal)
+        tray_menu.addAction("Open New Sticker", open_new_sticker)
         tray_menu.addSeparator()
         about_action = tray_menu.addAction("About")
         about_action.triggered.connect(lambda: AboutDialog().exec_())
@@ -800,7 +804,13 @@ def main():
         tray_icon.setToolTip("Ubuntu Sticky Notes")
         tray_icon.setVisible(True)
         tray_icon.setContextMenu(tray_menu)
+
+        tray_icon.activated.connect(
+            lambda reason: window.showNormal() if reason == QtWidgets.QSystemTrayIcon.DoubleClick else None
+        )
+
         tray_icon.show()
+
 
     QtCore.QTimer.singleShot(0, init_app)
     sys.exit(app.exec_())
