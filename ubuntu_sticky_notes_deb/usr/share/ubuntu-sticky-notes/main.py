@@ -16,16 +16,16 @@ COLOR_MAP = {"Yellow": "#FFF59D", "Green": "#C8E6C9", "Blue": "#BBDEFB", "Pink":
 
 
 class NotesDB:
-    """Handles SQLite database operations for sticky notes."""
+    """SQLite database handler for sticky notes. Supports add, update, delete, restore and query operations."""
 
     def __init__(self, path=DB_PATH):
-        """Initialize database connection and create table if not exists."""
+        """Initialize database connection and create the notes table if it does not exist."""
         self.conn = sqlite3.connect(path)
         self.conn.row_factory = sqlite3.Row
         self._create_table()
 
     def _create_table(self):
-        """Create the notes table if it doesn't exist."""
+        """Create the notes table schema if missing."""
         with self.conn:
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS notes (
@@ -42,7 +42,7 @@ class NotesDB:
             """)
 
     def add(self, content="", x=300, y=200, w=260, h=200, color="#FFF59D"):
-        """Add a new note to the database."""
+        """Insert a new note and return its ID."""
         with self.conn:
             cur = self.conn.execute(
                 "INSERT INTO notes(content, x, y, w, h, color) VALUES (?, ?, ?, ?, ?, ?)",
@@ -51,7 +51,7 @@ class NotesDB:
             return cur.lastrowid
 
     def update(self, note_id, content, x, y, w, h, color):
-        """Update an existing note in the database."""
+        """Update an existing note with new content, geometry and color."""
         with self.conn:
             self.conn.execute(
                 "UPDATE notes SET content=?, x=?, y=?, w=?, h=?, color=? WHERE id=?",
@@ -59,46 +59,46 @@ class NotesDB:
             )
 
     def get(self, note_id):
-        """Retrieve a note by its ID."""
+        """Retrieve a note by ID."""
         cur = self.conn.execute("SELECT * FROM notes WHERE id=?", (note_id,))
         return cur.fetchone()
 
     def all_notes(self):
-        """Return all active (non-deleted) notes."""
+        """Return all active notes (not deleted)."""
         cur = self.conn.execute("SELECT id, content, color FROM notes WHERE deleted=0")
         return cur.fetchall()
 
     def move_to_trash(self, note_id):
-        """Move a note to the trash."""
+        """Mark a note as deleted and move it to trash."""
         deleted_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with self.conn:
             self.conn.execute("UPDATE notes SET deleted=1, deleted_at=? WHERE id=?", (deleted_at, note_id))
 
     def all_trash(self):
-        """Return all deleted notes."""
+        """Return all deleted notes in trash."""
         cur = self.conn.execute("SELECT * FROM notes WHERE deleted=1")
         return cur.fetchall()
 
     def restore_from_trash(self, note_id):
-        """Restore a note from trash."""
+        """Restore a note from trash back to active notes."""
         with self.conn:
             self.conn.execute("UPDATE notes SET deleted=0, deleted_at=NULL WHERE id=?", (note_id,))
 
     def delete_permanently(self, note_id):
-        """Delete a note permanently from the database."""
+        """Remove a note permanently from the database."""
         with self.conn:
             self.conn.execute("DELETE FROM notes WHERE id=?", (note_id,))
 
 
 class StickyWindow(QtWidgets.QWidget):
-    """Represents an individual sticky note window."""
+    """Sticky note window supporting text editing, formatting, autosave, drag and resize."""
 
     closed = QtCore.pyqtSignal(int)
     textChanged = QtCore.pyqtSignal(int, str)
     colorChanged = QtCore.pyqtSignal(int, str)
 
     def __init__(self, db: NotesDB, note_id=None):
-        """Initialize a sticky note window."""
+        """Initialize a sticky note window and its components."""
         super().__init__()
         self.db = db
         self.note_id = note_id
@@ -112,21 +112,10 @@ class StickyWindow(QtWidgets.QWidget):
         self._drag_pos = None
         self.color = "#FFF59D"
 
-        self.format_bar = QtWidgets.QToolBar(self)
-        self.format_bar.setIconSize(QtCore.QSize(64, 64))
-        self.format_bar.setStyleSheet("background: transparent; border: none;")
-        bold_action = QtWidgets.QAction("B", self)
-        bold_action.triggered.connect(self.toggle_bold)
-        italic_action = QtWidgets.QAction("I", self)
-        italic_action.triggered.connect(self.toggle_italic)
-        strike_action = QtWidgets.QAction("S", self)
-        strike_action.triggered.connect(self.toggle_strike)
-        list_action = QtWidgets.QAction("⋮", self)
-        list_action.triggered.connect(self.toggle_list)
-        self.format_bar.addAction(bold_action)
-        self.format_bar.addAction(italic_action)
-        self.format_bar.addAction(strike_action)
-        self.format_bar.addAction(list_action)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+B"), self, self.toggle_bold)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+I"), self, self.toggle_italic)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Shift+S"), self, self.toggle_strike)
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Shift+L"), self, self.toggle_list)
 
         self.text_edit = QtWidgets.QTextEdit(self)
         self.text_edit.setStyleSheet("background: transparent; border: none; font-size: 12pt;")
@@ -144,37 +133,55 @@ class StickyWindow(QtWidgets.QWidget):
         self.autosave_timer.start()
 
     def on_text_changed(self):
-        """Handle text changes and emit signal."""
+        """Emit signal when text changes and trigger autosave."""
         if not self._loading and self.note_id:
             content = self.text_edit.toPlainText()
             self.textChanged.emit(self.note_id, content)
             self.save()
 
     def show_context_menu(self, pos):
-        """Show the context menu for a sticky note."""
+        """Show context menu for editing and formatting options."""
         menu = QtWidgets.QMenu(self)
-        copy_action = menu.addAction("📋 Copy")
-        paste_action = menu.addAction("📥 Paste")
-        select_all_action = menu.addAction("🔲 Select All")
+
+        copy_action = menu.addAction("📋 Copy (Ctrl+C)")
+        paste_action = menu.addAction("📥 Paste (Ctrl+V)")
+        select_all_action = menu.addAction("🔲 Select All (Ctrl+A)")
         menu.addSeparator()
+
+        bold_action = menu.addAction("Bold (Ctrl+B)")
+        italic_action = menu.addAction("Italic (Ctrl+I)")
+        strike_action = menu.addAction("Strike (Shift+S)")
+        list_action = menu.addAction("Bullet List (Shift+L)")
+        menu.addSeparator()
+
         color_menu = menu.addMenu("🎨 Background Color")
         for name, color in COLOR_MAP.items():
             action = color_menu.addAction(name)
             action.triggered.connect(lambda checked, c=color: self.change_color(c))
         menu.addSeparator()
-        close_action = menu.addAction("❌ Close Note")
+
+        close_action = menu.addAction("❌ Close Sticker")
         action = menu.exec_(self.text_edit.mapToGlobal(pos))
+
         if action == copy_action:
             self.text_edit.copy()
         elif action == paste_action:
             self.text_edit.paste()
         elif action == select_all_action:
             self.text_edit.selectAll()
+        elif action == bold_action:
+            self.toggle_bold()
+        elif action == italic_action:
+            self.toggle_italic()
+        elif action == strike_action:
+            self.toggle_strike()
+        elif action == list_action:
+            self.toggle_list()
         elif action == close_action:
             self.hide()
 
     def change_color(self, color):
-        """Change the background color of the sticky note."""
+        """Change sticky note background color and save it."""
         self.color = color
         self.update()
         self.save()
@@ -182,21 +189,21 @@ class StickyWindow(QtWidgets.QWidget):
             self.colorChanged.emit(self.note_id, color)
 
     def resizeEvent(self, event):
-        """Handle resizing of sticky window and its components."""
-        bar_height = 40
+        """Resize text area and size grip, then save state."""
         offset = 10
-        self.text_edit.setGeometry(self.margin, self.margin,
-                                   self.width() - 2*self.margin,
-                                   self.height() - 2*self.margin - bar_height - offset - 5)
-        self.format_bar.setGeometry(self.margin, self.height() - bar_height - self.margin - offset,
-                                    self.width() - 2*self.margin, bar_height)
-        self.size_grip.setGeometry(self.width()-20, self.height()-20, 15, 15)
+        self.text_edit.setGeometry(
+            self.margin,
+            self.margin,
+            self.width() - 2 * self.margin,
+            self.height() - 2 * self.margin - offset
+        )
+        self.size_grip.setGeometry(self.width() - 20, self.height() - 20, 15, 15)
         super().resizeEvent(event)
         if not self._loading:
             self.save()
 
     def toggle_bold(self):
-        """Toggle bold formatting for selected text."""
+        """Toggle bold formatting on selected text."""
         cursor = self.text_edit.textCursor()
         fmt = QtGui.QTextCharFormat()
         fmt.setFontWeight(QtGui.QFont.Bold if cursor.charFormat().fontWeight() != QtGui.QFont.Bold else QtGui.QFont.Normal)
@@ -204,7 +211,7 @@ class StickyWindow(QtWidgets.QWidget):
         self.text_edit.mergeCurrentCharFormat(fmt)
 
     def toggle_italic(self):
-        """Toggle italic formatting for selected text."""
+        """Toggle italic formatting on selected text."""
         cursor = self.text_edit.textCursor()
         fmt = QtGui.QTextCharFormat()
         fmt.setFontItalic(not cursor.charFormat().fontItalic())
@@ -212,7 +219,7 @@ class StickyWindow(QtWidgets.QWidget):
         self.text_edit.mergeCurrentCharFormat(fmt)
 
     def toggle_strike(self):
-        """Toggle strike-through formatting for selected text."""
+        """Toggle strike-through formatting on selected text."""
         cursor = self.text_edit.textCursor()
         fmt = QtGui.QTextCharFormat()
         fmt.setFontStrikeOut(not cursor.charFormat().fontStrikeOut())
@@ -220,7 +227,7 @@ class StickyWindow(QtWidgets.QWidget):
         self.text_edit.mergeCurrentCharFormat(fmt)
 
     def toggle_list(self):
-        """Toggle bullet list formatting for the current paragraph."""
+        """Toggle bullet list formatting on current paragraph."""
         cursor = self.text_edit.textCursor()
         if cursor.currentList():
             cursor.currentList().remove(cursor.block())
@@ -230,13 +237,13 @@ class StickyWindow(QtWidgets.QWidget):
             cursor.createList(list_fmt)
 
     def moveEvent(self, event):
-        """Handle window movement event."""
+        """Save state on window move."""
         super().moveEvent(event)
         if not self._loading:
             self.save()
 
     def paintEvent(self, event):
-        """Paint the sticky note background and line separator."""
+        """Draw note background and border."""
         painter = QtGui.QPainter(self)
         painter.setBrush(QtGui.QColor(self.color))
         pen = QtGui.QPen(QtGui.QColor("#A0A0A0"))
@@ -245,11 +252,10 @@ class StickyWindow(QtWidgets.QWidget):
         rect = self.rect()
         rect.adjust(0, 0, -1, -1)
         painter.drawRect(rect)
-        painter.drawLine(self.margin, self.height() - 45 - 10, self.width() - self.margin, self.height() - 45 - 10)
         super().paintEvent(event)
 
     def mousePressEvent(self, event):
-        """Handle mouse press for dragging."""
+        """Handle window drag start."""
         if event.button() == QtCore.Qt.LeftButton:
             platform = QtWidgets.QApplication.platformName()
             if platform == "wayland":
@@ -261,14 +267,14 @@ class StickyWindow(QtWidgets.QWidget):
             event.accept()
 
     def mouseMoveEvent(self, event):
-        """Handle mouse move for dragging."""
+        """Handle dragging window with mouse."""
         if event.buttons() == QtCore.Qt.LeftButton and self._drag_pos:
             if QtWidgets.QApplication.platformName() in ["xcb", "windows"]:
                 self.move(event.globalPos() - self._drag_pos)
             event.accept()
 
     def mouseReleaseEvent(self, event):
-        """Handle mouse release after dragging."""
+        """Save state after drag ends."""
         if event.button() == QtCore.Qt.LeftButton:
             if self._drag_pos:
                 self.save()
@@ -276,7 +282,7 @@ class StickyWindow(QtWidgets.QWidget):
         super().mouseReleaseEvent(event)
 
     def load_from_db(self):
-        """Load sticky note content and geometry from database."""
+        """Load sticky note state from database."""
         if self.note_id:
             row = self.db.get(self.note_id)
             if row:
@@ -285,14 +291,14 @@ class StickyWindow(QtWidgets.QWidget):
                 self.setGeometry(row["x"] or 300, row["y"] or 200, row["w"] or 260, row["h"] or 200)
 
     def showEvent(self, event):
-        """Load note from DB when window is shown."""
+        """Load state from DB when note is shown."""
         super().showEvent(event)
         self._loading = True
         self.load_from_db()
         self._loading = False
 
     def save(self):
-        """Save sticky note content and geometry to database."""
+        """Save note content and geometry into database."""
         x, y, w, h = self.x(), self.y(), self.width(), self.height()
         content = self.text_edit.toPlainText()
         if self._last_geo == (x, y, w, h) and self._last_content == content and self._last_color == self.color:
@@ -306,7 +312,7 @@ class StickyWindow(QtWidgets.QWidget):
             self.note_id = self.db.add(content, x, y, w, h, self.color)
 
     def closeEvent(self, event):
-        """Intercept close event to hide window instead of closing."""
+        """Intercept close event, save note and hide window instead."""
         self.save()
         event.ignore()
         self.hide()
@@ -315,10 +321,10 @@ class StickyWindow(QtWidgets.QWidget):
 
 
 class TrashWindow(QtWidgets.QWidget):
-    """Window displaying deleted notes."""
+    """Trash window to manage deleted notes (restore, delete permanently, preview)."""
 
     def __init__(self, db: NotesDB, main_window=None):
-        """Initialize trash window."""
+        """Initialize trash view window."""
         super().__init__()
         self.db = db
         self.main_window = main_window
@@ -331,7 +337,7 @@ class TrashWindow(QtWidgets.QWidget):
         self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
 
     def refresh_list(self):
-        """Refresh the list of deleted notes."""
+        """Refresh trash list from database."""
         self.list_widget.clear()
         for note in self.db.all_trash():
             snippet = note["content"][:15].replace("\n", " ")
@@ -376,13 +382,13 @@ class TrashWindow(QtWidgets.QWidget):
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    """Main application window showing all sticky notes."""
+    """Main application window showing a searchable list of all notes."""
 
     def __init__(self):
-        """Initialize main window."""
+        """Initialize main window with list, search bar, toolbar and trash window."""
         super().__init__()
         self.db = NotesDB()
-        self.setWindowTitle("Sticky Notes")
+        self.setWindowTitle("Ubuntu Sticky Notes")
         self.resize(300, 400)
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
@@ -400,14 +406,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.list_widget.itemDoubleClicked.connect(self.open_note)
 
         toolbar = self.addToolBar("Toolbar")
-        new_action = QtWidgets.QAction("New", self)
+
+        new_icon_path = os.path.join(BASE_DIR, "resources", "new.png")
+        new_action = QtWidgets.QAction(QtGui.QIcon(new_icon_path), "", self)
         new_action.triggered.connect(self.create_note)
         toolbar.addAction(new_action)
 
         spacer = QtWidgets.QWidget()
         spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         toolbar.addWidget(spacer)
-        bin_action = QtWidgets.QAction("Bin", self)
+
+        bin_icon_path = os.path.join(BASE_DIR, "resources", "bin.png")
+        bin_action = QtWidgets.QAction(QtGui.QIcon(bin_icon_path), "", self)
         bin_action.triggered.connect(self.open_trash)
         toolbar.addAction(bin_action)
 
@@ -416,12 +426,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.refresh_list()
 
     def closeEvent(self, event):
-        """Hide main window instead of closing."""
+        """Hide main window instead of closing app."""
         event.ignore()
         self.hide()
 
     def refresh_list(self):
-        """Refresh the list of active notes."""
+        """Refresh active notes list from database."""
         self.list_widget.clear()
         for note_id, content, color in self.db.all_notes():
             snippet = content[:15].replace("\n", " ")
@@ -441,7 +451,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filter_list()
 
     def filter_list(self):
-        """Filter notes in the list based on search query."""
+        """Filter notes list based on search query."""
         query = self.search_bar.text().lower()
         for i in range(self.list_widget.count()):
             item = self.list_widget.item(i)
@@ -449,7 +459,7 @@ class MainWindow(QtWidgets.QMainWindow):
             item.setHidden(query not in full_text)
 
     def create_note(self):
-        """Create a new sticky note."""
+        """Create and open a new sticky note."""
         note_id = self.db.add()
         sticky = StickyWindow(self.db, note_id)
         sticky.closed.connect(self.refresh_list)
@@ -460,7 +470,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.refresh_list()
 
     def open_note(self, item_or_id):
-        """Open a sticky note window."""
+        """Open a note window by list item or ID."""
         if isinstance(item_or_id, QtWidgets.QListWidgetItem):
             note_id = item_or_id.data(QtCore.Qt.UserRole)
         else:
@@ -479,7 +489,7 @@ class MainWindow(QtWidgets.QMainWindow):
         sticky.activateWindow()
 
     def on_sticky_text_changed(self, note_id, content):
-        """Update list item text when sticky content changes."""
+        """Update list entry text when sticky content changes."""
         for i in range(self.list_widget.count()):
             item = self.list_widget.item(i)
             if item.data(QtCore.Qt.UserRole) == note_id:
@@ -506,7 +516,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 break
 
     def show_context_menu(self, pos):
-        """Show context menu for a note in the main list."""
+        """Show context menu for managing a note."""
         item = self.list_widget.itemAt(pos)
         if not item:
             return
@@ -524,13 +534,13 @@ class MainWindow(QtWidgets.QMainWindow):
             self.delete_note_with_confirmation(item)
 
     def change_item_color(self, item, color):
-        """Change color of a note from the main list."""
+        """Change note color from main list."""
         note_id = item.data(QtCore.Qt.UserRole)
         if note_id in self.stickies:
             self.stickies[note_id].change_color(color)
 
     def delete_note_with_confirmation(self, item):
-        """Move a note to trash after confirmation."""
+        """Confirm deletion and move note to trash."""
         note_id = item.data(QtCore.Qt.UserRole)
         reply = QtWidgets.QMessageBox.question(
             self, "Delete Note",
@@ -548,45 +558,56 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.trash_window.refresh_list()
 
     def open_trash(self):
-        """Open the trash window."""
+        """Open trash window."""
         self.trash_window.refresh_list()
         self.trash_window.show()
 
     def open_all_stickies(self):
-        """Open all sticky notes."""
+        """Open all saved sticky notes at once."""
         for note_id in [item.data(QtCore.Qt.UserRole) for item in self.list_widget.findItems("", QtCore.Qt.MatchContains)]:
             self.open_note(note_id)
 
 
 def main():
-    """Launch the Sticky Notes application."""
     if sys.platform.startswith("linux") and "WAYLAND_DISPLAY" in os.environ:
         os.environ["QT_QPA_PLATFORM"] = "xcb"
+
     app = QtWidgets.QApplication(sys.argv)
-    window = MainWindow()
-    window.hide()
+    app.setQuitOnLastWindowClosed(False)
 
-    tray_icon = QtWidgets.QSystemTrayIcon(
-        QtGui.QIcon(ICON_PATH) if os.path.exists(ICON_PATH) else QtGui.QIcon.fromTheme("note"), app
-    )
+    def init_app():
+        window = MainWindow()
+        window.hide()
 
-    tray_menu = QtWidgets.QMenu()
+        tray_icon = QtWidgets.QSystemTrayIcon(
+            QtGui.QIcon(ICON_PATH) if os.path.exists(ICON_PATH) else QtGui.QIcon.fromTheme("note"), app
+        )
+        tray_menu = QtWidgets.QMenu()
 
-    def open_all_stickies():
-        for i in range(window.list_widget.count()):
-            item = window.list_widget.item(i)
-            window.open_note(item)
+        def open_all_stickies():
+            for i in range(window.list_widget.count()):
+                item = window.list_widget.item(i)
+                window.open_note(item)
 
-    tray_menu.addAction("Open All Stickers", open_all_stickies)
-    tray_menu.addSeparator()
-    tray_menu.addAction("Show Notes List", window.showNormal)
-    tray_menu.addAction("Exit", app.quit)
+        def hide_all_stickies():
+            for sticky in window.stickies.values():
+                sticky.hide()
 
-    tray_icon.setContextMenu(tray_menu)
-    tray_icon.setToolTip("Sticky Notes")
-    tray_icon.show()
+        tray_menu.addAction("Open All Stickers", open_all_stickies)
+        tray_menu.addAction("Hide All Stickers", hide_all_stickies)
+        tray_menu.addSeparator()
+        tray_menu.addAction("Show Notes List", window.showNormal)
+        tray_menu.addSeparator()
+        tray_menu.addAction("Exit", app.quit)
 
+        tray_icon.setToolTip("Ubuntu Sticky Notes")
+        tray_icon.setVisible(True)
+        tray_icon.setContextMenu(tray_menu)
+        tray_icon.show()
+
+    QtCore.QTimer.singleShot(0, init_app)
     sys.exit(app.exec_())
+
 
 
 if __name__ == "__main__":
