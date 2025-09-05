@@ -4,9 +4,21 @@ import os
 from datetime import datetime
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-APP_NAME = "ubuntu-sticky-notes"
+APP_INFO = {
+    "name": "Ubuntu Sticky Notes",
+    "version": "1.2.0",
+    "author": "Pavel Glukhov",
+    "email": "glukhov.p@gmail.com",
+    "website": "https://github.com/pavel-glukhov/ubuntu_sticky_notes",
+    "description": (
+        "Ubuntu Sticky Notes is a lightweight desktop application for creating "
+        "and managing sticky notes. Notes can be customized with colors, "
+        "pinned on top, moved to trash and restored."
+    ),
+    "license": "MIT License"
+}
 
-DATA_DIR = os.path.join(os.path.expanduser("~"), ".local", "share", APP_NAME)
+DATA_DIR = os.path.join(os.path.expanduser("~"), ".local", "share", APP_INFO.get('name').replace(' ', '-').lower())
 os.makedirs(DATA_DIR, exist_ok=True)
 DB_PATH = os.path.join(DATA_DIR, "stickies.db")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,16 +28,19 @@ COLOR_MAP = {"Yellow": "#FFF59D", "Green": "#C8E6C9", "Blue": "#BBDEFB", "Pink":
 
 
 class NotesDB:
-    """SQLite database handler for sticky notes. Supports add, update, delete, restore and query operations."""
+    """SQLite database handler for sticky notes. Supports add, update, delete, restore and query operations.
+       Also stores simple key/value settings (например: always_on_top)."""
 
     def __init__(self, path=DB_PATH):
         """Initialize database connection and create the notes table if it does not exist."""
         self.conn = sqlite3.connect(path)
         self.conn.row_factory = sqlite3.Row
         self._create_table()
+        if self.get_setting("always_on_top") is None:
+            self.set_setting("always_on_top", "0")
 
     def _create_table(self):
-        """Create the notes table schema if missing."""
+        """Create the notes table schema and settings table if missing."""
         with self.conn:
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS notes (
@@ -38,6 +53,12 @@ class NotesDB:
                     color TEXT DEFAULT '#FFF59D',
                     deleted INTEGER DEFAULT 0,
                     deleted_at TEXT
+                )
+            """)
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT
                 )
             """)
 
@@ -89,6 +110,18 @@ class NotesDB:
         with self.conn:
             self.conn.execute("DELETE FROM notes WHERE id=?", (note_id,))
 
+    # New: settings operations
+    def get_setting(self, key):
+        """Return setting value for key or None if missing."""
+        cur = self.conn.execute("SELECT value FROM settings WHERE key=?", (key,))
+        row = cur.fetchone()
+        return row["value"] if row else None
+
+    def set_setting(self, key, value):
+        """Set or update a setting."""
+        with self.conn:
+            self.conn.execute("INSERT INTO settings(key, value) VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (key, value))
+
 
 class StickyWindow(QtWidgets.QWidget):
     """Sticky note window supporting text editing, formatting, autosave, drag and resize."""
@@ -97,12 +130,15 @@ class StickyWindow(QtWidgets.QWidget):
     textChanged = QtCore.pyqtSignal(int, str)
     colorChanged = QtCore.pyqtSignal(int, str)
 
-    def __init__(self, db: NotesDB, note_id=None):
-        """Initialize a sticky note window and its components."""
+    def __init__(self, db: NotesDB, note_id=None, always_on_top=False):
         super().__init__()
         self.db = db
         self.note_id = note_id
-        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint)
+        self._always_on_top = bool(always_on_top)
+        flags = QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint
+        if self._always_on_top:
+            flags |= QtCore.Qt.WindowStaysOnTopHint
+        self.setWindowFlags(flags)
         self.setMinimumSize(200, 150)
         self._last_geo = None
         self._last_content = None
@@ -132,6 +168,19 @@ class StickyWindow(QtWidgets.QWidget):
         self.autosave_timer.timeout.connect(self.save)
         self.autosave_timer.start()
 
+    def set_always_on_top(self, flag: bool):
+        """Set/unset window always-on-top flag for this sticky."""
+        self._always_on_top = bool(flag)
+        flags = self.windowFlags()
+        if self._always_on_top:
+            flags |= QtCore.Qt.WindowStaysOnTopHint
+        else:
+            flags &= ~QtCore.Qt.WindowStaysOnTopHint
+        self.setWindowFlags(flags)
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
     def on_text_changed(self):
         """Emit signal when text changes and trigger autosave."""
         if not self._loading and self.note_id:
@@ -152,6 +201,12 @@ class StickyWindow(QtWidgets.QWidget):
         italic_action = menu.addAction("Italic (Ctrl+I)")
         strike_action = menu.addAction("Strike (Shift+S)")
         list_action = menu.addAction("Bullet List (Shift+L)")
+        menu.addSeparator()
+
+        if self._always_on_top:
+            top_action = menu.addAction("📍 Unpin from Top")
+        else:
+            top_action = menu.addAction("📌 Pin to Top")
         menu.addSeparator()
 
         color_menu = menu.addMenu("🎨 Background Color")
@@ -177,6 +232,8 @@ class StickyWindow(QtWidgets.QWidget):
             self.toggle_strike()
         elif action == list_action:
             self.toggle_list()
+        elif action == top_action:
+            self.set_always_on_top(not self._always_on_top)
         elif action == close_action:
             self.hide()
 
@@ -330,6 +387,7 @@ class TrashWindow(QtWidgets.QWidget):
         self.main_window = main_window
         self.setWindowTitle("Trash")
         self.resize(300, 400)
+        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
         layout = QtWidgets.QVBoxLayout(self)
         self.list_widget = QtWidgets.QListWidget()
         layout.addWidget(self.list_widget)
@@ -394,6 +452,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
 
+        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, True)
+
         self.search_bar = QtWidgets.QLineEdit()
         self.search_bar.setPlaceholderText("Search...")
         self.search_bar.textChanged.connect(self.filter_list)
@@ -404,9 +464,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.list_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
         self.list_widget.itemDoubleClicked.connect(self.open_note)
-
         toolbar = self.addToolBar("Toolbar")
-
+        toolbar.setMovable(False)
+        toolbar.setContextMenuPolicy(QtCore.Qt.PreventContextMenu)
+        toolbar.setIconSize(QtCore.QSize(32, 32))
         new_icon_path = os.path.join(BASE_DIR, "resources", "new.png")
         new_action = QtWidgets.QAction(QtGui.QIcon(new_icon_path), "", self)
         new_action.triggered.connect(self.create_note)
@@ -430,24 +491,52 @@ class MainWindow(QtWidgets.QMainWindow):
         event.ignore()
         self.hide()
 
+
+    def _create_list_item_widget(self, snippet_text: str, color: str):
+        """Create a QWidget used as the visual representation of a list item."""
+        widget = QtWidgets.QWidget()
+        h = QtWidgets.QHBoxLayout(widget)
+        h.setContentsMargins(4, 2, 4, 2)
+
+        # left color circle
+        color_label = QtWidgets.QLabel()
+        pixmap = QtGui.QPixmap(16, 16)
+        pixmap.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(pixmap)
+        painter.setBrush(QtGui.QColor(color))
+        painter.setPen(QtGui.QColor("#A0A0A0"))
+        painter.drawEllipse(0, 0, 15, 15)
+        painter.end()
+        color_label.setPixmap(pixmap)
+        color_label.setFixedSize(18, 18)
+        h.addWidget(color_label)
+
+        text_label = QtWidgets.QLabel(snippet_text)
+        text_label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        h.addWidget(text_label)
+
+        check_label = QtWidgets.QLabel("✓")
+        check_label.setVisible(False)  # всегда скрыт
+        h.addWidget(check_label)
+
+        widget._text_label = text_label
+        widget._color_label = color_label
+        return widget
+
+
     def refresh_list(self):
         """Refresh active notes list from database."""
         self.list_widget.clear()
         for note_id, content, color in self.db.all_notes():
             snippet = content[:15].replace("\n", " ")
-            item = QtWidgets.QListWidgetItem(f"{snippet}...")
+            item = QtWidgets.QListWidgetItem()
             item.setData(QtCore.Qt.UserRole, note_id)
             item.setData(QtCore.Qt.UserRole + 1, content)
             item.setData(QtCore.Qt.UserRole + 2, color)
-            pixmap = QtGui.QPixmap(16, 16)
-            pixmap.fill(QtCore.Qt.transparent)
-            painter = QtGui.QPainter(pixmap)
-            painter.setBrush(QtGui.QColor(color))
-            painter.setPen(QtGui.QColor("#A0A0A0"))
-            painter.drawEllipse(0, 0, 15, 15)
-            painter.end()
-            item.setIcon(QtGui.QIcon(pixmap))
+            # create custom widget
+            visual = self._create_list_item_widget(f"{snippet}...", color)
             self.list_widget.addItem(item)
+            self.list_widget.setItemWidget(item, visual)
         self.filter_list()
 
     def filter_list(self):
@@ -456,18 +545,20 @@ class MainWindow(QtWidgets.QMainWindow):
         for i in range(self.list_widget.count()):
             item = self.list_widget.item(i)
             full_text = item.data(QtCore.Qt.UserRole + 1).lower()
-            item.setHidden(query not in full_text)
+            hidden = query not in full_text
+            item.setHidden(hidden)
 
     def create_note(self):
         """Create and open a new sticky note."""
         note_id = self.db.add()
-        sticky = StickyWindow(self.db, note_id)
+        sticky = StickyWindow(self.db, note_id, always_on_top=False)
         sticky.closed.connect(self.refresh_list)
         sticky.textChanged.connect(self.on_sticky_text_changed)
         sticky.colorChanged.connect(self.on_sticky_color_changed)
         self.stickies[note_id] = sticky
         sticky.show()
         self.refresh_list()
+
 
     def open_note(self, item_or_id):
         """Open a note window by list item or ID."""
@@ -478,7 +569,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if note_id in self.stickies:
             sticky = self.stickies[note_id]
         else:
-            sticky = StickyWindow(self.db, note_id)
+            sticky = StickyWindow(self.db, note_id, always_on_top=False)
             sticky.closed.connect(self.refresh_list)
             sticky.textChanged.connect(self.on_sticky_text_changed)
             sticky.colorChanged.connect(self.on_sticky_color_changed)
@@ -494,8 +585,10 @@ class MainWindow(QtWidgets.QMainWindow):
             item = self.list_widget.item(i)
             if item.data(QtCore.Qt.UserRole) == note_id:
                 snippet = content[:15].replace("\n", " ")
-                item.setText(f"{snippet}...")
                 item.setData(QtCore.Qt.UserRole + 1, content)
+                widget = self.list_widget.itemWidget(item)
+                if widget and hasattr(widget, "_text_label"):
+                    widget._text_label.setText(f"{snippet}...")
                 break
         self.filter_list()
 
@@ -505,39 +598,68 @@ class MainWindow(QtWidgets.QMainWindow):
             item = self.list_widget.item(i)
             if item.data(QtCore.Qt.UserRole) == note_id:
                 item.setData(QtCore.Qt.UserRole + 2, color)
-                pixmap = QtGui.QPixmap(16, 16)
-                pixmap.fill(QtCore.Qt.transparent)
-                painter = QtGui.QPainter(pixmap)
-                painter.setBrush(QtGui.QColor(color))
-                painter.setPen(QtGui.QColor("#A0A0A0"))
-                painter.drawEllipse(0, 0, 15, 15)
-                painter.end()
-                item.setIcon(QtGui.QIcon(pixmap))
+                widget = self.list_widget.itemWidget(item)
+                if widget and hasattr(widget, "_color_label"):
+                    pixmap = QtGui.QPixmap(16, 16)
+                    pixmap.fill(QtCore.Qt.transparent)
+                    painter = QtGui.QPainter(pixmap)
+                    painter.setBrush(QtGui.QColor(color))
+                    painter.setPen(QtGui.QColor("#A0A0A0"))
+                    painter.drawEllipse(0, 0, 15, 15)
+                    painter.end()
+                    widget._color_label.setPixmap(pixmap)
                 break
 
     def show_context_menu(self, pos):
         """Show context menu for managing a note."""
         item = self.list_widget.itemAt(pos)
-        if not item:
-            return
         menu = QtWidgets.QMenu()
-        open_action = menu.addAction("Open")
-        color_menu = menu.addMenu("🎨 Change Color")
-        delete_action = menu.addAction("Delete")
-        for name, color in COLOR_MAP.items():
-            action = color_menu.addAction(name)
-            action.triggered.connect(lambda checked, c=color, i=item: self.change_item_color(i, c))
+
+        if item:
+            open_action = menu.addAction("Open")
+            color_menu = menu.addMenu("🎨 Change Color")
+            delete_action = menu.addAction("Delete")
+            for name, color in COLOR_MAP.items():
+                action = color_menu.addAction(name)
+                action.triggered.connect(lambda checked, c=color, i=item: self.change_item_color(i, c))
+        else:
+            open_action = delete_action = None
+
         action = menu.exec_(self.list_widget.mapToGlobal(pos))
-        if action == open_action:
+
+        if item and action == open_action:
             self.open_note(item)
-        elif action == delete_action:
+        elif item and action == delete_action:
             self.delete_note_with_confirmation(item)
+
+    def set_always_on_top(self, flag: bool):
+        """Set global always-on-top mode, save to DB, update main window and all stickies and UI check marks."""
+        self.always_on_top = bool(flag)
+        self.db.set_setting("always_on_top", "1" if self.always_on_top else "0")
+        self.setWindowFlag(QtCore.Qt.WindowStaysOnTopHint, self.always_on_top)
+        self.show()
+        self.raise_()
+        self.activateWindow()
+        for sticky in self.stickies.values():
+            sticky.set_always_on_top(self.always_on_top)
+        for i in range(self.list_widget.count()):
+            item = self.list_widget.item(i)
+            widget = self.list_widget.itemWidget(item)
+            if widget and hasattr(widget, "_check_label"):
+                widget._check_label.setVisible(self.always_on_top)
 
     def change_item_color(self, item, color):
         """Change note color from main list."""
         note_id = item.data(QtCore.Qt.UserRole)
         if note_id in self.stickies:
             self.stickies[note_id].change_color(color)
+        else:
+            cur_content = item.data(QtCore.Qt.UserRole + 1)
+            row = self.db.get(note_id)
+            if row:
+                x, y, w, h = row["x"] or 300, row["y"] or 200, row["w"] or 260, row["h"] or 200
+                self.db.update(note_id, cur_content, x, y, w, h, color)
+            self.refresh_list()
 
     def delete_note_with_confirmation(self, item):
         """Confirm deletion and move note to trash."""
@@ -566,6 +688,27 @@ class MainWindow(QtWidgets.QMainWindow):
         """Open all saved sticky notes at once."""
         for note_id in [item.data(QtCore.Qt.UserRole) for item in self.list_widget.findItems("", QtCore.Qt.MatchContains)]:
             self.open_note(note_id)
+
+
+class AboutDialog(QtWidgets.QMessageBox):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(f"About {APP_INFO['name']}")
+        self.setIcon(QtWidgets.QMessageBox.Information)
+
+        text = (
+            f"<b>{APP_INFO['name']}</b><br>"
+            f"Version: {APP_INFO['version']}<br>"
+            f"Author: {APP_INFO['author']}<br>"
+            f"Email: {APP_INFO['email']}<br>"
+            f"<a href='{APP_INFO['website']}'>{APP_INFO['website']}</a><br><br>"
+            f"{APP_INFO['description']}<br><br>"
+            f"<i>{APP_INFO['license']}</i>"
+        )
+
+        self.setText(text)
+        self.setStandardButtons(QtWidgets.QMessageBox.Ok)
+
 
 
 def main():
@@ -598,6 +741,9 @@ def main():
         tray_menu.addSeparator()
         tray_menu.addAction("Show Notes List", window.showNormal)
         tray_menu.addSeparator()
+        about_action = tray_menu.addAction("About")
+        about_action.triggered.connect(lambda: AboutDialog().exec_())
+        tray_menu.addSeparator()
         tray_menu.addAction("Exit", app.quit)
 
         tray_icon.setToolTip("Ubuntu Sticky Notes")
@@ -607,7 +753,6 @@ def main():
 
     QtCore.QTimer.singleShot(0, init_app)
     sys.exit(app.exec_())
-
 
 
 if __name__ == "__main__":
