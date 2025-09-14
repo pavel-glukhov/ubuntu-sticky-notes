@@ -122,7 +122,7 @@ def get_app_paths() -> dict:
         '/home/user/.local/share/ubuntu-sticky-notes/stickies.db'
     """
     app_info = load_app_info()
-    data_dir = get_data_dir(app_info.get("name", "app"))
+    data_dir = get_data_dir(app_info.get("service_name", "app"))
     return {
         "APP_INFO": app_info,
         "DATA_DIR": data_dir,

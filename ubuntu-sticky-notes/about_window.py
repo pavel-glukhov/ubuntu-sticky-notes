@@ -29,8 +29,8 @@ class AboutDialog(QtWidgets.QDialog):
         ui_path = os.path.join(UI_PATH, "aboutdialog.ui")
         uic.loadUi(ui_path, self)
 
-        self.setWindowTitle(f"About {APP_INFO['name']}")
-        self.label_title.setText(f"<h2>{APP_INFO['name']}</h2>")
+        self.setWindowTitle(f"About {APP_INFO['app_name']}")
+        self.label_title.setText(f"<h2>{APP_INFO['app_name']}</h2>")
         self.label_info.setText(
             f"Version: {APP_INFO['version']}<br>"
             f"Author: {APP_INFO['author']}<br>"

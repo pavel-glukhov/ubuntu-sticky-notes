@@ -1,9 +1,15 @@
 {
-    "name": "Ubuntu Sticky Notes",
+    "service_name": "ubuntu-sticky-notes",
+    "app_name": "Ubuntu Sticky Notes",
     "version": "1.2.3",
     "author": "Pavel Glukhov",
     "email": "glukhov.p@gmail.com",
     "website": "https://github.com/pavel-glukhov/ubuntu_sticky_notes",
     "description": "Ubuntu Sticky Notes is a lightweight desktop application for creating and managing sticky notes. Notes can be customized with colors, pinned on top, moved to trash and restored.",
-    "license": "MIT License"
+    "license": "MIT License",
+    "architecture": "all",
+    "dependencies": [
+        "python3",
+        "python3-pyqt5"
+    ]
 }
