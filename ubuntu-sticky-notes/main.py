@@ -28,7 +28,7 @@ def init_tray(window: MainWindow, app: QtWidgets.QApplication):
             - Open New Sticker
             - About dialog
             - Exit application
-        - Handles double-click on the tray icon to show the main window.
+        - Does not handle icon double-click activation (only context menu is available).
     """
     tray_icon = QtWidgets.QSystemTrayIcon(
         QtGui.QIcon(APP_ICON_PATH) if os.path.exists(APP_ICON_PATH) else QtGui.QIcon.fromTheme("note"),
@@ -53,7 +53,6 @@ def init_tray(window: MainWindow, app: QtWidgets.QApplication):
     tray_icon.setToolTip("Ubuntu Sticky Notes")
     tray_icon.setContextMenu(tray_menu)
     tray_icon.setVisible(True)
-    tray_icon.activated.connect(lambda reason: window.showNormal() if reason == QtWidgets.QSystemTrayIcon.DoubleClick else None)
     tray_icon.show()
 
 
