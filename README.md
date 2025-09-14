@@ -2,10 +2,10 @@
 
 Simple sticky notes application built with Python and PyQt5 for Ubuntu.
 
-Version: 1.2.2
+Version: 1.2.3
 _______________
 
-![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/example_1.2.0.png)
+![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/example_1.2.3.png)
 
 ## ✨ Features
 
@@ -33,16 +33,30 @@ _______________
 
 ## Download:
 You can download deb packet here:
-https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/tag/1.2.2
-
+https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/tag/1.2.3
+______________________________________________________________________________________
 ## Installation:
-
-
 ```bash
     sudo apt update
     sudo apt install -y python3-pyqt5
-    curl -L -o ubuntu-sticky-notes.deb https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/download/1.2.2/ubuntu-sticky-notes-1.2.2.deb \
-        && sudo apt install ./ubuntu-sticky-notes.deb -y
+    curl -O https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/download/1.2.2/ubuntu-sticky-notes-1.2.3.deb
+    sudo apt install ./ubuntu-sticky-notes-1.2.3.deb -y
 ```
+_____________________________________________________________________________________
+## Self build and Install Ubuntu Sticky Notes (.deb package)
+
+``` bash
+# Clone the repository
+git clone https://github.com/pavel-glukhov/ubuntu_sticky_notes.git
+cd ubuntu_sticky_notes
+# Make the script executable
+chmod +x build_deb_package.sh
+# Run the package build
+./build_deb_package.sh
+# Install the package
+sudo dpkg -i ubuntu-sticky-notes_<VERSION OF APPLICATION>_all.deb
+sudo apt-get install -f
+```
+
 ## Usage
 Run the application after installation to start creating and managing sticky notes.
