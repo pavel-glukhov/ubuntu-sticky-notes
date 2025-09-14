@@ -39,7 +39,7 @@ ________________________________________________________________________________
 ```bash
     sudo apt update
     sudo apt install -y python3-pyqt5
-    curl -O https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/download/1.2.2/ubuntu-sticky-notes-1.2.3.deb
+    curl -O https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/download/1.2.3/ubuntu-sticky-notes-1.2.3.deb
     sudo apt install ./ubuntu-sticky-notes-1.2.3.deb -y
 ```
 _____________________________________________________________________________________
