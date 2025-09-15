@@ -45,18 +45,8 @@
      </property>
     </widget>
    </item>
-   <item alignment="Qt::AlignRight|Qt::AlignBottom">
-    <widget class="QSizeGrip" name="size_grip" native="true"/>
-   </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QSizeGrip</class>
-   <extends>QWidget</extends>
-   <header>qsizegrip.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

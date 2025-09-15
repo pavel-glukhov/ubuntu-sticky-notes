@@ -1,7 +1,8 @@
 import os
-from PyQt5 import QtCore, QtWidgets, QtGui, uic
-from notes_db import NotesDB
+
 from config import AUTOSAVE_INTERVAL_MS, COLOR_MAP, get_app_paths
+from notes_db import NotesDB
+from PyQt6 import QtCore, QtGui, QtWidgets, uic
 
 paths = get_app_paths()
 UI_PATH = paths["UI_DIR"]
@@ -9,12 +10,13 @@ UI_PATH = paths["UI_DIR"]
 
 class StickyWindow(QtWidgets.QWidget):
     """
-    A sticky note window supporting text editing, formatting, autosave, drag, and resize.
+    A sticky note window with support for text editing, formatting, autosave,
+    drag and resize, custom context menu, and persistent database storage.
 
     Signals:
-        closed (int): Emitted when the sticky note is closed; provides the note ID.
-        textChanged (int, str): Emitted when text content changes; provides the note ID and content.
-        colorChanged (int, str): Emitted when background color changes; provides the note ID and new color.
+        closed (int): Emitted when the sticky note is closed with its note ID.
+        textChanged (int, str): Emitted when note content changes (ID, content).
+        colorChanged (int, str): Emitted when background color changes (ID, hex color).
     """
 
     closed = QtCore.pyqtSignal(int)
@@ -26,9 +28,9 @@ class StickyWindow(QtWidgets.QWidget):
         Initialize a sticky note window.
 
         Args:
-            db (NotesDB): The database instance for storing notes.
-            note_id (int, optional): The ID of the note to load. Defaults to None for new notes.
-            always_on_top (bool, optional): Whether the window should stay on top. Defaults to False.
+            db (NotesDB): Database handler for persisting note data.
+            note_id (int | None): Existing note ID or None for a new note.
+            always_on_top (bool): Whether the note should stay on top of other windows.
         """
         super().__init__()
         self.db = db
@@ -38,9 +40,12 @@ class StickyWindow(QtWidgets.QWidget):
         ui_path = os.path.join(UI_PATH, "stickywindow.ui")
         uic.loadUi(ui_path, self)
 
-        flags = QtCore.Qt.Window | QtCore.Qt.FramelessWindowHint
+        self.size_grip = QtWidgets.QSizeGrip(self)
+        self.size_grip.setFixedSize(15, 15)
+
+        flags = QtCore.Qt.WindowType.Window | QtCore.Qt.WindowType.FramelessWindowHint
         if self._always_on_top:
-            flags |= QtCore.Qt.WindowStaysOnTopHint
+            flags |= QtCore.Qt.WindowType.WindowStaysOnTopHint
         self.setWindowFlags(flags)
         self.setMinimumSize(300, 300)
 
@@ -60,7 +65,7 @@ class StickyWindow(QtWidgets.QWidget):
             "Ctrl+Shift+L": self.toggle_list,
         }
         for key, slot in shortcuts.items():
-            QtWidgets.QShortcut(QtGui.QKeySequence(key), self, slot)
+            QtGui.QShortcut(QtGui.QKeySequence(key), self, slot)
 
         self.text_edit.customContextMenuRequested.connect(self.show_context_menu)
         self.text_edit.textChanged.connect(self.on_text_changed)
@@ -72,17 +77,17 @@ class StickyWindow(QtWidgets.QWidget):
 
     def set_always_on_top(self, flag: bool):
         """
-        Set or unset the always-on-top property for the sticky window.
+        Set whether the window should stay on top of other windows.
 
         Args:
-            flag (bool): True to keep window on top, False otherwise.
+            flag (bool): True to enable always-on-top, False to disable.
         """
         self._always_on_top = bool(flag)
         flags = self.windowFlags()
         if self._always_on_top:
-            flags |= QtCore.Qt.WindowStaysOnTopHint
+            flags |= QtCore.Qt.WindowType.WindowStaysOnTopHint
         else:
-            flags &= ~QtCore.Qt.WindowStaysOnTopHint
+            flags &= ~QtCore.Qt.WindowType.WindowStaysOnTopHint
         self.setWindowFlags(flags)
         self.show()
         self.raise_()
@@ -90,9 +95,7 @@ class StickyWindow(QtWidgets.QWidget):
 
     def on_text_changed(self):
         """
-        Emit the textChanged signal when the content changes and trigger autosave.
-
-        This is only executed if the note is not in loading state.
+        Handle text changes: emit signal and save to database if not loading.
         """
         if not self._loading and self.note_id:
             content = self.text_edit.toPlainText()
@@ -101,14 +104,13 @@ class StickyWindow(QtWidgets.QWidget):
 
     def show_context_menu(self, pos):
         """
-        Show the context menu at the given position.
+        Show the custom context menu for text editing and note actions.
 
         Args:
-            pos (QPoint): Position where the menu should appear.
+            pos (QPoint): Position relative to the text edit where menu is opened.
         """
         menu = QtWidgets.QMenu(self)
 
-        # Actions
         copy_action = menu.addAction("📋 Copy (Ctrl+C)")
         paste_action = menu.addAction("📥 Paste (Ctrl+V)")
         select_all_action = menu.addAction("🔲 Select All (Ctrl+A)")
@@ -120,7 +122,9 @@ class StickyWindow(QtWidgets.QWidget):
         list_action = menu.addAction("Bullet List (Shift+L)")
         menu.addSeparator()
 
-        top_action = menu.addAction("📍 Unpin from Top" if self._always_on_top else "📌 Pin to Top")
+        top_action = menu.addAction(
+            "📍 Unpin from Top" if self._always_on_top else "📌 Pin to Top"
+        )
         menu.addSeparator()
 
         color_menu = menu.addMenu("🎨 Background Color")
@@ -130,9 +134,8 @@ class StickyWindow(QtWidgets.QWidget):
         menu.addSeparator()
 
         close_action = menu.addAction("❌ Close Sticker")
-        action = menu.exec_(self.text_edit.mapToGlobal(pos))
+        action = menu.exec(self.text_edit.mapToGlobal(pos))
 
-        # Execute selected action
         if action == copy_action:
             self.text_edit.copy()
         elif action == paste_action:
@@ -152,12 +155,12 @@ class StickyWindow(QtWidgets.QWidget):
         elif action == close_action:
             self.close()
 
-    def change_color(self, color):
+    def change_color(self, color: str):
         """
-        Change the background color of the sticky note.
+        Change the background color of the note.
 
         Args:
-            color (str): Hex color code to apply.
+            color (str): New background color (hex string).
         """
         self.color = color
         self.update()
@@ -167,33 +170,43 @@ class StickyWindow(QtWidgets.QWidget):
 
     def resizeEvent(self, event):
         """
-        Handle window resize events.
-
-        Adjusts the text edit area and size grip, then triggers save if not loading.
+        Handle resize events: adjust text edit and size grip, save state.
         """
         offset = 10
         self.text_edit.setGeometry(
             self.margin,
             self.margin,
             self.width() - 2 * self.margin,
-            self.height() - 2 * self.margin - offset
+            self.height() - 2 * self.margin - offset,
         )
-        self.size_grip.setGeometry(self.width() - 20, self.height() - 20, 15, 15)
+        self.size_grip.move(
+            self.width() - self.size_grip.width(),
+            self.height() - self.size_grip.height(),
+        )
         super().resizeEvent(event)
         if not self._loading:
             self.save()
 
     def toggle_bold(self):
-        """Toggle bold formatting on selected text."""
+        """
+        Toggle bold formatting for the selected text.
+        """
         cursor = self.text_edit.textCursor()
         if not cursor.hasSelection():
             return
         fmt = QtGui.QTextCharFormat()
-        fmt.setFontWeight(QtGui.QFont.Normal if cursor.charFormat().fontWeight() > QtGui.QFont.Normal else QtGui.QFont.Bold)
+        current_weight = cursor.charFormat().fontWeight()
+        fmt.setFontWeight(
+            QtGui.QFont.Weight.Normal
+            if current_weight > QtGui.QFont.Weight.Normal
+            else QtGui.QFont.Weight.Bold
+        )
         cursor.mergeCharFormat(fmt)
 
     def toggle_italic(self):
-        """Toggle italic formatting on selected text."""
+        """
+        Toggle italic formatting for the selected text.
+        """
         cursor = self.text_edit.textCursor()
         if not cursor.hasSelection():
             return
@@ -202,7 +215,9 @@ class StickyWindow(QtWidgets.QWidget):
         cursor.mergeCharFormat(fmt)
 
     def toggle_strike(self):
-        """Toggle strike-through formatting on selected text."""
+        """
+        Toggle strikethrough formatting for the selected text.
+        """
         cursor = self.text_edit.textCursor()
         if not cursor.hasSelection():
             return
@@ -211,23 +226,29 @@ class StickyWindow(QtWidgets.QWidget):
         cursor.mergeCharFormat(fmt)
 
     def toggle_list(self):
-        """Toggle bullet list for the selected paragraph(s)."""
+        """
+        Toggle bullet list formatting for the selected paragraph.
+        """
         cursor = self.text_edit.textCursor()
         if cursor.currentList():
             block_fmt = cursor.blockFormat()
             block_fmt.setObjectIndex(-1)
             cursor.setBlockFormat(block_fmt)
         else:
-            cursor.createList(QtGui.QTextListFormat.ListDisc)
+            cursor.createList(QtGui.QTextListFormat.Style.ListDisc)
 
     def moveEvent(self, event):
-        """Save state when the window is moved."""
+        """
+        Save note position when moved.
+        """
         super().moveEvent(event)
         if not self._loading:
             self.save()
 
     def paintEvent(self, event):
-        """Draw the sticky note background and border."""
+        """
+        Paint the background color and border of the sticky note.
+        """
         painter = QtGui.QPainter(self)
         painter.setBrush(QtGui.QColor(self.color))
         pen = QtGui.QPen(QtGui.QColor("#A0A0A0"))
@@ -239,44 +260,61 @@ class StickyWindow(QtWidgets.QWidget):
         super().paintEvent(event)
 
     def mousePressEvent(self, event):
-        """Handle the start of window dragging with the mouse."""
-        if event.button() == QtCore.Qt.LeftButton:
+        """
+        Handle mouse press for moving the window (supports Wayland system move).
+        """
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
             platform = QtWidgets.QApplication.platformName()
             if platform == "wayland":
                 handle = self.windowHandle()
                 if handle:
                     handle.startSystemMove()
             else:
-                self._drag_pos = event.globalPos() - self.frameGeometry().topLeft()
+                self._drag_pos = (
+                    event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+                )
             event.accept()
 
     def mouseMoveEvent(self, event):
-        """Handle window dragging with the mouse."""
-        if event.buttons() == QtCore.Qt.LeftButton and self._drag_pos:
+        """
+        Handle mouse drag to move the window.
+        """
+        if event.buttons() == QtCore.Qt.MouseButton.LeftButton and self._drag_pos:
             if QtWidgets.QApplication.platformName() in ["xcb", "windows"]:
-                self.move(event.globalPos() - self._drag_pos)
+                self.move(event.globalPosition().toPoint() - self._drag_pos)
             event.accept()
 
     def mouseReleaseEvent(self, event):
-        """Handle end of window dragging and save state."""
-        if event.button() == QtCore.Qt.LeftButton:
+        """
+        Save window position when mouse is released after dragging.
+        """
+        if event.button() == QtCore.Qt.MouseButton.LeftButton:
             if self._drag_pos:
                 self.save()
             self._drag_pos = None
         super().mouseReleaseEvent(event)
 
     def load_from_db(self):
-        """Load note content, geometry, color, and always-on-top state from the database."""
+        """
+        Load note content, geometry, color, and top state from the database.
+        """
         if self.note_id:
             row = self.db.get(self.note_id)
             if row:
                 self.text_edit.setHtml(row["content"])
                 self.color = row["color"] or self.color
-                self.setGeometry(row["x"] or 300, row["y"] or 200, row["w"] or 260, row["h"] or 200)
+                self.setGeometry(
+                    row["x"] or 300,
+                    row["y"] or 200,
+                    row["w"] or 260,
+                    row["h"] or 200,
+                )
                 self.set_always_on_top(bool(row["always_on_top"] or 0))
 
     def showEvent(self, event):
-        """Handle show event; mark as loading, load data from DB, set open state, then stop loading."""
+        """
+        Handle widget show: load from database and mark as open.
+        """
         super().showEvent(event)
         self._loading = True
         self.load_from_db()
@@ -285,28 +323,35 @@ class StickyWindow(QtWidgets.QWidget):
         self._loading = False
 
     def save(self):
-        """Save note geometry, content, color, and always-on-top state to the database."""
+        """
+        Save current state (content, geometry, color, top flag) to the database.
+        """
         x, y, w, h = self.x(), self.y(), self.width(), self.height()
         content = self.text_edit.toHtml()
         always_on_top_int = 1 if self._always_on_top else 0
-        if self._last_geo == (x, y, w, h) and self._last_content == content \
-        and self._last_color == self.color and self._last_always_on_top == always_on_top_int:
+        if (
+            self._last_geo == (x, y, w, h)
+            and self._last_content == content
+            and self._last_color == self.color
+            and self._last_always_on_top == always_on_top_int
+        ):
             return
         self._last_geo = (x, y, w, h)
         self._last_content = content
         self._last_color = self.color
         self._last_always_on_top = always_on_top_int
         if self.note_id:
-            self.db.update(self.note_id, content, x, y, w, h, self.color, always_on_top_int)
+            self.db.update(
+                self.note_id, content, x, y, w, h, self.color, always_on_top_int
+            )
         else:
-            self.note_id = self.db.add(content, x, y, w, h, self.color, always_on_top_int)
+            self.note_id = self.db.add(
+                content, x, y, w, h, self.color, always_on_top_int
+            )
 
     def closeEvent(self, event):
         """
-        Intercept the close event to save the note and hide the window instead of destroying it.
-
-        Emits:
-            closed signal with the note ID.
+        Save note state and mark as closed in the database when the window is closed.
         """
         self.save()
         if self.note_id:
