@@ -6,13 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>606</width>
-    <height>393</height>
+    <width>500</width>
+    <height>350</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>About</string>
   </property>
+
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label_title">
@@ -22,11 +23,15 @@
      <property name="textFormat">
       <enum>Qt::RichText</enum>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignVCenter</set>
+     </property>
      <property name="margin">
       <number>10</number>
      </property>
     </widget>
    </item>
+
    <item>
     <widget class="QLabel" name="label_info">
      <property name="text">
@@ -35,14 +40,15 @@
      <property name="wordWrap">
       <bool>true</bool>
      </property>
-     <property name="margin">
-      <number>10</number>
-     </property>
      <property name="openExternalLinks">
       <bool>true</bool>
      </property>
+     <property name="margin">
+      <number>10</number>
+     </property>
     </widget>
    </item>
+
    <item>
     <widget class="QLabel" name="label_description">
      <property name="text">
@@ -56,6 +62,7 @@
      </property>
     </widget>
    </item>
+
    <item>
     <widget class="QLabel" name="label_license">
      <property name="text">
@@ -64,15 +71,22 @@
      <property name="textFormat">
       <enum>Qt::RichText</enum>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter</set>
+     </property>
      <property name="margin">
       <number>10</number>
      </property>
     </widget>
    </item>
+
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="standardButtons">
       <set>QDialogButtonBox::Ok</set>
+     </property>
+     <property name="centerButtons">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

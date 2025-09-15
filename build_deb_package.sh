@@ -67,13 +67,13 @@ Description: $DESCRIPTION
 EOL
 
 # ----------------------
-# Create DEBIAN/postinst to check PyQt5
+# Create DEBIAN/postinst to check PyQt6
 # ----------------------
 cat > "$DEBIAN_DIR/postinst" <<'EOL'
 #!/bin/bash
-# Check if PyQt5 is installed after package installation
-if ! python3 -c "import PyQt5" &>/dev/null; then
-    echo "PyQt5 is not installed. Please run: sudo apt install -y python3-pyqt5"
+# Check if PyQt6 is installed after package installation
+if ! python3 -c "import PyQt6" &>/dev/null; then
+    echo "PyQt6 is not installed. Please run: sudo apt install -y python3-pyqt6"
 fi
 EOL
 chmod +x "$DEBIAN_DIR/postinst"

@@ -1,6 +1,7 @@
 import os
-from PyQt5 import QtWidgets, uic
+
 from config import get_app_paths
+from PyQt6 import QtWidgets, uic
 
 paths = get_app_paths()
 APP_INFO = paths["APP_INFO"]
@@ -9,20 +10,21 @@ UI_PATH = paths["UI_DIR"]
 
 class AboutDialog(QtWidgets.QDialog):
     """
-    About dialog displaying application information.
+    Dialog window displaying information about the application.
 
-    Shows the app's name, version, author, contact, website, description, and license.
+    Features:
+        - Shows application name and version.
+        - Displays author information, contact email, and website link.
+        - Provides a short description and license details.
+        - Contains a close button to dismiss the dialog.
     """
 
     def __init__(self, parent=None):
         """
-        Initialize the AboutDialog UI.
-
-        Loads the UI from `aboutdialog.ui`, sets the text labels with application info,
-        and connects the OK/Close button.
+        Initialize the AboutDialog.
 
         Args:
-            parent (QWidget, optional): Parent widget. Defaults to None.
+            parent (QWidget, optional): Parent widget for the dialog.
         """
         super().__init__(parent)
 
@@ -37,7 +39,7 @@ class AboutDialog(QtWidgets.QDialog):
             f"Email: {APP_INFO['email']}<br>"
             f"<a href='{APP_INFO['website']}'>{APP_INFO['website']}</a>"
         )
-        self.label_description.setText(APP_INFO['description'])
+        self.label_description.setText(APP_INFO["description"])
         self.label_license.setText(f"<i>{APP_INFO['license']}</i>")
 
         self.buttonBox.accepted.connect(self.accept)
