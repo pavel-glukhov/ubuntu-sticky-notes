@@ -41,14 +41,29 @@ def init_tray(window: MainWindow, app: QtWidgets.QApplication):
     about_action = tray_menu.addAction("About")
     about_action.triggered.connect(lambda: AboutDialog().exec())
     tray_menu.addSeparator()
-    tray_menu.addAction("Exit", app.quit)
+
+    def exit_app():
+        for sticky in window.stickies.values():
+            if sticky.isVisible():
+                sticky.save()
+                if sticky.note_id:
+                    window.db.set_open_state(sticky.note_id, 1)
+            else:
+                if sticky.note_id:
+                    window.db.set_open_state(sticky.note_id, 0)
+
+        if hasattr(window.db, "close"):
+            window.db.close()
+        app.quit()
+        QtWidgets.QApplication.exit(0)
+
+    tray_menu.addAction("Exit", exit_app)
 
     tray_icon.setToolTip("Ubuntu Sticky Notes")
     tray_icon.setContextMenu(tray_menu)
     tray_icon.setVisible(True)
 
     def toggle_main_window():
-        """Показать/скрыть главное окно."""
         if window.isVisible() and not window.isMinimized():
             window.hide()
         else:
