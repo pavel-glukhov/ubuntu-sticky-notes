@@ -226,9 +226,9 @@ class MainWindow(QtWidgets.QMainWindow):
         menu = QtWidgets.QMenu()
 
         if item:
-            open_action = menu.addAction("Open")
+            open_action = menu.addAction("📂 Open")
             color_menu = menu.addMenu("🎨 Change Color")
-            delete_action = menu.addAction("Delete")
+            delete_action = menu.addAction("🗑 Delete")
             for name, color in COLOR_MAP.items():
                 action = color_menu.addAction(name)
                 action.triggered.connect(lambda checked, c=color, i=item: self.change_item_color(i, c))

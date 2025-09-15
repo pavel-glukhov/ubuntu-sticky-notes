@@ -14,16 +14,22 @@ APP_INFO = paths["APP_INFO"]
 
 def init_tray(window: MainWindow, app: QtWidgets.QApplication):
     """
-    Initialize the system tray icon and context menu for the application.
-    """
+    Initialize the system tray icon and context menu.
 
+    Provides quick access to:
+        - Restoring previous state.
+        - Opening or hiding all sticky notes.
+        - Showing notes list.
+        - Creating a new sticky note.
+        - About dialog.
+        - Exiting the application.
+    """
     tray_icon = QtWidgets.QSystemTrayIcon(
         QtGui.QIcon(APP_ICON_PATH) if os.path.exists(APP_ICON_PATH) else QtGui.QIcon.fromTheme("note"),
-        app
+        app,
     )
 
     tray_menu = QtWidgets.QMenu()
-
     tray_menu.addAction("📘 Open Previous State", lambda: open_previous_state(window))
     tray_menu.addAction("📗 Open All Stickers", lambda: open_all_stickies(window))
     tray_menu.addAction("🗂 Hide All Stickers", lambda: hide_all_stickies(window))
@@ -35,21 +41,27 @@ def init_tray(window: MainWindow, app: QtWidgets.QApplication):
     about_action = tray_menu.addAction("About")
     about_action.triggered.connect(lambda: AboutDialog().exec())
     tray_menu.addSeparator()
-
     tray_menu.addAction("Exit", app.quit)
 
     tray_icon.setToolTip("Ubuntu Sticky Notes")
     tray_icon.setContextMenu(tray_menu)
     tray_icon.setVisible(True)
 
+    def toggle_main_window():
+        """Показать/скрыть главное окно."""
+        if window.isVisible() and not window.isMinimized():
+            window.hide()
+        else:
+            window.showNormal()
+            window.raise_()
+            window.activateWindow()
+
     def on_tray_activated(reason):
-        if reason == QtWidgets.QSystemTrayIcon.ActivationReason.DoubleClick:
-            if window.isVisible() and not window.isMinimized():
-                window.hide()
-            else:
-                window.showNormal()
-                window.raise_()
-                window.activateWindow()
+        if reason in (
+            QtWidgets.QSystemTrayIcon.ActivationReason.Trigger,       # одинарный клик
+            QtWidgets.QSystemTrayIcon.ActivationReason.DoubleClick,   # двойной клик
+        ):
+            toggle_main_window()
 
     tray_icon.activated.connect(on_tray_activated)
     tray_icon.show()
@@ -57,12 +69,14 @@ def init_tray(window: MainWindow, app: QtWidgets.QApplication):
 
 def show_main_window(window: QtWidgets.QMainWindow):
     """
-    Shows the main window and brings it to the foreground.
+    Bring the main window to the foreground.
+
+    Ensures the window is visible and active, restoring if minimized.
     """
     if window.isHidden() or window.isMinimized():
         window.showNormal()
     else:
-        window.show()  # на всякий случай, если скрыто
+        window.show()
 
     window.raise_()
     window.activateWindow()
@@ -70,7 +84,7 @@ def show_main_window(window: QtWidgets.QMainWindow):
 
 def open_previous_state(window: MainWindow):
     """
-    Open all sticky notes that were previously opened.
+    Restore and open all sticky notes that were previously open.
     """
     for note_id in window.db.get_open_notes():
         sticky = window.stickies.get(note_id)
@@ -90,7 +104,7 @@ def open_previous_state(window: MainWindow):
 
 def open_all_stickies(window: MainWindow):
     """
-    Open all sticky notes listed in the main window's list widget.
+    Open all sticky notes from the main window's list.
     """
     for i in range(window.list_widget.count()):
         item = window.list_widget.item(i)
@@ -99,7 +113,7 @@ def open_all_stickies(window: MainWindow):
 
 def hide_all_stickies(window: MainWindow):
     """
-    Hide all currently open sticky note windows.
+    Hide all currently open sticky notes.
     """
     for sticky in window.stickies.values():
         sticky.hide()
@@ -107,15 +121,16 @@ def hide_all_stickies(window: MainWindow):
 
 def main():
     """
-    Entry point of the application.
+    Application entry point.
+
+    Handles platform quirks (e.g., Wayland vs X11),
+    initializes QApplication, main window, and system tray.
     """
     if sys.platform.startswith("linux") and "WAYLAND_DISPLAY" in os.environ:
         os.environ["QT_QPA_PLATFORM"] = "xcb"
 
     app = QtWidgets.QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
-
-    # В Qt6 setDesktopFileName отсутствует
     app.setApplicationName(APP_INFO.get("app_name", "Sticky Notes"))
 
     def init_app():

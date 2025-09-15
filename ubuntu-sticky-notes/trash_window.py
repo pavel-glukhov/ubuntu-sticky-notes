@@ -79,9 +79,9 @@ class TrashWindow(QtWidgets.QWidget):
             return
 
         menu = QtWidgets.QMenu()
-        restore_action = menu.addAction("Restore")
-        open_action = menu.addAction("Open")
-        delete_action = menu.addAction("Delete Permanently")
+        restore_action = menu.addAction("🔙 Restore")
+        open_action = menu.addAction("📂 Open")
+        delete_action = menu.addAction("❌ Delete Permanently")
 
         action = menu.exec(self.list_widget.mapToGlobal(pos))
         note_id = item.data(QtCore.Qt.ItemDataRole.UserRole)
