@@ -73,8 +73,8 @@ def init_tray(window: MainWindow, app: QtWidgets.QApplication):
 
     def on_tray_activated(reason):
         if reason in (
-            QtWidgets.QSystemTrayIcon.ActivationReason.Trigger,       # одинарный клик
-            QtWidgets.QSystemTrayIcon.ActivationReason.DoubleClick,   # двойной клик
+            QtWidgets.QSystemTrayIcon.ActivationReason.Trigger,
+            QtWidgets.QSystemTrayIcon.ActivationReason.DoubleClick,
         ):
             toggle_main_window()
 
