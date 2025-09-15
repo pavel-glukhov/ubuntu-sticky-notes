@@ -8,6 +8,7 @@ from config import get_app_paths
 
 paths = get_app_paths()
 APP_ICON_PATH = paths["APP_ICON_PATH"]
+APP_INFO = paths["APP_INFO"]
 
 
 def init_tray(window: MainWindow, app: QtWidgets.QApplication):
@@ -28,8 +29,8 @@ def init_tray(window: MainWindow, app: QtWidgets.QApplication):
             - Open New Sticker
             - About dialog
             - Exit application
-        - Does not handle icon double-click activation (only context menu is available).
     """
+
     tray_icon = QtWidgets.QSystemTrayIcon(
         QtGui.QIcon(APP_ICON_PATH) if os.path.exists(APP_ICON_PATH) else QtGui.QIcon.fromTheme("note"),
         app
@@ -37,7 +38,6 @@ def init_tray(window: MainWindow, app: QtWidgets.QApplication):
 
     tray_menu = QtWidgets.QMenu()
 
-    # --- Actions ---
     tray_menu.addAction("📘 Open Previous State", lambda: open_previous_state(window))
     tray_menu.addAction("📗 Open All Stickers", lambda: open_all_stickies(window))
     tray_menu.addAction("🗂 Hide All Stickers", lambda: hide_all_stickies(window))
@@ -53,7 +53,31 @@ def init_tray(window: MainWindow, app: QtWidgets.QApplication):
     tray_icon.setToolTip("Ubuntu Sticky Notes")
     tray_icon.setContextMenu(tray_menu)
     tray_icon.setVisible(True)
+
+    def on_tray_activated(reason):
+        if reason == QtWidgets.QSystemTrayIcon.DoubleClick:
+            if window.isVisible() and not window.isMinimized():
+                window.hide()
+            else:
+                window.showNormal()
+                window.raise_()
+                window.activateWindow()
+    tray_icon.activated.connect(on_tray_activated)
     tray_icon.show()
+
+
+def show_main_window(window: QtWidgets.QMainWindow):
+    """
+    Shows the main window and brings it to the foreground.
+    """
+    if window.isHidden() or window.isMinimized():
+        window.showNormal()
+    else:
+        window.show()  # на всякий случай, если скрыто
+
+    window.raise_()
+    window.activateWindow()
+
 
 
 def open_previous_state(window: MainWindow):
@@ -135,6 +159,8 @@ def main():
 
     app = QtWidgets.QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
+    app.setDesktopFileName(APP_INFO.get("service_name"))
+    app.setApplicationName(APP_INFO.get("app_name"))
 
     def init_app():
         """

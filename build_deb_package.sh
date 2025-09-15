@@ -92,6 +92,7 @@ Terminal=false
 Type=Application
 Categories=Utility;
 StartupNotify=true
+StartupWMClass=APP_NAME
 EOL
 
 # ----------------------
