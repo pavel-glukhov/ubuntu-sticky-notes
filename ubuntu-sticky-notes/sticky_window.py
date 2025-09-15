@@ -47,7 +47,6 @@ class StickyWindow(QtWidgets.QWidget):
         if self._always_on_top:
             flags |= QtCore.Qt.WindowType.WindowStaysOnTopHint
         self.setWindowFlags(flags)
-        self.setMinimumSize(300, 300)
 
         self._last_geo = None
         self._last_content = None

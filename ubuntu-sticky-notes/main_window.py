@@ -35,7 +35,6 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi(ui_path, self)
 
         self.setWindowTitle("Ubuntu Sticky Notes")
-        self.resize(400, 500)
         self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
 
         self.new_action.setIcon(QtGui.QIcon(os.path.join(ICONS_PATH, "new.png")))
