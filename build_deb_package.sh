@@ -3,11 +3,8 @@
 # Script to create a Debian package for Ubuntu Sticky Notes
 # =========================================================
 
-set -e  # stop on error
+set -e
 
-# ----------------------
-# Define paths
-# ----------------------
 PACKAGE_DIR="ubuntu_sticky_notes_deb"
 DEBIAN_DIR="$PACKAGE_DIR/DEBIAN"
 USR_BIN_DIR="$PACKAGE_DIR/usr/local/bin"
@@ -126,9 +123,6 @@ EOL
 DEB_FILE="${SERVICE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
 dpkg-deb --build --root-owner-group --verbose "$PACKAGE_DIR" "$DEB_FILE"
 
-# ----------------------
-# Print instructions
-# ----------------------
 echo ""
 echo "Package built successfully: $DEB_FILE"
 echo "Installation instructions:"
