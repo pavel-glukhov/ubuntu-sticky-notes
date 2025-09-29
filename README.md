@@ -33,13 +33,13 @@ _______________
 
 ## Download:
 You can download deb packet here:
-https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/tag/1.2.4
+https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/tag/1.2.4
 ______________________________________________________________________________________
 ## Installation:
 ```bash
     sudo apt update
     sudo apt install -y python3-pyqt6
-    curl -O https://github.com/pavel-glukhov/ubuntu_sticky_notes/releases/download/1.2.4/ubuntu-sticky-notes_1.2.4_all.deb
+    curl -O https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/1.2.4/ubuntu-sticky-notes_1.2.4_all.deb
     sudo apt install ./ubuntu-sticky-notes_1.2.4_all.deb -y
 ```
 _____________________________________________________________________________________
@@ -47,7 +47,7 @@ ________________________________________________________________________________
 
 ``` bash
 # Clone the repository
-git clone https://github.com/pavel-glukhov/ubuntu_sticky_notes.git
+git clone https://github.com/pavel-glukhov/ubuntu-sticky-notes.git
 cd ubuntu_sticky_notes
 # Make the script executable
 chmod +x build_deb_package.sh
