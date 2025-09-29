@@ -4,7 +4,7 @@
     "version": "1.2.4",
     "author": "Pavel Glukhov",
     "email": "glukhov.p@gmail.com",
-    "website": "https://github.com/pavel-glukhov/ubuntu_sticky_notes",
+    "website": "https://github.com/pavel-glukhov/ubuntu-sticky-notes",
     "description": "Ubuntu Sticky Notes is a lightweight desktop application for creating and managing sticky notes. Notes can be customized with colors, pinned on top, moved to trash and restored.",
     "license": "MIT License",
     "architecture": "all",
