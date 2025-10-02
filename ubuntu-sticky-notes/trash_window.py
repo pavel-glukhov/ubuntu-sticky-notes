@@ -11,12 +11,6 @@ UI_PATH = paths["UI_DIR"]
 class TrashWindow(QtWidgets.QWidget):
     """
     Trash window for managing deleted sticky notes.
-
-    Features:
-        - Displays deleted notes with preview and deletion timestamp.
-        - Allows restoring notes back to the main list.
-        - Supports permanent deletion of notes.
-        - Can open deleted notes in the main window for preview.
     """
 
     def __init__(self, db: NotesDB, main_window=None):
@@ -25,8 +19,8 @@ class TrashWindow(QtWidgets.QWidget):
 
         Args:
             db (NotesDB): Notes database instance.
-            main_window (QWidget, optional): Reference to the main window
-                for refreshing the list or opening restored notes.
+            main_window (QWidget, optional): Reference to the main window for refreshing the list
+                                             or opening restored notes.
         """
         super().__init__()
         self.db = db
@@ -36,8 +30,11 @@ class TrashWindow(QtWidgets.QWidget):
         uic.loadUi(ui_path, self)
 
         self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
+        self.list_widget.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.list_widget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
+
+        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key.Key_Delete), self, self.delete_selected_notes)
 
     def refresh_list(self):
         """
@@ -69,30 +66,57 @@ class TrashWindow(QtWidgets.QWidget):
 
     def show_context_menu(self, pos):
         """
-        Show context menu for a selected note in the trash list.
+        Show the context menu for selected notes in the trash list.
 
         Args:
-            pos (QPoint): Mouse position where the context menu should appear.
+            pos (QPoint): Mouse position for displaying the menu.
         """
-        item = self.list_widget.itemAt(pos)
-        if not item:
+        selected_items = self.list_widget.selectedItems()
+        if not selected_items:
             return
 
         menu = QtWidgets.QMenu()
         restore_action = menu.addAction("🔙 Restore")
-        open_action = menu.addAction("📂 Open")
-        delete_action = menu.addAction("❌ Delete Permanently")
+        open_action = menu.addAction("📂 Open (first selected)")
+        delete_action = menu.addAction("❌ Delete Permanently (Del)")
 
         action = menu.exec(self.list_widget.mapToGlobal(pos))
-        note_id = item.data(QtCore.Qt.ItemDataRole.UserRole)
+
+        note_ids = [item.data(QtCore.Qt.ItemDataRole.UserRole) for item in selected_items]
 
         if action == restore_action:
-            self.db.restore_from_trash(note_id)
+            for note_id in note_ids:
+                self.db.restore_from_trash(note_id)
+            self.list_widget.clearSelection()
             if self.main_window:
                 self.main_window.refresh_list()
-        elif action == delete_action:
-            self.db.delete_permanently(note_id)
-        elif action == open_action and self.main_window:
-            self.main_window.open_note(note_id)
+            self.refresh_list()
 
-        self.refresh_list()
+        elif action == delete_action:
+            self.delete_selected_notes()
+
+        elif action == open_action and self.main_window and note_ids:
+            self.main_window.open_note(note_ids[0])
+
+    def delete_selected_notes(self):
+        """
+        Permanently delete all selected notes with a confirmation dialog.
+        """
+        selected_items = self.list_widget.selectedItems()
+        if not selected_items:
+            return
+
+        reply = QtWidgets.QMessageBox.question(
+            self,
+            "Delete Notes",
+            f"Are you sure you want to permanently delete {len(selected_items)} note(s)?",
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.No
+        )
+
+        if reply == QtWidgets.QMessageBox.StandardButton.Yes:
+            for item in selected_items:
+                note_id = item.data(QtCore.Qt.ItemDataRole.UserRole)
+                self.db.delete_permanently(note_id)
+
+            self.refresh_list()
