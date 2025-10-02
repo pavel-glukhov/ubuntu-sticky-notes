@@ -48,7 +48,7 @@
 
   <action name="new_action">
    <property name="text">
-    <string>New Note</string>
+    <string>New Note (Shift + N)</string>
    </property>
   </action>
   <action name="bin_action">
