@@ -54,7 +54,7 @@ class MainWindow(QtWidgets.QMainWindow):
         old_list_widget = self.list_widget
         self.list_widget = ReorderableListWidget()
         self.list_widget.setObjectName("list_widget")
-
+        self.search_bar.textChanged.connect(self.filter_list)
         self._setup_list_widget()
         self._replace_old_list_widget(old_list_widget)
         self.setWindowTitle("Ubuntu Sticky Notes")
@@ -182,15 +182,20 @@ class MainWindow(QtWidgets.QMainWindow):
             note_id = note["id"]
             title = note["title"] or "Untitled"
             color = note["color"] or "#FFF59D"
+            content = note["content"] or ""
 
             item = QtWidgets.QListWidgetItem()
             item.setData(QtCore.Qt.ItemDataRole.UserRole, note_id)
+            item.setData(QtCore.Qt.ItemDataRole.UserRole + 1, title)
+            item.setData(QtCore.Qt.ItemDataRole.UserRole + 3, content)
 
             widget = self._create_list_item_widget(title, color)
             item.setSizeHint(widget.sizeHint())
 
             self.list_widget.addItem(item)
             self.list_widget.setItemWidget(item, widget)
+
+        self.filter_list()
 
     def refresh_selection(self):
         """Updates selection frames for all note widgets based on their selection state."""
@@ -254,7 +259,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def filter_list(self):
         """Filters the notes displayed based on the search bar text."""
-        query = self.search_bar.text().lower().strip()
+        query = (self.search_bar.text() or "").lower().strip()
         for i in range(self.list_widget.count()):
             item = self.list_widget.item(i)
             title = (item.data(QtCore.Qt.ItemDataRole.UserRole + 1) or "").lower()
@@ -262,9 +267,7 @@ class MainWindow(QtWidgets.QMainWindow):
             doc = QtGui.QTextDocument()
             doc.setHtml(content_html)
             content = doc.toPlainText().lower().strip()
-            if not title and not content:
-                item.setHidden(query != "")
-                continue
+
             item.setHidden(query not in title and query not in content)
 
     def open_note(self, item_or_id):
