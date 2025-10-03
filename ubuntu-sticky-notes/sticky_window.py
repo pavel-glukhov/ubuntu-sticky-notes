@@ -308,14 +308,16 @@ class StickyWindow(QtWidgets.QWidget):
         Paint the sticky note background color and border.
         """
         painter = QtGui.QPainter(self)
+        painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, False)
+
         painter.setBrush(QtGui.QColor(self.color))
-        pen = QtGui.QPen(QtGui.QColor("#A0A0A0"))
+        painter.setPen(QtCore.Qt.PenStyle.NoPen)
+        painter.drawRect(self.rect())
+
+        pen = QtGui.QPen(QtGui.QColor(160, 160, 160, 60))  # серый с прозрачностью 60/255
         pen.setWidth(1)
         painter.setPen(pen)
-        rect = self.rect()
-        rect.adjust(0, 0, -1, -1)
-        painter.drawRect(rect)
-        super().paintEvent(event)
+        painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
 
     def mousePressEvent(self, event):
         """
@@ -370,6 +372,7 @@ class StickyWindow(QtWidgets.QWidget):
                     row["h"] or 200,
                 )
                 self.set_always_on_top(bool(row["always_on_top"] or 0))
+                self.update_pin_button()
 
     def showEvent(self, event):
         """

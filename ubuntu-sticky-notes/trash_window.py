@@ -11,6 +11,9 @@ UI_PATH = paths["UI_DIR"]
 class TrashWindow(QtWidgets.QWidget):
     """
     Trash window for managing deleted sticky notes.
+
+    Provides a list of deleted notes with options to restore,
+    permanently delete, or reopen a note.
     """
 
     def __init__(self, db: NotesDB, main_window=None):
@@ -19,8 +22,8 @@ class TrashWindow(QtWidgets.QWidget):
 
         Args:
             db (NotesDB): Notes database instance.
-            main_window (QWidget, optional): Reference to the main window for refreshing the list
-                                             or opening restored notes.
+            main_window (QWidget, optional): Reference to the main window
+                for refreshing the list or opening restored notes.
         """
         super().__init__()
         self.db = db
@@ -39,6 +42,10 @@ class TrashWindow(QtWidgets.QWidget):
     def refresh_list(self):
         """
         Refresh the trash list with all deleted notes from the database.
+
+        - Uses the note title if available.
+        - If the title is missing, extracts a plain text snippet from content.
+        - Each note is displayed with its deletion timestamp and color marker.
         """
         self.list_widget.clear()
         for note in self.db.all_trash():
@@ -47,11 +54,14 @@ class TrashWindow(QtWidgets.QWidget):
             plain_text = doc.toPlainText()
             snippet = plain_text[:15].replace("\n", " ")
 
-            item = QtWidgets.QListWidgetItem(f"{snippet}... ({note['deleted_at']})")
+            title = note["title"] if note["title"] else snippet
+
+            item = QtWidgets.QListWidgetItem(f"{title} ({note['deleted_at']})")
             item.setData(QtCore.Qt.ItemDataRole.UserRole, note["id"])
             item.setData(QtCore.Qt.ItemDataRole.UserRole + 1, note["content"])
             item.setData(QtCore.Qt.ItemDataRole.UserRole + 2, note["color"])
             item.setData(QtCore.Qt.ItemDataRole.UserRole + 3, note["deleted_at"])
+            item.setData(QtCore.Qt.ItemDataRole.UserRole + 4, note["title"])
 
             pixmap = QtGui.QPixmap(16, 16)
             pixmap.fill(QtCore.Qt.GlobalColor.transparent)
@@ -66,10 +76,10 @@ class TrashWindow(QtWidgets.QWidget):
 
     def show_context_menu(self, pos):
         """
-        Show the context menu for selected notes in the trash list.
+        Display the context menu for selected notes in the trash list.
 
         Args:
-            pos (QPoint): Mouse position for displaying the menu.
+            pos (QPoint): Mouse position relative to the list widget.
         """
         selected_items = self.list_widget.selectedItems()
         if not selected_items:
@@ -81,7 +91,6 @@ class TrashWindow(QtWidgets.QWidget):
         delete_action = menu.addAction("❌ Delete Permanently (Del)")
 
         action = menu.exec(self.list_widget.mapToGlobal(pos))
-
         note_ids = [item.data(QtCore.Qt.ItemDataRole.UserRole) for item in selected_items]
 
         if action == restore_action:
@@ -100,7 +109,10 @@ class TrashWindow(QtWidgets.QWidget):
 
     def delete_selected_notes(self):
         """
-        Permanently delete all selected notes with a confirmation dialog.
+        Permanently delete all selected notes after confirmation.
+
+        Prompts the user with a confirmation dialog.
+        If confirmed, removes notes from the database and refreshes the list.
         """
         selected_items = self.list_widget.selectedItems()
         if not selected_items:

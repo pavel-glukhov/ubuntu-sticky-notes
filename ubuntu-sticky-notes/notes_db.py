@@ -20,7 +20,7 @@ class NotesDB:
         Initialize the NotesDB instance.
 
         - Connects to the SQLite database.
-        - Creates tables if they do not exist.
+        - Creates or updates tables if they do not exist.
         - Ensures default settings are set (e.g., always_on_top).
 
         Args:
@@ -34,16 +34,17 @@ class NotesDB:
 
     def _create_table(self):
         """
-        Create the database schema if missing.
+        Create or migrate the database schema.
 
-        Tables created:
-            - notes: Stores all sticky note data (content, position, size, color, deleted state, etc.)
-            - settings: Stores simple key-value application settings.
+        - If the database is new → creates `notes` with `title` and all modern fields.
+        - If the database is old → validates schema via PRAGMA and
+          adds missing fields via ALTER TABLE.
         """
         with self.conn:
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS notes (
                     id INTEGER PRIMARY KEY,
+                    title TEXT,
                     content TEXT,
                     x INTEGER,
                     y INTEGER,
@@ -56,6 +57,7 @@ class NotesDB:
                     is_open INTEGER DEFAULT 0
                 )
             """)
+
             self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS settings (
                     key TEXT PRIMARY KEY,
@@ -63,36 +65,56 @@ class NotesDB:
                 )
             """)
 
-    def add(self, content="", x=300, y=200, w=260, h=200, color="#FFF59D", always_on_top=0):
+            cur = self.conn.execute("PRAGMA table_info(notes)")
+            columns = [row[1] for row in cur.fetchall()]
+
+            if "title" not in columns:
+                self.conn.execute("ALTER TABLE notes ADD COLUMN title TEXT")
+            if "always_on_top" not in columns:
+                self.conn.execute("ALTER TABLE notes ADD COLUMN always_on_top INTEGER DEFAULT 0")
+            if "is_open" not in columns:
+                self.conn.execute("ALTER TABLE notes ADD COLUMN is_open INTEGER DEFAULT 0")
+            if "deleted" not in columns:
+                self.conn.execute("ALTER TABLE notes ADD COLUMN deleted INTEGER DEFAULT 0")
+            if "deleted_at" not in columns:
+                self.conn.execute("ALTER TABLE notes ADD COLUMN deleted_at TEXT")
+
+    def add(self, title=None, content="", x=300, y=200, w=260, h=200, color="#FFF59D", always_on_top=0):
         """
-        Add a new sticky note to the database.
+        Insert a new sticky note into the database.
 
         Args:
-            content (str): Initial content of the note.
-            x, y, w, h (int): Position and size of the note.
+            title (str): Title of the note. If None, a default "Sticker N" is used.
+            content (str): Initial HTML/text content.
+            x, y, w, h (int): Position and dimensions of the note.
             color (str): Background color in HEX.
-            always_on_top (int): Whether the note is always on top (0 or 1).
+            always_on_top (int): Whether the note is pinned on top (0 or 1).
 
         Returns:
             int: The newly created note's ID.
         """
+        if title is None:
+            cur = self.conn.execute("SELECT COUNT(*) FROM notes")
+            count = cur.fetchone()[0]
+            title = f"Sticker {count + 1}"
         with self.conn:
             cur = self.conn.execute(
-                "INSERT INTO notes(content, x, y, w, h, color, always_on_top) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (content, x, y, w, h, color, always_on_top)
+                "INSERT INTO notes(title, content, x, y, w, h, color, always_on_top) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (title, content, x, y, w, h, color, always_on_top)
             )
             return cur.lastrowid
 
+
     def update(self, note_id, content, x, y, w, h, color, always_on_top=0):
         """
-        Update an existing sticky note.
+        Update an existing sticky note by ID.
 
         Args:
-            note_id (int): The ID of the note to update.
-            content (str): New content.
-            x, y, w, h (int): Updated position and size.
-            color (str): Updated background color.
-            always_on_top (int): Updated always-on-top flag (0 or 1).
+            note_id (int): ID of the note to update.
+            content (str): Updated HTML/text content.
+            x, y, w, h (int): Updated position and dimensions.
+            color (str): Updated HEX color.
+            always_on_top (int): Whether the note is pinned on top.
         """
         with self.conn:
             self.conn.execute(
@@ -102,33 +124,40 @@ class NotesDB:
 
     def get(self, note_id):
         """
-        Retrieve a note by its ID.
+        Fetch a single note by ID.
 
         Args:
-            note_id (int): Note ID to retrieve.
+            note_id (int): Note ID.
 
         Returns:
-            sqlite3.Row: Row object representing the note, or None if not found.
+            sqlite3.Row | None: Row representing the note, or None if not found.
         """
         cur = self.conn.execute("SELECT * FROM notes WHERE id=?", (note_id,))
         return cur.fetchone()
 
-    def all_notes(self):
+    def all_notes(self, full=False):
         """
-        Retrieve all active (not deleted) notes.
+        Retrieve all active (non-deleted) notes.
+
+        Args:
+            full (bool): If True, returns id, title, color, content.
+                         If False, returns only id and title.
 
         Returns:
-            list[sqlite3.Row]: List of active notes containing id, content, and color.
+            list[sqlite3.Row]: List of active notes.
         """
-        cur = self.conn.execute("SELECT id, content, color FROM notes WHERE deleted=0")
-        return cur.fetchall()
+        if full:
+            query = "SELECT id, title, color, content FROM notes WHERE deleted = 0 ORDER BY id DESC"
+        else:
+            query = "SELECT id, title FROM notes WHERE deleted = 0 ORDER BY id DESC"
+        return self.conn.execute(query).fetchall()
 
     def move_to_trash(self, note_id):
         """
-        Mark a note as deleted (move to trash) with timestamp.
+        Soft-delete a note (mark as deleted and set a timestamp).
 
         Args:
-            note_id (int): ID of the note to trash.
+            note_id (int): Note ID to trash.
         """
         deleted_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with self.conn:
@@ -136,20 +165,20 @@ class NotesDB:
 
     def all_trash(self):
         """
-        Retrieve all notes that are in the trash.
+        Retrieve all notes currently in the trash.
 
         Returns:
-            list[sqlite3.Row]: List of notes marked as deleted.
+            list[sqlite3.Row]: List of trashed notes.
         """
         cur = self.conn.execute("SELECT * FROM notes WHERE deleted=1")
         return cur.fetchall()
 
     def restore_from_trash(self, note_id):
         """
-        Restore a note from trash back to active notes.
+        Restore a note from trash back to active state.
 
         Args:
-            note_id (int): ID of the note to restore.
+            note_id (int): Note ID to restore.
         """
         with self.conn:
             self.conn.execute("UPDATE notes SET deleted=0, deleted_at=NULL WHERE id=?", (note_id,))
@@ -159,7 +188,7 @@ class NotesDB:
         Permanently delete a note from the database.
 
         Args:
-            note_id (int): ID of the note to remove.
+            note_id (int): Note ID to remove.
         """
         with self.conn:
             self.conn.execute("DELETE FROM notes WHERE id=?", (note_id,))
@@ -172,7 +201,7 @@ class NotesDB:
             key (str): Setting key.
 
         Returns:
-            str or None: Setting value, or None if the key does not exist.
+            str | None: Setting value, or None if not found.
         """
         cur = self.conn.execute("SELECT value FROM settings WHERE key=?", (key,))
         row = cur.fetchone()
@@ -180,7 +209,7 @@ class NotesDB:
 
     def set_setting(self, key, value):
         """
-        Set or update a setting in the settings table.
+        Insert or update a setting in the settings table.
 
         Args:
             key (str): Setting key.
@@ -195,7 +224,7 @@ class NotesDB:
 
     def set_open_state(self, note_id, state: int):
         """
-        Save whether the note is open or closed.
+        Persist whether a note is open or closed.
 
         Args:
             note_id (int): Note ID.
@@ -206,10 +235,21 @@ class NotesDB:
 
     def get_open_notes(self):
         """
-        Retrieve all notes that were open during the last session.
+        Retrieve all notes that were open in the last session.
 
         Returns:
             list[int]: List of note IDs that are currently marked as open and not deleted.
         """
         cur = self.conn.execute("SELECT id FROM notes WHERE is_open=1 AND deleted=0")
         return [row["id"] for row in cur.fetchall()]
+
+    def update_title(self, note_id: int, title: str):
+        """
+        Update the title of a note.
+
+        Args:
+            note_id (int): Note ID.
+            title (str): New title string.
+        """
+        with self.conn:
+            self.conn.execute("UPDATE notes SET title = ? WHERE id = ?", (title, note_id))
