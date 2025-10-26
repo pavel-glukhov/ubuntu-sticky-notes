@@ -41,9 +41,13 @@ class StickyWindow(QtWidgets.QWidget):
         self._always_on_top = bool(always_on_top)
         self.main_window = main_window
 
-        ui_path = os.path.join(UI_PATH, "stickywindow.ui_qt")
         self.ui = Ui_StickyWindow()
         self.ui.setupUi(self)
+        self.text_edit = self.ui.text_edit
+        self.btn_close = self.ui.btn_close
+        self.btn_add = self.ui.btn_add
+        self.btn_pin = self.ui.btn_pin
+        self.header_bar_panel = self.ui.header_bar_panel
 
         self.size_grip = QtWidgets.QSizeGrip(self)
         self.size_grip.setFixedSize(15, 15)

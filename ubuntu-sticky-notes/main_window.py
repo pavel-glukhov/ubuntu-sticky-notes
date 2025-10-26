@@ -50,6 +50,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.db = NotesDB()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.list_widget = self.ui.list_widget
+        self.search_bar = self.ui.search_bar
+        self.new_action = self.ui.new_action
+        self.bin_action = self.ui.bin_action
+
 
         old_list_widget = self.list_widget
         self.list_widget = ReorderableListWidget()
@@ -75,7 +80,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.list_widget.setUniformItemSizes(True)
         self.list_widget.setWrapping(True)
         self.list_widget.setFlow(QtWidgets.QListView.Flow.LeftToRight)
-        self.list_widget.setGridSize(QtCore.QSize(150, 150))
+        self.list_widget.setGridSize(QtCore.QSize(135, 135))
         self.list_widget.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.list_widget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
@@ -83,6 +88,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.list_widget.itemSelectionChanged.connect(self.refresh_selection)
         self.list_widget.setAttribute(QtCore.Qt.WidgetAttribute.WA_MacShowFocusRect, False)
         self.list_widget.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
+
+        self.list_widget.setDragEnabled(False)
+        self.list_widget.setAcceptDrops(False)
+        self.list_widget.setDragDropMode(QtWidgets.QAbstractItemView.DragDropMode.NoDragDrop)
+        self.list_widget.setDefaultDropAction(QtCore.Qt.DropAction.IgnoreAction)
+
         self.list_widget.setStyleSheet("""
             QListWidget::item {
                 background: transparent;
@@ -141,7 +152,7 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QWidget: A QWidget representing the sticky note card.
         """
         widget = QtWidgets.QWidget()
-        widget.setFixedSize(130, 130)
+        widget.setFixedSize(135, 135)
         layout = QtWidgets.QVBoxLayout(widget)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)

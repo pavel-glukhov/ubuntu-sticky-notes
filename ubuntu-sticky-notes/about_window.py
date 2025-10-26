@@ -29,9 +29,13 @@ class AboutDialog(QtWidgets.QDialog):
         """
         super().__init__(parent)
 
-        ui_path = os.path.join(UI_PATH, "aboutdialog.ui_qt")
         self.ui = Ui_AboutDialog()
         self.ui.setupUi(self)
+        self.label_title = self.ui.label_title
+        self.label_info = self.ui.label_info
+        self.label_description = self.ui.label_description
+        self.label_license = self.ui.label_license
+        self.buttonBox = self.ui.buttonBox
 
         self.setWindowTitle(f"About {APP_INFO['app_name']}")
         self.label_title.setText(f"<h2>{APP_INFO['app_name']}</h2>")

@@ -30,9 +30,9 @@ class TrashWindow(QtWidgets.QWidget):
         self.db = db
         self.main_window = main_window
 
-        ui_path = os.path.join(UI_PATH, "trashwindow.ui_qt")
         self.ui = Ui_TrashWindow()
         self.ui.setupUi(self)
+        self.list_widget = self.ui.list_widget
 
         self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
         self.list_widget.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
