@@ -37,10 +37,10 @@ https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/tag/1.3.1
 ______________________________________________________________________________________
 ## Installation:
 ```bash
-    sudo apt update
-    sudo apt install -y python3-pyqt6
-    curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/1.3.1/ubuntu-sticky-notes_1.3.1_all.deb
-    sudo apt install ./ubuntu-sticky-notes_1.3.1_all.deb -y
+curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/1.3.1/ubuntu-sticky-notes_1.3.1_all.deb
+sudo apt update
+sudo apt install -y python3-pyqt6
+sudo dpkg -i ubuntu-sticky-notes_1.3.1_all.deb
 ```
 _____________________________________________________________________________________
 ## Self build and Install Ubuntu Sticky Notes (.deb package)
