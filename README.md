@@ -39,7 +39,7 @@ ________________________________________________________________________________
 ```bash
     sudo apt update
     sudo apt install -y python3-pyqt6
-    curl -O https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/1.3.0/ubuntu-sticky-notes_1.3.0_all.deb
+    curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/1.3.0/ubuntu-sticky-notes_1.3.0_all.deb
     sudo apt install ./ubuntu-sticky-notes_1.3.0_all.deb -y
 ```
 _____________________________________________________________________________________
@@ -48,7 +48,7 @@ ________________________________________________________________________________
 ``` bash
 # Clone the repository
 git clone https://github.com/pavel-glukhov/ubuntu-sticky-notes.git
-cd ubuntu_sticky_notes
+cd ubuntu-sticky-notes
 # Make the script executable
 chmod +x build_deb_package.sh
 # Run the package build
