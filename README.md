@@ -45,7 +45,7 @@ sudo dpkg -i ubuntu-sticky-notes_1.3.1_all.deb
 
 ### ⚠️ Important
 > This application will start in the system tray. 
-![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/tree/main/pic/tray_example.png)
+![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/tray_example.png)
 _____________________________________________________________________________________
 ## Self build and Install Ubuntu Sticky Notes (.deb package)
 
