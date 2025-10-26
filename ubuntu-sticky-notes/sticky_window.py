@@ -2,8 +2,8 @@ import os
 
 from config import AUTOSAVE_INTERVAL_MS, COLOR_MAP, get_app_paths
 from notes_db import NotesDB
-from PyQt6 import QtCore, QtGui, QtWidgets, uic
-
+from PyQt6 import QtCore, QtGui, QtWidgets
+from resources.ui_py.stickywindow import Ui_StickyWindow
 paths = get_app_paths()
 UI_PATH = paths["UI_DIR"]
 
@@ -41,8 +41,9 @@ class StickyWindow(QtWidgets.QWidget):
         self._always_on_top = bool(always_on_top)
         self.main_window = main_window
 
-        ui_path = os.path.join(UI_PATH, "stickywindow.ui")
-        uic.loadUi(ui_path, self)
+        ui_path = os.path.join(UI_PATH, "stickywindow.ui_qt")
+        self.ui = Ui_StickyWindow()
+        self.ui.setupUi(self)
 
         self.size_grip = QtWidgets.QSizeGrip(self)
         self.size_grip.setFixedSize(15, 15)

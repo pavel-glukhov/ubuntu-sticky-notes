@@ -2,7 +2,8 @@ import os
 
 from config import get_app_paths
 from notes_db import NotesDB
-from PyQt6 import QtCore, QtGui, QtWidgets, uic
+from PyQt6 import QtCore, QtGui, QtWidgets
+from resources.ui_py.trashwindow import Ui_TrashWindow
 
 paths = get_app_paths()
 UI_PATH = paths["UI_DIR"]
@@ -29,8 +30,9 @@ class TrashWindow(QtWidgets.QWidget):
         self.db = db
         self.main_window = main_window
 
-        ui_path = os.path.join(UI_PATH, "trashwindow.ui")
-        uic.loadUi(ui_path, self)
+        ui_path = os.path.join(UI_PATH, "trashwindow.ui_qt")
+        self.ui = Ui_TrashWindow()
+        self.ui.setupUi(self)
 
         self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
         self.list_widget.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)

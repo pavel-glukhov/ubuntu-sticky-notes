@@ -1,7 +1,8 @@
 import os
 
 from config import get_app_paths
-from PyQt6 import QtWidgets, uic
+from PyQt6 import QtWidgets
+from resources.ui_py.aboutdialog import Ui_AboutDialog
 
 paths = get_app_paths()
 APP_INFO = paths["APP_INFO"]
@@ -28,8 +29,9 @@ class AboutDialog(QtWidgets.QDialog):
         """
         super().__init__(parent)
 
-        ui_path = os.path.join(UI_PATH, "aboutdialog.ui")
-        uic.loadUi(ui_path, self)
+        ui_path = os.path.join(UI_PATH, "aboutdialog.ui_qt")
+        self.ui = Ui_AboutDialog()
+        self.ui.setupUi(self)
 
         self.setWindowTitle(f"About {APP_INFO['app_name']}")
         self.label_title.setText(f"<h2>{APP_INFO['app_name']}</h2>")

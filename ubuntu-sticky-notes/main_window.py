@@ -2,10 +2,10 @@ import os
 
 from config import COLOR_MAP, get_app_paths
 from notes_db import NotesDB
-from PyQt6 import QtCore, QtGui, QtWidgets, uic
+from PyQt6 import QtCore, QtGui, QtWidgets
 from sticky_window import StickyWindow
 from trash_window import TrashWindow
-
+from resources.ui_py.mainwindow import Ui_MainWindow
 paths = get_app_paths()
 UI_PATH = paths["UI_DIR"]
 ICONS_PATH = paths["ICONS_DIR"]
@@ -48,8 +48,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """Initializes the main window, loads UI, sets up signals and keyboard shortcuts."""
         super().__init__()
         self.db = NotesDB()
-        ui_path = os.path.join(UI_PATH, "mainwindow.ui")
-        uic.loadUi(ui_path, self)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
 
         old_list_widget = self.list_widget
         self.list_widget = ReorderableListWidget()

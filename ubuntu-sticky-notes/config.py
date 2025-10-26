@@ -8,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_INFO_FILE = os.path.join(BASE_DIR, "app_info.json")
 RESOURCES_DIR = os.path.join(BASE_DIR, "resources")
 ICONS_DIR = os.path.join(RESOURCES_DIR, "icons")
-UI_DIR = os.path.join(RESOURCES_DIR, "ui")
+UI_DIR = os.path.join(RESOURCES_DIR, "ui_qt")
 
 AUTOSAVE_INTERVAL_MS = 2000
 COLOR_MAP = {
