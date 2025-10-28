@@ -30,6 +30,7 @@ done
 cp main.py "$APP_DIR/"
 cp -r src "$APP_DIR/"
 cp -r resources "$APP_DIR/"
+cp uninstall.sh "$APP_DIR/"
 
 # ----------------------
 # Read application info from JSON

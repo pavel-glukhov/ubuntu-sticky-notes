@@ -110,6 +110,24 @@ sudo dpkg -i ubuntu-sticky-notes_2.0.0_all.deb
 sudo apt-get install -f
 ```
 
+### 🗑️ Kaldırma (Uninstall)
+
+Uygulamayı tamamen kaldırmak için güvenli uninstall scriptini kullanın:
+
+```bash
+# Kaynak koddan kaldırma
+sudo ./uninstall.sh
+
+# Veya .deb paketi kurduysanız
+sudo /usr/share/ubuntu-sticky-notes/uninstall.sh
+```
+
+Bu script:
+- ✅ **Güvenli kaldırma:** Sadece uygulama dosyalarını siler
+- ✅ **Sistem koruması:** Python, GTK4 gibi sistem paketlerine dokunmaz  
+- ✅ **Kullanıcı seçimi:** Notlarınızı koruma seçeneği sunar
+- ✅ **Temiz kaldırma:** Tüm uygulama izlerini temizler
+
 ## 🎯 Kullanım
 
 - **Not Oluşturma:** Ana pencereden "Yeni Not" butonuna tıklayın
