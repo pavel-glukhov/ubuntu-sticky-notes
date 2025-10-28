@@ -1,0 +1,215 @@
+# Russian translations for Ubuntu Sticky Notes
+# Copyright (C) 2025
+# This file is distributed under the same license as the Ubuntu Sticky Notes package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubuntu Sticky Notes 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-29 00:00+0300\n"
+"PO-Revision-Date: 2025-10-29 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Application
+msgid "Sticky Notes"
+msgstr "Заметки"
+
+# Buttons
+msgid "+ Add"
+msgstr "+ Добавить"
+
+msgid "Trash"
+msgstr "Корзина"
+
+msgid "Menu"
+msgstr "Меню"
+
+msgid "Sort"
+msgstr "Сортировать"
+
+msgid "Share"
+msgstr "Поделиться"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Restore"
+msgstr "Восстановить"
+
+msgid "Empty Trash"
+msgstr "Очистить Корзину"
+
+# Table Headers
+msgid "Note Name"
+msgstr "Название Заметки"
+
+msgid "Modified"
+msgstr "Изменено"
+
+msgid "Created"
+msgstr "Создано"
+
+msgid "Actions"
+msgstr "Действия"
+
+# Sorting
+msgid "Sort by"
+msgstr "Сортировать по"
+
+msgid "By Name"
+msgstr "По Названию"
+
+msgid "By Date"
+msgstr "По Дате"
+
+msgid "Name (A → Z)"
+msgstr "Название (А → Я)"
+
+msgid "Name (Z → A)"
+msgstr "Название (Я → А)"
+
+msgid "Modified (New → Old)"
+msgstr "Изменено (Новые → Старые)"
+
+msgid "Modified (Old → New)"
+msgstr "Изменено (Старые → Новые)"
+
+msgid "Created (New → Old)"
+msgstr "Создано (Новые → Старые)"
+
+msgid "Created (Old → New)"
+msgstr "Создано (Старые → Новые)"
+
+# Search
+msgid "Search notes…"
+msgstr "Поиск заметок…"
+
+# Dialogs
+msgid "Create New Note"
+msgstr "Создать Новую Заметку"
+
+msgid "Enter note title:"
+msgstr "Введите название заметки:"
+
+msgid "Note title…"
+msgstr "Название заметки…"
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "Create"
+msgstr "Создать"
+
+msgid "Untitled"
+msgstr "Без названия"
+
+# Trash
+msgid "Delete Permanently?"
+msgstr "Удалить Навсегда?"
+
+msgid "This note will be permanently deleted and cannot be recovered."
+msgstr "Эта заметка будет удалена навсегда и не может быть восстановлена."
+
+msgid "Empty Trash?"
+msgstr "Очистить Корзину?"
+
+msgid "All notes in trash will be permanently deleted and cannot be recovered."
+msgstr "Все заметки в корзине будут удалены навсегда и не могут быть восстановлены."
+
+msgid "Delete All"
+msgstr "Удалить Все"
+
+# Tooltips
+msgid "New Note"
+msgstr "Новая Заметка"
+
+msgid "Move to Trash"
+msgstr "Переместить в Корзину"
+
+msgid "Permanently delete selected note"
+msgstr "Удалить выбранную заметку навсегда"
+
+msgid "Restore selected note"
+msgstr "Восстановить выбранную заметку"
+
+# Sticky Window
+msgid "Toggle Format Menu"
+msgstr "Переключить Меню Форматирования"
+
+msgid "Keep on Top"
+msgstr "Поверх Всех Окон"
+
+msgid "Pin Window"
+msgstr "Закрепить Окно"
+
+msgid "Settings"
+msgstr "Настройки"
+
+# Format Toolbar
+msgid "Font Size"
+msgstr "Размер Шрифта"
+
+msgid "Text Color"
+msgstr "Цвет Текста"
+
+msgid "Bold"
+msgstr "Жирный"
+
+msgid "Italic"
+msgstr "Курсив"
+
+msgid "Underline"
+msgstr "Подчеркнутый"
+
+msgid "Strikethrough"
+msgstr "Зачеркнутый"
+
+msgid "Align Left"
+msgstr "По Левому Краю"
+
+msgid "Align Center"
+msgstr "По Центру"
+
+msgid "Align Right"
+msgstr "По Правому Краю"
+
+msgid "Alignment"
+msgstr "Выравнивание"
+
+# Share
+msgid "Share note feature coming soon!"
+msgstr "Функция совместного использования заметок скоро появится!"
+
+msgid "OK"
+msgstr "ОК"
+
+# About
+msgid "About"
+msgstr "О программе"
+
+msgid "Quit"
+msgstr "Выход"
+
+msgid "A simple sticky notes application for Ubuntu"
+msgstr "Простое приложение для заметок для Ubuntu"
+
+msgid "Version"
+msgstr "Версия"
+
+# Languages
+msgid "Language"
+msgstr "Язык"
+
+msgid "Select Language"
+msgstr "Выбрать Язык"
+
+msgid "Language Changed"
+msgstr "Язык Изменен"
+
+msgid "Please restart the application to apply the new language."
+msgstr "Пожалуйста, перезапустите приложение, чтобы применить новый язык."

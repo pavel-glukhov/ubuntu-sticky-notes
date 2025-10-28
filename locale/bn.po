@@ -1,0 +1,215 @@
+# Bengali translations for Ubuntu Sticky Notes
+# Copyright (C) 2025
+# This file is distributed under the same license as the Ubuntu Sticky Notes package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubuntu Sticky Notes 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-29 00:00+0300\n"
+"PO-Revision-Date: 2025-10-29 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: Bengali\n"
+"Language: bn\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Application
+msgid "Sticky Notes"
+msgstr "স্টিকি নোট"
+
+# Buttons
+msgid "+ Add"
+msgstr "+ যোগ করুন"
+
+msgid "Trash"
+msgstr "ট্র্যাশ"
+
+msgid "Menu"
+msgstr "মেনু"
+
+msgid "Sort"
+msgstr "সাজান"
+
+msgid "Share"
+msgstr "শেয়ার করুন"
+
+msgid "Delete"
+msgstr "মুছুন"
+
+msgid "Restore"
+msgstr "পুনরুদ্ধার করুন"
+
+msgid "Empty Trash"
+msgstr "ট্র্যাশ খালি করুন"
+
+# Table Headers
+msgid "Note Name"
+msgstr "নোটের নাম"
+
+msgid "Modified"
+msgstr "পরিবর্তিত"
+
+msgid "Created"
+msgstr "তৈরি"
+
+msgid "Actions"
+msgstr "কর্ম"
+
+# Sorting
+msgid "Sort by"
+msgstr "সাজানোর ধরন"
+
+msgid "By Name"
+msgstr "নাম অনুসারে"
+
+msgid "By Date"
+msgstr "তারিখ অনুসারে"
+
+msgid "Name (A → Z)"
+msgstr "নাম (ক → হ)"
+
+msgid "Name (Z → A)"
+msgstr "নাম (হ → ক)"
+
+msgid "Modified (New → Old)"
+msgstr "পরিবর্তিত (নতুন → পুরাতন)"
+
+msgid "Modified (Old → New)"
+msgstr "পরিবর্তিত (পুরাতন → নতুন)"
+
+msgid "Created (New → Old)"
+msgstr "তৈরি (নতুন → পুরাতন)"
+
+msgid "Created (Old → New)"
+msgstr "তৈরি (পুরাতন → নতুন)"
+
+# Search
+msgid "Search notes…"
+msgstr "নোট খুঁজুন…"
+
+# Dialogs
+msgid "Create New Note"
+msgstr "নতুন নোট তৈরি করুন"
+
+msgid "Enter note title:"
+msgstr "নোটের শিরোনাম লিখুন:"
+
+msgid "Note title…"
+msgstr "নোটের শিরোনাম…"
+
+msgid "Cancel"
+msgstr "বাতিল"
+
+msgid "Create"
+msgstr "তৈরি করুন"
+
+msgid "Untitled"
+msgstr "শিরোনামহীন"
+
+# Trash
+msgid "Delete Permanently?"
+msgstr "স্থায়ীভাবে মুছবেন?"
+
+msgid "This note will be permanently deleted and cannot be recovered."
+msgstr "এই নোটটি স্থায়ীভাবে মুছে ফেলা হবে এবং পুনরুদ্ধার করা যাবে না।"
+
+msgid "Empty Trash?"
+msgstr "ট্র্যাশ খালি করবেন?"
+
+msgid "All notes in trash will be permanently deleted and cannot be recovered."
+msgstr "ট্র্যাশের সমস্ত নোট স্থায়ীভাবে মুছে ফেলা হবে এবং পুনরুদ্ধার করা যাবে না।"
+
+msgid "Delete All"
+msgstr "সব মুছুন"
+
+# Tooltips
+msgid "New Note"
+msgstr "নতুন নোট"
+
+msgid "Move to Trash"
+msgstr "ট্র্যাশে সরান"
+
+msgid "Permanently delete selected note"
+msgstr "নির্বাচিত নোট স্থায়ীভাবে মুছুন"
+
+msgid "Restore selected note"
+msgstr "নির্বাচিত নোট পুনরুদ্ধার করুন"
+
+# Sticky Window
+msgid "Toggle Format Menu"
+msgstr "ফরম্যাট মেনু টগল করুন"
+
+msgid "Keep on Top"
+msgstr "উপরে রাখুন"
+
+msgid "Pin Window"
+msgstr "উইন্ডো পিন করুন"
+
+msgid "Settings"
+msgstr "সেটিংস"
+
+# Format Toolbar
+msgid "Font Size"
+msgstr "ফন্ট সাইজ"
+
+msgid "Text Color"
+msgstr "লেখার রঙ"
+
+msgid "Bold"
+msgstr "মোটা"
+
+msgid "Italic"
+msgstr "তির্যক"
+
+msgid "Underline"
+msgstr "নিচে দাগ"
+
+msgid "Strikethrough"
+msgstr "মাঝে দাগ"
+
+msgid "Align Left"
+msgstr "বামে সারিবদ্ধ করুন"
+
+msgid "Align Center"
+msgstr "মাঝে সারিবদ্ধ করুন"
+
+msgid "Align Right"
+msgstr "ডানে সারিবদ্ধ করুন"
+
+msgid "Alignment"
+msgstr "সারিবদ্ধতা"
+
+# Share
+msgid "Share note feature coming soon!"
+msgstr "নোট শেয়ার করার বৈশিষ্ট্য শীঘ্রই আসছে!"
+
+msgid "OK"
+msgstr "ঠিক আছে"
+
+# About
+msgid "About"
+msgstr "সম্পর্কে"
+
+msgid "Quit"
+msgstr "প্রস্থান"
+
+msgid "A simple sticky notes application for Ubuntu"
+msgstr "Ubuntu-এর জন্য একটি সহজ স্টিকি নোট অ্যাপ্লিকেশন"
+
+msgid "Version"
+msgstr "সংস্করণ"
+
+# Languages
+msgid "Language"
+msgstr "ভাষা"
+
+msgid "Select Language"
+msgstr "ভাষা নির্বাচন করুন"
+
+msgid "Language Changed"
+msgstr "ভাষা পরিবর্তিত হয়েছে"
+
+msgid "Please restart the application to apply the new language."
+msgstr "নতুন ভাষা প্রয়োগ করতে অ্যাপ্লিকেশন পুনরায় চালু করুন।"

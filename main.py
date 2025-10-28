@@ -19,6 +19,14 @@ def _ensure_src_on_path():
 
 def main():
 	_ensure_src_on_path()
+	
+	# Initialize i18n
+	try:
+		from core.i18n import init_translation
+		init_translation()
+	except Exception as e:
+		print(f"Warning: Failed to initialize translations: {e}", file=sys.stderr)
+	
 	try:
 		import gi
 		gi.require_version("Gtk", "4.0")

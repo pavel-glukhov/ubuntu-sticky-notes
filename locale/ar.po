@@ -1,0 +1,215 @@
+# Arabic translations for Ubuntu Sticky Notes
+# Copyright (C) 2025
+# This file is distributed under the same license as the Ubuntu Sticky Notes package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubuntu Sticky Notes 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-29 00:00+0300\n"
+"PO-Revision-Date: 2025-10-29 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Application
+msgid "Sticky Notes"
+msgstr "الملاحظات اللاصقة"
+
+# Buttons
+msgid "+ Add"
+msgstr "+ إضافة"
+
+msgid "Trash"
+msgstr "سلة المهملات"
+
+msgid "Menu"
+msgstr "القائمة"
+
+msgid "Sort"
+msgstr "ترتيب"
+
+msgid "Share"
+msgstr "مشاركة"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Restore"
+msgstr "استعادة"
+
+msgid "Empty Trash"
+msgstr "إفراغ سلة المهملات"
+
+# Table Headers
+msgid "Note Name"
+msgstr "اسم الملاحظة"
+
+msgid "Modified"
+msgstr "التعديل"
+
+msgid "Created"
+msgstr "الإنشاء"
+
+msgid "Actions"
+msgstr "الإجراءات"
+
+# Sorting
+msgid "Sort by"
+msgstr "ترتيب حسب"
+
+msgid "By Name"
+msgstr "حسب الاسم"
+
+msgid "By Date"
+msgstr "حسب التاريخ"
+
+msgid "Name (A → Z)"
+msgstr "الاسم (أ → ي)"
+
+msgid "Name (Z → A)"
+msgstr "الاسم (ي → أ)"
+
+msgid "Modified (New → Old)"
+msgstr "التعديل (جديد → قديم)"
+
+msgid "Modified (Old → New)"
+msgstr "التعديل (قديم → جديد)"
+
+msgid "Created (New → Old)"
+msgstr "الإنشاء (جديد → قديم)"
+
+msgid "Created (Old → New)"
+msgstr "الإنشاء (قديم → جديد)"
+
+# Search
+msgid "Search notes…"
+msgstr "البحث في الملاحظات…"
+
+# Dialogs
+msgid "Create New Note"
+msgstr "إنشاء ملاحظة جديدة"
+
+msgid "Enter note title:"
+msgstr "أدخل عنوان الملاحظة:"
+
+msgid "Note title…"
+msgstr "عنوان الملاحظة…"
+
+msgid "Cancel"
+msgstr "إلغاء"
+
+msgid "Create"
+msgstr "إنشاء"
+
+msgid "Untitled"
+msgstr "بدون عنوان"
+
+# Trash
+msgid "Delete Permanently?"
+msgstr "حذف نهائي؟"
+
+msgid "This note will be permanently deleted and cannot be recovered."
+msgstr "سيتم حذف هذه الملاحظة نهائياً ولن يمكن استعادتها."
+
+msgid "Empty Trash?"
+msgstr "إفراغ سلة المهملات؟"
+
+msgid "All notes in trash will be permanently deleted and cannot be recovered."
+msgstr "سيتم حذف جميع الملاحظات في سلة المهملات نهائياً ولن يمكن استعادتها."
+
+msgid "Delete All"
+msgstr "حذف الكل"
+
+# Tooltips
+msgid "New Note"
+msgstr "ملاحظة جديدة"
+
+msgid "Move to Trash"
+msgstr "نقل إلى سلة المهملات"
+
+msgid "Permanently delete selected note"
+msgstr "حذف الملاحظة المحددة نهائياً"
+
+msgid "Restore selected note"
+msgstr "استعادة الملاحظة المحددة"
+
+# Sticky Window
+msgid "Toggle Format Menu"
+msgstr "تبديل قائمة التنسيق"
+
+msgid "Keep on Top"
+msgstr "الإبقاء في المقدمة"
+
+msgid "Pin Window"
+msgstr "تثبيت النافذة"
+
+msgid "Settings"
+msgstr "الإعدادات"
+
+# Format Toolbar
+msgid "Font Size"
+msgstr "حجم الخط"
+
+msgid "Text Color"
+msgstr "لون النص"
+
+msgid "Bold"
+msgstr "عريض"
+
+msgid "Italic"
+msgstr "مائل"
+
+msgid "Underline"
+msgstr "تسطير"
+
+msgid "Strikethrough"
+msgstr "يتوسطه خط"
+
+msgid "Align Left"
+msgstr "محاذاة لليسار"
+
+msgid "Align Center"
+msgstr "محاذاة للوسط"
+
+msgid "Align Right"
+msgstr "محاذاة لليمين"
+
+msgid "Alignment"
+msgstr "المحاذاة"
+
+# Share
+msgid "Share note feature coming soon!"
+msgstr "ميزة مشاركة الملاحظات قادمة قريباً!"
+
+msgid "OK"
+msgstr "موافق"
+
+# About
+msgid "About"
+msgstr "حول"
+
+msgid "Quit"
+msgstr "خروج"
+
+msgid "A simple sticky notes application for Ubuntu"
+msgstr "تطبيق بسيط للملاحظات اللاصقة لنظام Ubuntu"
+
+msgid "Version"
+msgstr "الإصدار"
+
+# Languages
+msgid "Language"
+msgstr "اللغة"
+
+msgid "Select Language"
+msgstr "اختر اللغة"
+
+msgid "Language Changed"
+msgstr "تم تغيير اللغة"
+
+msgid "Please restart the application to apply the new language."
+msgstr "يرجى إعادة تشغيل التطبيق لتطبيق اللغة الجديدة."

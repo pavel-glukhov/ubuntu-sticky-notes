@@ -3,24 +3,117 @@
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.0"/>
   <object class="AdwApplicationWindow" id="StickyWindow">
-    <property name="default-width">320</property>
-    <property name="default-height">240</property>
+    <property name="default-width">400</property>
+    <property name="default-height">300</property>
     <child>
       <object class="GtkBox" id="main_box">
         <property name="orientation">vertical</property>
         <child>
           <object class="AdwHeaderBar" id="headerbar">
             <child type="start">
-              <object class="GtkButton" id="btn_pin">
-                <property name="icon-name">window-pin-symbolic</property>
-                <property name="tooltip-text">Pin on Top</property>
+              <object class="GtkToggleButton" id="btn_toggle_toolbar">
+                <property name="icon-name">format-text-rich-symbolic</property>
+                <property name="tooltip-text">Format Menüsü</property>
               </object>
             </child>
             <child type="end">
-              <object class="GtkButton" id="btn_close">
-                <property name="icon-name">window-close-symbolic</property>
-                <property name="tooltip-text">Close</property>
+              <object class="GtkMenuButton" id="menu_button">
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text">Menü</property>
               </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkRevealer" id="toolbar_revealer">
+            <property name="reveal-child">false</property>
+            <property name="transition-type">slide-down</property>
+            <property name="transition-duration">200</property>
+            <child>
+              <object class="GtkFlowBox" id="toolbar_flowbox">
+                <property name="orientation">horizontal</property>
+                <property name="column-spacing">4</property>
+                <property name="row-spacing">4</property>
+                <property name="margin-start">8</property>
+                <property name="margin-end">8</property>
+                <property name="margin-top">4</property>
+                <property name="margin-bottom">4</property>
+                <property name="max-children-per-line">20</property>
+                <property name="min-children-per-line">1</property>
+                <property name="homogeneous">false</property>
+                <property name="selection-mode">none</property>
+                <style>
+                  <class name="toolbar"/>
+                </style>
+            <!-- Font Size -->
+            <child>
+              <object class="GtkDropDown" id="font_size_dropdown">
+                <property name="tooltip-text">Font Boyutu</property>
+              </object>
+            </child>
+            <!-- Bold -->
+            <child>
+              <object class="GtkToggleButton" id="btn_bold">
+                <property name="icon-name">format-text-bold-symbolic</property>
+                <property name="tooltip-text">Kalın</property>
+              </object>
+            </child>
+            <!-- Italic -->
+            <child>
+              <object class="GtkToggleButton" id="btn_italic">
+                <property name="icon-name">format-text-italic-symbolic</property>
+                <property name="tooltip-text">İtalik</property>
+              </object>
+            </child>
+            <!-- Underline -->
+            <child>
+              <object class="GtkToggleButton" id="btn_underline">
+                <property name="icon-name">format-text-underline-symbolic</property>
+                <property name="tooltip-text">Altı Çizili</property>
+              </object>
+            </child>
+            <!-- Strikethrough -->
+            <child>
+              <object class="GtkToggleButton" id="btn_strikethrough">
+                <property name="icon-name">format-text-strikethrough-symbolic</property>
+                <property name="tooltip-text">Üstü Çizili</property>
+              </object>
+            </child>
+            <!-- Text Color -->
+            <child>
+              <object class="GtkColorButton" id="text_color_button">
+                <property name="tooltip-text">Yazı Rengi</property>
+              </object>
+            </child>
+            <!-- Alignment Menu Button -->
+            <child>
+              <object class="GtkMenuButton" id="alignment_button">
+                <property name="icon-name">format-justify-left-symbolic</property>
+                <property name="tooltip-text">Paragraf Hizalama</property>
+              </object>
+            </child>
+            <!-- Bullet List -->
+            <child>
+              <object class="GtkMenuButton" id="bullet_list_button">
+                <property name="icon-name">view-list-symbolic</property>
+                <property name="tooltip-text">Madde İşaretleri</property>
+              </object>
+            </child>
+            <!-- Numbered List -->
+            <child>
+              <object class="GtkMenuButton" id="numbered_list_button">
+                <property name="icon-name">view-list-ordered-symbolic</property>
+                <property name="tooltip-text">Numaralı Liste</property>
+              </object>
+            </child>
+            <!-- Checklist -->
+            <child>
+              <object class="GtkButton" id="btn_checklist">
+                <property name="icon-name">checkbox-checked-symbolic</property>
+                <property name="tooltip-text">Kontrol Listesi</property>
+              </object>
+            </child>
+          </object>
             </child>
           </object>
         </child>
@@ -28,9 +121,16 @@
           <object class="GtkScrolledWindow" id="scrolled">
             <property name="hexpand">true</property>
             <property name="vexpand">true</property>
+            <property name="margin-start">8</property>
+            <property name="margin-end">8</property>
+            <property name="margin-bottom">8</property>
             <child>
               <object class="GtkTextView" id="text_view">
                 <property name="wrap-mode">word-char</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">12</property>
               </object>
             </child>
           </object>

@@ -15,41 +15,12 @@ class StickyNotesApp(Adw.Application):
 						 flags=Gio.ApplicationFlags.FLAGS_NONE)
 		Adw.init()
 		self.paths = get_app_paths()
-		self.tray = None
 
 	def do_activate(self):
 		# Single main window instance
 		win = self.props.active_window
 		if not win:
 			win = MainWindow(application=self)
-			# Initialize system tray after main window is created
-			tray_initialized = False
-			
-			# Try StatusNotifierItem first (GTK4 compatible)
-			try:
-				from utils.status_notifier import init_status_notifier
-				self.tray = init_status_notifier(self, win)
-				if self.tray:
-					tray_initialized = True
-					print("✓ System tray initialized using StatusNotifierItem")
-			except Exception as e:
-				print(f"StatusNotifierItem not available: {e}")
-			
-			# If SNI failed, try AppIndicator (requires GTK3 bindings but may work)
-			if not tray_initialized:
-				try:
-					from utils.system_tray import init_tray
-					self.tray = init_tray(self, win)
-					if self.tray:
-						tray_initialized = True
-						print("✓ System tray initialized using AppIndicator")
-				except Exception as e:
-					print(f"AppIndicator not available: {e}")
-			
-			if not tray_initialized:
-				print("\n⚠ System tray not available on this system.")
-				print("For GNOME Shell, install: sudo apt install gnome-shell-extension-appindicator")
-				print("The application will work without system tray.\n")
 		
 		win.present()
 

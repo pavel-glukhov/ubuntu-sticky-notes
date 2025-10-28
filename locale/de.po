@@ -1,0 +1,215 @@
+# German translations for Ubuntu Sticky Notes
+# Copyright (C) 2025
+# This file is distributed under the same license as the Ubuntu Sticky Notes package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubuntu Sticky Notes 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-29 00:00+0300\n"
+"PO-Revision-Date: 2025-10-29 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Application
+msgid "Sticky Notes"
+msgstr "Haftnotizen"
+
+# Buttons
+msgid "+ Add"
+msgstr "+ Hinzufügen"
+
+msgid "Trash"
+msgstr "Papierkorb"
+
+msgid "Menu"
+msgstr "Menü"
+
+msgid "Sort"
+msgstr "Sortieren"
+
+msgid "Share"
+msgstr "Teilen"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Restore"
+msgstr "Wiederherstellen"
+
+msgid "Empty Trash"
+msgstr "Papierkorb Leeren"
+
+# Table Headers
+msgid "Note Name"
+msgstr "Notizname"
+
+msgid "Modified"
+msgstr "Geändert"
+
+msgid "Created"
+msgstr "Erstellt"
+
+msgid "Actions"
+msgstr "Aktionen"
+
+# Sorting
+msgid "Sort by"
+msgstr "Sortieren nach"
+
+msgid "By Name"
+msgstr "Nach Name"
+
+msgid "By Date"
+msgstr "Nach Datum"
+
+msgid "Name (A → Z)"
+msgstr "Name (A → Z)"
+
+msgid "Name (Z → A)"
+msgstr "Name (Z → A)"
+
+msgid "Modified (New → Old)"
+msgstr "Geändert (Neu → Alt)"
+
+msgid "Modified (Old → New)"
+msgstr "Geändert (Alt → Neu)"
+
+msgid "Created (New → Old)"
+msgstr "Erstellt (Neu → Alt)"
+
+msgid "Created (Old → New)"
+msgstr "Erstellt (Alt → Neu)"
+
+# Search
+msgid "Search notes…"
+msgstr "Notizen durchsuchen…"
+
+# Dialogs
+msgid "Create New Note"
+msgstr "Neue Notiz Erstellen"
+
+msgid "Enter note title:"
+msgstr "Notiztitel eingeben:"
+
+msgid "Note title…"
+msgstr "Notiztitel…"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Create"
+msgstr "Erstellen"
+
+msgid "Untitled"
+msgstr "Ohne Titel"
+
+# Trash
+msgid "Delete Permanently?"
+msgstr "Dauerhaft Löschen?"
+
+msgid "This note will be permanently deleted and cannot be recovered."
+msgstr "Diese Notiz wird dauerhaft gelöscht und kann nicht wiederhergestellt werden."
+
+msgid "Empty Trash?"
+msgstr "Papierkorb Leeren?"
+
+msgid "All notes in trash will be permanently deleted and cannot be recovered."
+msgstr "Alle Notizen im Papierkorb werden dauerhaft gelöscht und können nicht wiederhergestellt werden."
+
+msgid "Delete All"
+msgstr "Alle Löschen"
+
+# Tooltips
+msgid "New Note"
+msgstr "Neue Notiz"
+
+msgid "Move to Trash"
+msgstr "In Papierkorb Verschieben"
+
+msgid "Permanently delete selected note"
+msgstr "Ausgewählte Notiz dauerhaft löschen"
+
+msgid "Restore selected note"
+msgstr "Ausgewählte Notiz wiederherstellen"
+
+# Sticky Window
+msgid "Toggle Format Menu"
+msgstr "Formatmenü Umschalten"
+
+msgid "Keep on Top"
+msgstr "Immer im Vordergrund"
+
+msgid "Pin Window"
+msgstr "Fenster Anheften"
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+# Format Toolbar
+msgid "Font Size"
+msgstr "Schriftgröße"
+
+msgid "Text Color"
+msgstr "Textfarbe"
+
+msgid "Bold"
+msgstr "Fett"
+
+msgid "Italic"
+msgstr "Kursiv"
+
+msgid "Underline"
+msgstr "Unterstrichen"
+
+msgid "Strikethrough"
+msgstr "Durchgestrichen"
+
+msgid "Align Left"
+msgstr "Linksbündig"
+
+msgid "Align Center"
+msgstr "Zentriert"
+
+msgid "Align Right"
+msgstr "Rechtsbündig"
+
+msgid "Alignment"
+msgstr "Ausrichtung"
+
+# Share
+msgid "Share note feature coming soon!"
+msgstr "Die Funktion zum Teilen von Notizen kommt bald!"
+
+msgid "OK"
+msgstr "OK"
+
+# About
+msgid "About"
+msgstr "Über"
+
+msgid "Quit"
+msgstr "Beenden"
+
+msgid "A simple sticky notes application for Ubuntu"
+msgstr "Eine einfache Haftnotizen-Anwendung für Ubuntu"
+
+msgid "Version"
+msgstr "Version"
+
+# Languages
+msgid "Language"
+msgstr "Sprache"
+
+msgid "Select Language"
+msgstr "Sprache Auswählen"
+
+msgid "Language Changed"
+msgstr "Sprache Geändert"
+
+msgid "Please restart the application to apply the new language."
+msgstr "Bitte starten Sie die Anwendung neu, um die neue Sprache anzuwenden."

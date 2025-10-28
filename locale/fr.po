@@ -1,0 +1,215 @@
+# French translations for Ubuntu Sticky Notes
+# Copyright (C) 2025
+# This file is distributed under the same license as the Ubuntu Sticky Notes package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubuntu Sticky Notes 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-29 00:00+0300\n"
+"PO-Revision-Date: 2025-10-29 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Application
+msgid "Sticky Notes"
+msgstr "Notes Adhésives"
+
+# Buttons
+msgid "+ Add"
+msgstr "+ Ajouter"
+
+msgid "Trash"
+msgstr "Corbeille"
+
+msgid "Menu"
+msgstr "Menu"
+
+msgid "Sort"
+msgstr "Trier"
+
+msgid "Share"
+msgstr "Partager"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Restore"
+msgstr "Restaurer"
+
+msgid "Empty Trash"
+msgstr "Vider la Corbeille"
+
+# Table Headers
+msgid "Note Name"
+msgstr "Nom de la Note"
+
+msgid "Modified"
+msgstr "Modifié"
+
+msgid "Created"
+msgstr "Créé"
+
+msgid "Actions"
+msgstr "Actions"
+
+# Sorting
+msgid "Sort by"
+msgstr "Trier par"
+
+msgid "By Name"
+msgstr "Par Nom"
+
+msgid "By Date"
+msgstr "Par Date"
+
+msgid "Name (A → Z)"
+msgstr "Nom (A → Z)"
+
+msgid "Name (Z → A)"
+msgstr "Nom (Z → A)"
+
+msgid "Modified (New → Old)"
+msgstr "Modifié (Nouveau → Ancien)"
+
+msgid "Modified (Old → New)"
+msgstr "Modifié (Ancien → Nouveau)"
+
+msgid "Created (New → Old)"
+msgstr "Créé (Nouveau → Ancien)"
+
+msgid "Created (Old → New)"
+msgstr "Créé (Ancien → Nouveau)"
+
+# Search
+msgid "Search notes…"
+msgstr "Rechercher des notes…"
+
+# Dialogs
+msgid "Create New Note"
+msgstr "Créer une Nouvelle Note"
+
+msgid "Enter note title:"
+msgstr "Entrez le titre de la note :"
+
+msgid "Note title…"
+msgstr "Titre de la note…"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Create"
+msgstr "Créer"
+
+msgid "Untitled"
+msgstr "Sans titre"
+
+# Trash
+msgid "Delete Permanently?"
+msgstr "Supprimer Définitivement ?"
+
+msgid "This note will be permanently deleted and cannot be recovered."
+msgstr "Cette note sera définitivement supprimée et ne pourra pas être récupérée."
+
+msgid "Empty Trash?"
+msgstr "Vider la Corbeille ?"
+
+msgid "All notes in trash will be permanently deleted and cannot be recovered."
+msgstr "Toutes les notes dans la corbeille seront définitivement supprimées et ne pourront pas être récupérées."
+
+msgid "Delete All"
+msgstr "Tout Supprimer"
+
+# Tooltips
+msgid "New Note"
+msgstr "Nouvelle Note"
+
+msgid "Move to Trash"
+msgstr "Déplacer vers la Corbeille"
+
+msgid "Permanently delete selected note"
+msgstr "Supprimer définitivement la note sélectionnée"
+
+msgid "Restore selected note"
+msgstr "Restaurer la note sélectionnée"
+
+# Sticky Window
+msgid "Toggle Format Menu"
+msgstr "Basculer le Menu de Format"
+
+msgid "Keep on Top"
+msgstr "Garder au Premier Plan"
+
+msgid "Pin Window"
+msgstr "Épingler la Fenêtre"
+
+msgid "Settings"
+msgstr "Paramètres"
+
+# Format Toolbar
+msgid "Font Size"
+msgstr "Taille de Police"
+
+msgid "Text Color"
+msgstr "Couleur du Texte"
+
+msgid "Bold"
+msgstr "Gras"
+
+msgid "Italic"
+msgstr "Italique"
+
+msgid "Underline"
+msgstr "Souligné"
+
+msgid "Strikethrough"
+msgstr "Barré"
+
+msgid "Align Left"
+msgstr "Aligner à Gauche"
+
+msgid "Align Center"
+msgstr "Centrer"
+
+msgid "Align Right"
+msgstr "Aligner à Droite"
+
+msgid "Alignment"
+msgstr "Alignement"
+
+# Share
+msgid "Share note feature coming soon!"
+msgstr "La fonction de partage de notes arrive bientôt !"
+
+msgid "OK"
+msgstr "OK"
+
+# About
+msgid "About"
+msgstr "À propos"
+
+msgid "Quit"
+msgstr "Quitter"
+
+msgid "A simple sticky notes application for Ubuntu"
+msgstr "Une application simple de notes adhésives pour Ubuntu"
+
+msgid "Version"
+msgstr "Version"
+
+# Languages
+msgid "Language"
+msgstr "Langue"
+
+msgid "Select Language"
+msgstr "Sélectionner la Langue"
+
+msgid "Language Changed"
+msgstr "Langue Modifiée"
+
+msgid "Please restart the application to apply the new language."
+msgstr "Veuillez redémarrer l'application pour appliquer la nouvelle langue."

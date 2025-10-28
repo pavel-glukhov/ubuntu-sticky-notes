@@ -1,0 +1,215 @@
+# Turkish translations for Ubuntu Sticky Notes
+# Copyright (C) 2025
+# This file is distributed under the same license as the Ubuntu Sticky Notes package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubuntu Sticky Notes 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-29 00:00+0300\n"
+"PO-Revision-Date: 2025-10-29 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: Turkish\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Application
+msgid "Sticky Notes"
+msgstr "Yapışkan Notlar"
+
+# Buttons
+msgid "+ Add"
+msgstr "+ Ekle"
+
+msgid "Trash"
+msgstr "Çöp Kutusu"
+
+msgid "Menu"
+msgstr "Menü"
+
+msgid "Sort"
+msgstr "Sırala"
+
+msgid "Share"
+msgstr "Paylaş"
+
+msgid "Delete"
+msgstr "Sil"
+
+msgid "Restore"
+msgstr "Geri Yükle"
+
+msgid "Empty Trash"
+msgstr "Çöp Kutusunu Boşalt"
+
+# Table Headers
+msgid "Note Name"
+msgstr "Not Adı"
+
+msgid "Modified"
+msgstr "Değiştirilme"
+
+msgid "Created"
+msgstr "Oluşturulma"
+
+msgid "Actions"
+msgstr "Eylemler"
+
+# Sorting
+msgid "Sort by"
+msgstr "Sıralama"
+
+msgid "By Name"
+msgstr "İsme Göre"
+
+msgid "By Date"
+msgstr "Tarihe Göre"
+
+msgid "Name (A → Z)"
+msgstr "İsim (A → Z)"
+
+msgid "Name (Z → A)"
+msgstr "İsim (Z → A)"
+
+msgid "Modified (New → Old)"
+msgstr "Değiştirilme (Yeni → Eski)"
+
+msgid "Modified (Old → New)"
+msgstr "Değiştirilme (Eski → Yeni)"
+
+msgid "Created (New → Old)"
+msgstr "Oluşturulma (Yeni → Eski)"
+
+msgid "Created (Old → New)"
+msgstr "Oluşturulma (Eski → Yeni)"
+
+# Search
+msgid "Search notes…"
+msgstr "Notlarda ara…"
+
+# Dialogs
+msgid "Create New Note"
+msgstr "Yeni Not Oluştur"
+
+msgid "Enter note title:"
+msgstr "Not başlığını girin:"
+
+msgid "Note title…"
+msgstr "Not başlığı…"
+
+msgid "Cancel"
+msgstr "İptal"
+
+msgid "Create"
+msgstr "Oluştur"
+
+msgid "Untitled"
+msgstr "Başlıksız"
+
+# Trash
+msgid "Delete Permanently?"
+msgstr "Kalıcı Olarak Sil?"
+
+msgid "This note will be permanently deleted and cannot be recovered."
+msgstr "Bu not kalıcı olarak silinecek ve geri getirilemeyecek."
+
+msgid "Empty Trash?"
+msgstr "Çöp Kutusunu Boşalt?"
+
+msgid "All notes in trash will be permanently deleted and cannot be recovered."
+msgstr "Çöp kutusundaki tüm notlar kalıcı olarak silinecek ve geri getirilemeyecek."
+
+msgid "Delete All"
+msgstr "Tümünü Sil"
+
+# Tooltips
+msgid "New Note"
+msgstr "Yeni Not"
+
+msgid "Move to Trash"
+msgstr "Çöp Kutusuna Taşı"
+
+msgid "Permanently delete selected note"
+msgstr "Seçili notu kalıcı olarak sil"
+
+msgid "Restore selected note"
+msgstr "Seçili notu geri yükle"
+
+# Sticky Window
+msgid "Toggle Format Menu"
+msgstr "Format Menüsünü Aç/Kapat"
+
+msgid "Keep on Top"
+msgstr "Üstte Tut"
+
+msgid "Pin Window"
+msgstr "Sabitle"
+
+msgid "Settings"
+msgstr "Ayarlar"
+
+# Format Toolbar
+msgid "Font Size"
+msgstr "Yazı Boyutu"
+
+msgid "Text Color"
+msgstr "Metin Rengi"
+
+msgid "Bold"
+msgstr "Kalın"
+
+msgid "Italic"
+msgstr "İtalik"
+
+msgid "Underline"
+msgstr "Altı Çizili"
+
+msgid "Strikethrough"
+msgstr "Üstü Çizili"
+
+msgid "Align Left"
+msgstr "Sola Hizala"
+
+msgid "Align Center"
+msgstr "Ortala"
+
+msgid "Align Right"
+msgstr "Sağa Hizala"
+
+msgid "Alignment"
+msgstr "Hizalama"
+
+# Share
+msgid "Share note feature coming soon!"
+msgstr "Not paylaşma özelliği yakında eklenecek!"
+
+msgid "OK"
+msgstr "Tamam"
+
+# About
+msgid "About"
+msgstr "Hakkında"
+
+msgid "Quit"
+msgstr "Çıkış"
+
+msgid "A simple sticky notes application for Ubuntu"
+msgstr "Ubuntu için basit bir yapışkan not uygulaması"
+
+msgid "Version"
+msgstr "Sürüm"
+
+# Languages
+msgid "Language"
+msgstr "Dil"
+
+msgid "Select Language"
+msgstr "Dil Seçin"
+
+msgid "Language Changed"
+msgstr "Dil Değiştirildi"
+
+msgid "Please restart the application to apply the new language."
+msgstr "Yeni dili uygulamak için lütfen uygulamayı yeniden başlatın."

@@ -53,6 +53,8 @@ class NotesDB:
                     color TEXT DEFAULT '#FFF59D',
                     deleted INTEGER DEFAULT 0,
                     deleted_at TEXT,
+                    created_at TEXT,
+                    updated_at TEXT,
                     always_on_top INTEGER DEFAULT 0,
                     is_open INTEGER DEFAULT 0
                 )
@@ -78,6 +80,15 @@ class NotesDB:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN deleted INTEGER DEFAULT 0")
             if "deleted_at" not in columns:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN deleted_at TEXT")
+            if "created_at" not in columns:
+                self.conn.execute("ALTER TABLE notes ADD COLUMN created_at TEXT")
+            if "updated_at" not in columns:
+                self.conn.execute("ALTER TABLE notes ADD COLUMN updated_at TEXT")
+            
+            # Update existing notes with NULL dates
+            now = datetime.now().isoformat()
+            self.conn.execute("UPDATE notes SET created_at = ? WHERE created_at IS NULL", (now,))
+            self.conn.execute("UPDATE notes SET updated_at = ? WHERE updated_at IS NULL", (now,))
 
     def add(self, title=None, content="", x=300, y=200, w=260, h=200, color="#FFF59D", always_on_top=0):
         """
@@ -97,10 +108,12 @@ class NotesDB:
             cur = self.conn.execute("SELECT COUNT(*) FROM notes")
             count = cur.fetchone()[0]
             title = f"Sticker {count + 1}"
+        
+        now = datetime.now().isoformat()
         with self.conn:
             cur = self.conn.execute(
-                "INSERT INTO notes(title, content, x, y, w, h, color, always_on_top) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (title, content, x, y, w, h, color, always_on_top)
+                "INSERT INTO notes(title, content, x, y, w, h, color, always_on_top, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (title, content, x, y, w, h, color, always_on_top, now, now)
             )
             return cur.lastrowid
 
@@ -116,10 +129,11 @@ class NotesDB:
             color (str): Updated HEX color.
             always_on_top (int): Whether the note is pinned on top.
         """
+        now = datetime.now().isoformat()
         with self.conn:
             self.conn.execute(
-                "UPDATE notes SET content=?, x=?, y=?, w=?, h=?, color=?, always_on_top=? WHERE id=?",
-                (content, x, y, w, h, color, always_on_top, note_id)
+                "UPDATE notes SET content=?, x=?, y=?, w=?, h=?, color=?, always_on_top=?, updated_at=? WHERE id=?",
+                (content, x, y, w, h, color, always_on_top, now, note_id)
             )
 
     def get(self, note_id):
@@ -140,14 +154,14 @@ class NotesDB:
         Retrieve all active (non-deleted) notes.
 
         Args:
-            full (bool): If True, returns id, title, color, content.
+            full (bool): If True, returns all fields including dates.
                          If False, returns only id and title.
 
         Returns:
             list[sqlite3.Row]: List of active notes.
         """
         if full:
-            query = "SELECT id, title, color, content FROM notes WHERE deleted = 0 ORDER BY id DESC"
+            query = "SELECT id, title, color, content, created_at, updated_at FROM notes WHERE deleted = 0 ORDER BY id DESC"
         else:
             query = "SELECT id, title FROM notes WHERE deleted = 0 ORDER BY id DESC"
         return self.conn.execute(query).fetchall()

@@ -1,0 +1,215 @@
+# Chinese (Simplified) translations for Ubuntu Sticky Notes
+# Copyright (C) 2025
+# This file is distributed under the same license as the Ubuntu Sticky Notes package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubuntu Sticky Notes 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-29 00:00+0300\n"
+"PO-Revision-Date: 2025-10-29 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: Chinese\n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Application
+msgid "Sticky Notes"
+msgstr "便签"
+
+# Buttons
+msgid "+ Add"
+msgstr "+ 添加"
+
+msgid "Trash"
+msgstr "回收站"
+
+msgid "Menu"
+msgstr "菜单"
+
+msgid "Sort"
+msgstr "排序"
+
+msgid "Share"
+msgstr "分享"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "Restore"
+msgstr "恢复"
+
+msgid "Empty Trash"
+msgstr "清空回收站"
+
+# Table Headers
+msgid "Note Name"
+msgstr "便签名称"
+
+msgid "Modified"
+msgstr "修改时间"
+
+msgid "Created"
+msgstr "创建时间"
+
+msgid "Actions"
+msgstr "操作"
+
+# Sorting
+msgid "Sort by"
+msgstr "排序方式"
+
+msgid "By Name"
+msgstr "按名称"
+
+msgid "By Date"
+msgstr "按日期"
+
+msgid "Name (A → Z)"
+msgstr "名称 (A → Z)"
+
+msgid "Name (Z → A)"
+msgstr "名称 (Z → A)"
+
+msgid "Modified (New → Old)"
+msgstr "修改时间 (新 → 旧)"
+
+msgid "Modified (Old → New)"
+msgstr "修改时间 (旧 → 新)"
+
+msgid "Created (New → Old)"
+msgstr "创建时间 (新 → 旧)"
+
+msgid "Created (Old → New)"
+msgstr "创建时间 (旧 → 新)"
+
+# Search
+msgid "Search notes…"
+msgstr "搜索便签…"
+
+# Dialogs
+msgid "Create New Note"
+msgstr "创建新便签"
+
+msgid "Enter note title:"
+msgstr "输入便签标题："
+
+msgid "Note title…"
+msgstr "便签标题…"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Create"
+msgstr "创建"
+
+msgid "Untitled"
+msgstr "无标题"
+
+# Trash
+msgid "Delete Permanently?"
+msgstr "永久删除？"
+
+msgid "This note will be permanently deleted and cannot be recovered."
+msgstr "此便签将被永久删除且无法恢复。"
+
+msgid "Empty Trash?"
+msgstr "清空回收站？"
+
+msgid "All notes in trash will be permanently deleted and cannot be recovered."
+msgstr "回收站中的所有便签将被永久删除且无法恢复。"
+
+msgid "Delete All"
+msgstr "全部删除"
+
+# Tooltips
+msgid "New Note"
+msgstr "新建便签"
+
+msgid "Move to Trash"
+msgstr "移至回收站"
+
+msgid "Permanently delete selected note"
+msgstr "永久删除所选便签"
+
+msgid "Restore selected note"
+msgstr "恢复所选便签"
+
+# Sticky Window
+msgid "Toggle Format Menu"
+msgstr "切换格式菜单"
+
+msgid "Keep on Top"
+msgstr "保持在最前"
+
+msgid "Pin Window"
+msgstr "固定窗口"
+
+msgid "Settings"
+msgstr "设置"
+
+# Format Toolbar
+msgid "Font Size"
+msgstr "字体大小"
+
+msgid "Text Color"
+msgstr "文字颜色"
+
+msgid "Bold"
+msgstr "粗体"
+
+msgid "Italic"
+msgstr "斜体"
+
+msgid "Underline"
+msgstr "下划线"
+
+msgid "Strikethrough"
+msgstr "删除线"
+
+msgid "Align Left"
+msgstr "左对齐"
+
+msgid "Align Center"
+msgstr "居中对齐"
+
+msgid "Align Right"
+msgstr "右对齐"
+
+msgid "Alignment"
+msgstr "对齐方式"
+
+# Share
+msgid "Share note feature coming soon!"
+msgstr "便签分享功能即将推出！"
+
+msgid "OK"
+msgstr "确定"
+
+# About
+msgid "About"
+msgstr "关于"
+
+msgid "Quit"
+msgstr "退出"
+
+msgid "A simple sticky notes application for Ubuntu"
+msgstr "一个简单的 Ubuntu 便签应用"
+
+msgid "Version"
+msgstr "版本"
+
+# Languages
+msgid "Language"
+msgstr "语言"
+
+msgid "Select Language"
+msgstr "选择语言"
+
+msgid "Language Changed"
+msgstr "语言已更改"
+
+msgid "Please restart the application to apply the new language."
+msgstr "请重启应用程序以应用新语言。"

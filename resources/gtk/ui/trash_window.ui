@@ -12,16 +12,67 @@
           <object class="AdwHeaderBar">
             <property name="title-widget">
               <object class="AdwWindowTitle">
-                <property name="title">Trash</property>
+                <property name="title">Çöp Kutusu</property>
               </object>
             </property>
           </object>
         </child>
         <child>
-          <object class="GtkScrolledWindow">
+          <object class="GtkBox" id="content_box">
+            <property name="orientation">vertical</property>
             <property name="vexpand">true</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="spacing">12</property>
             <child>
-              <object class="GtkListView" id="trash_list"/>
+              <object class="GtkBox" id="action_box">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">8</property>
+                <child>
+                  <object class="GtkButton" id="btn_restore">
+                    <property name="label">Geri Yükle</property>
+                    <property name="tooltip-text">Seçili notu geri yükle</property>
+                    <property name="sensitive">false</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_delete">
+                    <property name="label">Sil</property>
+                    <property name="tooltip-text">Seçili notu kalıcı olarak sil</property>
+                    <property name="sensitive">false</property>
+                    <style>
+                      <class name="destructive-action"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="btn_empty">
+                    <property name="label">Tümünü Temizle</property>
+                    <property name="tooltip-text">Çöp kutusunu boşalt</property>
+                    <style>
+                      <class name="destructive-action"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="vexpand">true</property>
+                <child>
+                  <object class="GtkListView" id="trash_list">
+                    <property name="margin-start">4</property>
+                    <property name="margin-end">4</property>
+                  </object>
+                </child>
+              </object>
             </child>
           </object>
         </child>

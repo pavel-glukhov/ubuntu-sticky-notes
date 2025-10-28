@@ -1,0 +1,215 @@
+# Spanish translations for Ubuntu Sticky Notes
+# Copyright (C) 2025
+# This file is distributed under the same license as the Ubuntu Sticky Notes package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubuntu Sticky Notes 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-29 00:00+0300\n"
+"PO-Revision-Date: 2025-10-29 00:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Application
+msgid "Sticky Notes"
+msgstr "Notas Adhesivas"
+
+# Buttons
+msgid "+ Add"
+msgstr "+ Agregar"
+
+msgid "Trash"
+msgstr "Papelera"
+
+msgid "Menu"
+msgstr "Menú"
+
+msgid "Sort"
+msgstr "Ordenar"
+
+msgid "Share"
+msgstr "Compartir"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Restore"
+msgstr "Restaurar"
+
+msgid "Empty Trash"
+msgstr "Vaciar Papelera"
+
+# Table Headers
+msgid "Note Name"
+msgstr "Nombre de Nota"
+
+msgid "Modified"
+msgstr "Modificado"
+
+msgid "Created"
+msgstr "Creado"
+
+msgid "Actions"
+msgstr "Acciones"
+
+# Sorting
+msgid "Sort by"
+msgstr "Ordenar por"
+
+msgid "By Name"
+msgstr "Por Nombre"
+
+msgid "By Date"
+msgstr "Por Fecha"
+
+msgid "Name (A → Z)"
+msgstr "Nombre (A → Z)"
+
+msgid "Name (Z → A)"
+msgstr "Nombre (Z → A)"
+
+msgid "Modified (New → Old)"
+msgstr "Modificado (Nuevo → Antiguo)"
+
+msgid "Modified (Old → New)"
+msgstr "Modificado (Antiguo → Nuevo)"
+
+msgid "Created (New → Old)"
+msgstr "Creado (Nuevo → Antiguo)"
+
+msgid "Created (Old → New)"
+msgstr "Creado (Antiguo → Nuevo)"
+
+# Search
+msgid "Search notes…"
+msgstr "Buscar notas…"
+
+# Dialogs
+msgid "Create New Note"
+msgstr "Crear Nueva Nota"
+
+msgid "Enter note title:"
+msgstr "Ingrese el título de la nota:"
+
+msgid "Note title…"
+msgstr "Título de la nota…"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Create"
+msgstr "Crear"
+
+msgid "Untitled"
+msgstr "Sin título"
+
+# Trash
+msgid "Delete Permanently?"
+msgstr "¿Eliminar Permanentemente?"
+
+msgid "This note will be permanently deleted and cannot be recovered."
+msgstr "Esta nota se eliminará permanentemente y no se podrá recuperar."
+
+msgid "Empty Trash?"
+msgstr "¿Vaciar Papelera?"
+
+msgid "All notes in trash will be permanently deleted and cannot be recovered."
+msgstr "Todas las notas en la papelera se eliminarán permanentemente y no se podrán recuperar."
+
+msgid "Delete All"
+msgstr "Eliminar Todo"
+
+# Tooltips
+msgid "New Note"
+msgstr "Nueva Nota"
+
+msgid "Move to Trash"
+msgstr "Mover a Papelera"
+
+msgid "Permanently delete selected note"
+msgstr "Eliminar permanentemente la nota seleccionada"
+
+msgid "Restore selected note"
+msgstr "Restaurar nota seleccionada"
+
+# Sticky Window
+msgid "Toggle Format Menu"
+msgstr "Alternar Menú de Formato"
+
+msgid "Keep on Top"
+msgstr "Mantener Encima"
+
+msgid "Pin Window"
+msgstr "Fijar Ventana"
+
+msgid "Settings"
+msgstr "Configuración"
+
+# Format Toolbar
+msgid "Font Size"
+msgstr "Tamaño de Fuente"
+
+msgid "Text Color"
+msgstr "Color de Texto"
+
+msgid "Bold"
+msgstr "Negrita"
+
+msgid "Italic"
+msgstr "Cursiva"
+
+msgid "Underline"
+msgstr "Subrayado"
+
+msgid "Strikethrough"
+msgstr "Tachado"
+
+msgid "Align Left"
+msgstr "Alinear a la Izquierda"
+
+msgid "Align Center"
+msgstr "Centrar"
+
+msgid "Align Right"
+msgstr "Alinear a la Derecha"
+
+msgid "Alignment"
+msgstr "Alineación"
+
+# Share
+msgid "Share note feature coming soon!"
+msgstr "¡La función de compartir notas estará disponible pronto!"
+
+msgid "OK"
+msgstr "Aceptar"
+
+# About
+msgid "About"
+msgstr "Acerca de"
+
+msgid "Quit"
+msgstr "Salir"
+
+msgid "A simple sticky notes application for Ubuntu"
+msgstr "Una aplicación simple de notas adhesivas para Ubuntu"
+
+msgid "Version"
+msgstr "Versión"
+
+# Languages
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Select Language"
+msgstr "Seleccionar Idioma"
+
+msgid "Language Changed"
+msgstr "Idioma Cambiado"
+
+msgid "Please restart the application to apply the new language."
+msgstr "Por favor, reinicie la aplicación para aplicar el nuevo idioma."
