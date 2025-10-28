@@ -6,8 +6,6 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-green.svg)](https://python.org)
 [![GTK](https://img.shields.io/badge/GTK-4.0-purple.svg)](https://gtk.org)
 
-![Uygulama Örneği](https://github.com/omercngiz/ubuntu-sticky-notes/blob/main/pic/example_1.3.0.png)
-
 ## ✨ Özellikler
 
 - 📝 **Yapışkan Notlar**  
@@ -105,8 +103,8 @@ chmod +x build_deb_package.sh
 # Paketi oluşturun
 ./build_deb_package.sh
 
-# Paketi kurun (VERSION yerine gerçek sürüm numarasını yazın)
-sudo dpkg -i ubuntu-sticky-notes_*.deb
+# Paketi kurun
+sudo dpkg -i ubuntu-sticky-notes_2.0.0_all.deb
 
 # Eksik bağımlılıkları otomatik olarak çözün
 sudo apt-get install -f
@@ -162,6 +160,6 @@ Katkılarınızı memnuniyetle karşılıyoruz! Issue açabilir veya pull reques
 
 ---
 
-**Sürüm:** 1.3.1  
+**Sürüm:** 2.0.0  
 **Geliştirici:** Pavel Glukhov (Orijinal), Ömer Can Giz (Fork)  
 **Repository:** https://github.com/omercngiz/ubuntu-sticky-notes

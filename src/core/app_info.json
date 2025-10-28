@@ -1,11 +1,11 @@
 {
     "service_name": "ubuntu-sticky-notes",
     "app_name": "Ubuntu Sticky Notes",
-    "version": "1.3.1",
-    "author": "Pavel Glukhov",
-    "email": "glukhov.p@gmail.com",
-    "website": "https://github.com/pavel-glukhov/ubuntu-sticky-notes",
-    "description": "Ubuntu Sticky Notes is a lightweight desktop application for creating and managing sticky notes. Notes can be customized with colors, pinned on top, moved to trash and restored.",
+    "version": "2.0.0",
+    "author": "Ömer Can Giz",
+    "email": "omercangiz@gmail.com",
+    "website": "https://github.com/omercngiz/ubuntu-sticky-notes",
+    "description": "Ubuntu Sticky Notes is a modern desktop application for creating and managing sticky notes built with GTK4/libadwaita. Notes can be customized with colors, moved to trash and restored.",
     "license": "MIT License",
     "architecture": "all",
     "dependencies": [
