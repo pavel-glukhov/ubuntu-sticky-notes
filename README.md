@@ -1,8 +1,8 @@
 # Ubuntu Sticky Notes
 
-Simple sticky notes application built with Python and PyQt6 for Ubuntu.
+Simple sticky notes application built with Python and GTK4/libadwaita for Ubuntu.
 
-Version: 1.3.1
+Version: 2.0.0 (GTK4 Edition)
 _______________
 
 ![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/example_1.3.0.png)
@@ -10,43 +10,91 @@ _______________
 ## ✨ Features
 
 - 📝 **Sticky Notes**  
-  Create, edit, move and resize notes that are automatically saved.
+  Create, edit, and manage notes that are automatically saved.
 
 - 🎨 **Customization**  
-  Change background colors and format text (bold, italic, strikethrough, bullet lists).
+  Change background colors for better organization.
 
 - 📌 **Pin on Top**  
-  Keep individual notes or all notes always visible above other windows.
+  Keep individual notes visible (planned feature).
 
 - 🔍 **Searchable List**  
-  Manage all notes in a searchable list with quick open and color change options.
+  Manage all notes in a searchable list with quick access.
 
 - 🗑 **Trash Bin**  
   Deleted notes go to Trash where they can be restored or permanently removed.
 
-- 🖥 **System Tray Integration**  
-  Quick access to show/hide notes, open all at once, or exit the app.
+- 🖥 **Background Operation**  
+  The app runs in the background when closed. Use the Quit option from the menu to exit.
 
 - 💾 **Persistent Storage**  
   Notes and settings are stored in a local SQLite database.
 
 
-## Download:
-You can download deb packet here:
-https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/tag/1.3.1
-______________________________________________________________________________________
-## Installation:
+## Installation
+
+### System Requirements
+
 ```bash
-curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/1.3.1/ubuntu-sticky-notes_1.3.1_all.deb
 sudo apt update
-sudo apt install -y python3-pyqt6
-sudo dpkg -i ubuntu-sticky-notes_1.3.1_all.deb
+sudo apt install -y python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
 ```
 
-### ⚠️ Important
-> After running the application will start in the system tray.
+### Running from Source
 
-![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/tray_example.png)
+```bash
+# Clone the repository
+git clone https://github.com/pavel-glukhov/ubuntu-sticky-notes.git
+cd ubuntu-sticky-notes
+
+# Run with system Python (recommended)
+python3 main.py
+```
+
+### ⚠️ Important Notes
+
+> **Background Operation:** When you close the main window, the app continues running in the background.  
+> To completely exit the application, use the **Quit** option from the application menu (☰).
+
+> **System Tray Support:** The app supports StatusNotifierItem protocol for system tray integration.  
+> On Ubuntu/GNOME, you need to enable the AppIndicator extension for the tray icon to appear:
+> ```bash
+> sudo apt install -y gnome-shell-extension-appindicator
+> gnome-extensions enable ubuntu-appindicators@ubuntu.com
+> ```
+> After enabling, you may need to restart GNOME Shell (Alt+F2, type 'r', press Enter) or log out and back in.  
+> The system tray icon allows quick access to show/hide the main window by clicking it.
+
+
+## Development (GTK4/libadwaita)
+
+Run locally with Python 3.12+ and GTK4/libadwaita (GI bindings provided by system packages):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt  # optional; GTK comes from system packages
+python main.py  # runs GTK UI by default
+```
+
+VS Code:
+- Use the launch config "Run Ubuntu Sticky Notes (Refactored)" (calls main.py)
+- Or Tasks: "Run Ubuntu Sticky Notes (Refactored)"
+
+### GTK4/libadwaita preview (work-in-progress)
+
+A new GNOME HIG-compliant UI is being implemented with GTK4/libadwaita. You can try it locally:
+
+- Install system dependencies (Ubuntu/Debian):
+  - python3-gi
+  - gir1.2-gtk-4.0
+  - gir1.2-adw-1
+
+- Run with the GTK UI:
+  - Temporarily via CLI flag: `python main.py --gtk`
+  - Or via env var: `STICKY_NOTES_UI=gtk python main.py`
+
+If GTK dependencies are missing, the app will automatically fall back to the existing PyQt UI.
 
 _____________________________________________________________________________________
 ## Self build and Install Ubuntu Sticky Notes (.deb package)
@@ -63,6 +111,7 @@ chmod +x build_deb_package.sh
 sudo apt install -y python3-pyqt6
 sudo dpkg -i ubuntu-sticky-notes_<VERSION OF APPLICATION>_all.deb
 sudo apt-get install -f
+sudo apt install -y python3-gi gir1.2-gtk-4.0 gir1.2-adw-1
 ```
 
 ## Usage

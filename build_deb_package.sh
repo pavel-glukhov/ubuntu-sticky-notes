@@ -12,7 +12,7 @@ USR_SHARE_DIR="$PACKAGE_DIR/usr/share"
 APPLICATIONS_DIR="$USR_SHARE_DIR/applications"
 APP_DIR="$USR_SHARE_DIR/ubuntu-sticky-notes"
 METAINFO_DIR="$USR_SHARE_DIR/metainfo"
-APP_INFO_JSON="ubuntu-sticky-notes/app_info.json"
+APP_INFO_JSON="src/core/app_info.json"
 APP_EXEC="ubuntu-sticky-notes"
 APP_MAIN_SCRIPT="/usr/share/ubuntu-sticky-notes/main.py"
 ICON_PATH="/usr/share/ubuntu-sticky-notes/resources/icons/app.png"
@@ -25,9 +25,11 @@ for dir in "$DEBIAN_DIR" "$USR_BIN_DIR" "$APPLICATIONS_DIR" "$APP_DIR" "$METAINF
 done
 
 # ----------------------
-# Copy all application files to /usr/share/ubuntu-sticky-notes
+# Copy application to /usr/share/ubuntu-sticky-notes (refactored layout)
 # ----------------------
-cp -r ubuntu-sticky-notes/* "$APP_DIR/"
+cp main.py "$APP_DIR/"
+cp -r src "$APP_DIR/"
+cp -r resources "$APP_DIR/"
 
 # ----------------------
 # Read application info from JSON
@@ -70,14 +72,23 @@ Description: $DESCRIPTION
 EOL
 
 # ----------------------
-# Create DEBIAN/postinst to check PyQt6
+# Create DEBIAN/postinst to check GTK/GI
 # ----------------------
 cat > "$DEBIAN_DIR/postinst" <<'EOL'
 #!/bin/bash
-# Check if PyQt6 is installed after package installation
-if ! python3 -c "import PyQt6" &>/dev/null; then
-    echo "PyQt6 is not installed. Please run: sudo apt install -y python3-pyqt6"
-fi
+# Check if GTK4/libadwaita GI bindings are installed after package installation
+python3 - <<'PY'
+try:
+  import gi
+  gi.require_version('Gtk', '4.0')
+  gi.require_version('Adw', '1')
+  from gi.repository import Gtk, Adw  # noqa: F401
+  print('GTK4/libadwaita GI found')
+except Exception as e:
+  print('GTK4/libadwaita not available. Please install:', e)
+  print('  sudo apt update')
+  print('  sudo apt install -y python3-gi gir1.2-gtk-4.0 gir1.2-adw-1')
+PY
 EOL
 chmod +x "$DEBIAN_DIR/postinst"
 

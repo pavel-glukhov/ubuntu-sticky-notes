@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
 
-from config import get_app_paths
+from core.config import get_app_paths
 
 paths = get_app_paths()
 DB_PATH = paths["DB_PATH"]

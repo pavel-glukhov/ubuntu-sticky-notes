@@ -4,26 +4,34 @@ import os
 # ========================
 # Constants
 # ========================
+# Current file: <project_root>/src/core/config.py
+# Project root is three levels up from this file
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Files and resources
 APP_INFO_FILE = os.path.join(BASE_DIR, "app_info.json")
-RESOURCES_DIR = os.path.join(BASE_DIR, "resources")
+RESOURCES_DIR = os.path.join(PROJECT_ROOT, "resources")
 ICONS_DIR = os.path.join(RESOURCES_DIR, "icons")
-UI_DIR = os.path.join(RESOURCES_DIR, "ui_qt")
+UI_DIR = os.path.join(RESOURCES_DIR, "ui", "designs")
+UI_PY_DIR = os.path.join(RESOURCES_DIR, "ui", "generated")
 
 AUTOSAVE_INTERVAL_MS = 2000
 COLOR_MAP = {
     "Yellow": "#FFF59D",
     "Green": "#C8E6C9",
     "Blue": "#BBDEFB",
-    "Pink": "#F8BBD0"
+    "Pink": "#F8BBD0",
 }
 
 """
+PROJECT_ROOT: Absolute path to the repository root.
 BASE_DIR: The absolute path to the directory containing this configuration file.
 APP_INFO_FILE: Path to the JSON file containing application metadata such as name, version, author, etc.
 RESOURCES_DIR: Path to the resources directory, containing icons and UI files.
 ICONS_DIR: Path to the icons subdirectory inside resources.
-UI_DIR: Path to the UI files subdirectory inside resources.
+UI_DIR: Path to the UI designs (.ui) subdirectory inside resources.
+UI_PY_DIR: Path to the generated Python UI modules created from .ui files.
 AUTOSAVE_INTERVAL_MS: Interval in milliseconds for automatic saving of sticky notes.
 COLOR_MAP: Dictionary mapping color names to their corresponding HEX color codes.
 """
@@ -112,7 +120,8 @@ def get_app_paths() -> dict:
             - "DB_PATH": Path to the SQLite database file.
             - "ICONS_DIR": Path to the icons directory.
             - "APP_ICON_PATH": Full path to the main application icon.
-            - "UI_DIR": Path to the UI files directory.
+            - "UI_DIR": Path to the UI designs directory.
+            - "UI_PY_DIR": Path to the generated Python UI modules directory.
 
     Example:
         >>> paths = get_app_paths()
@@ -129,5 +138,6 @@ def get_app_paths() -> dict:
         "DB_PATH": get_db_path(data_dir),
         "ICONS_DIR": ICONS_DIR,
         "APP_ICON_PATH": os.path.join(ICONS_DIR, "app.png"),
-        "UI_DIR": UI_DIR
+        "UI_DIR": UI_DIR,
+        "UI_PY_DIR": UI_PY_DIR,
     }
