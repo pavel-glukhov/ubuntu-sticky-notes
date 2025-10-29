@@ -1,0 +1,17 @@
+{
+    "service_name": "ubuntu-sticky-notes",
+    "app_name": "Ubuntu Sticky Notes",
+    "version": "2.0.0",
+    "author": "Ömer Can Giz",
+    "email": "omercangiz@gmail.com",
+    "website": "https://github.com/omercngiz/ubuntu-sticky-notes",
+    "description": "Ubuntu Sticky Notes is a modern desktop application for creating and managing sticky notes built with GTK4/libadwaita. Notes can be customized with colors, moved to trash and restored.",
+    "license": "MIT License",
+    "architecture": "all",
+    "dependencies": [
+        "python3",
+        "python3-gi",
+        "gir1.2-gtk-4.0",
+        "gir1.2-adw-1"
+    ]
+}
