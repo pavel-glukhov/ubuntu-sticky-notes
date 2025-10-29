@@ -1,10 +1,25 @@
+"""SQLite database handler for sticky notes application.
+
+This module provides the NotesDB class for managing sticky notes data,
+including CRUD operations, trash management, and user settings.
+"""
+
+from __future__ import annotations
 import sqlite3
 from datetime import datetime
+from typing import Optional, List, Dict, Any
 
 from core.config import get_app_paths
 
 paths = get_app_paths()
 DB_PATH = paths["DB_PATH"]
+
+# Default window dimensions and position
+DEFAULT_X = 300
+DEFAULT_Y = 200
+DEFAULT_WIDTH = 260
+DEFAULT_HEIGHT = 200
+DEFAULT_COLOR = "#FFF59D"
 
 
 class NotesDB:
@@ -33,12 +48,10 @@ class NotesDB:
             self.set_setting("always_on_top", "0")
 
     def _create_table(self):
-        """
-        Create or migrate the database schema.
+        """Create or migrate the database schema.
 
-        - If the database is new → creates `notes` with `title` and all modern fields.
-        - If the database is old → validates schema via PRAGMA and
-          adds missing fields via ALTER TABLE.
+        Creates tables if they don't exist, and adds missing columns
+        to existing tables for backward compatibility.
         """
         with self.conn:
             self.conn.execute("""
@@ -70,6 +83,7 @@ class NotesDB:
             cur = self.conn.execute("PRAGMA table_info(notes)")
             columns = [row[1] for row in cur.fetchall()]
 
+            # Add missing columns for backward compatibility with old databases
             if "title" not in columns:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN title TEXT")
             if "always_on_top" not in columns:
@@ -85,24 +99,33 @@ class NotesDB:
             if "updated_at" not in columns:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN updated_at TEXT")
             
-            # Update existing notes with NULL dates
+            # Populate timestamps for existing notes that lack them
             now = datetime.now().isoformat()
             self.conn.execute("UPDATE notes SET created_at = ? WHERE created_at IS NULL", (now,))
             self.conn.execute("UPDATE notes SET updated_at = ? WHERE updated_at IS NULL", (now,))
 
-    def add(self, title=None, content="", x=300, y=200, w=260, h=200, color="#FFF59D", always_on_top=0):
-        """
-        Insert a new sticky note into the database.
+    def add(
+        self,
+        title: Optional[str] = None,
+        content: str = "",
+        x: int = DEFAULT_X,
+        y: int = DEFAULT_Y,
+        w: int = DEFAULT_WIDTH,
+        h: int = DEFAULT_HEIGHT,
+        color: str = DEFAULT_COLOR,
+        always_on_top: int = 0
+    ) -> int:
+        """Insert a new sticky note into the database.
 
         Args:
-            title (str): Title of the note. If None, a default "Sticker N" is used.
-            content (str): Initial HTML/text content.
-            x, y, w, h (int): Position and dimensions of the note.
-            color (str): Background color in HEX.
-            always_on_top (int): Whether the note is pinned on top (0 or 1).
+            title: Title of the note. If None, auto-generates "Sticker N".
+            content: Initial HTML/text content.
+            x, y, w, h: Position and dimensions of the note window.
+            color: Background color in HEX format.
+            always_on_top: Whether the note is pinned on top (0 or 1).
 
         Returns:
-            int: The newly created note's ID.
+            The newly created note's ID.
         """
         if title is None:
             cur = self.conn.execute("SELECT COUNT(*) FROM notes")

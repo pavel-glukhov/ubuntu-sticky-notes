@@ -15,6 +15,56 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+# Sorting menu
+
+msgid "Name (Z → A)"
+msgstr "名称 (Z → A)"
+
+msgid "By Name"
+msgstr "按名称"
+
+msgid "Modified (Newest → Oldest)"
+msgstr "修改时间（最新 → 最旧）"
+
+msgid "Modified (Oldest → Newest)"
+msgstr "修改时间（最旧 → 最新）"
+
+msgid "Created (Newest → Oldest)"
+msgstr "创建时间（最新 → 最旧）"
+
+msgid "Created (Oldest → Newest)"
+msgstr "创建时间（最旧 → 最新）"
+
+msgid "By Date"
+msgstr "按日期"
+
+# Sticky window menu
+msgid "Pin"
+msgstr "固定"
+
+# Alignment menu
+msgid "Center"
+msgstr "居中"
+
+msgid "Justify"
+msgstr "两端对齐"
+
+# List formatting
+msgid "• Disc"
+msgstr "• 实心圆点"
+
+msgid "- Dash"
+msgstr "- 短横线"
+
+msgid "1,2,3... Numbers"
+msgstr "1,2,3... 数字"
+
+msgid "I,II,III... Roman"
+msgstr "I,II,III... 罗马数字"
+
+msgid "a,b,c... Alphabetic"
+msgstr "a,b,c... 字母"
+
 # Application
 msgid "Sticky Notes"
 msgstr "便签"
@@ -57,33 +107,6 @@ msgstr "创建时间"
 msgid "Actions"
 msgstr "操作"
 
-# Sorting
-msgid "Sort by"
-msgstr "排序方式"
-
-msgid "By Name"
-msgstr "按名称"
-
-msgid "By Date"
-msgstr "按日期"
-
-msgid "Name (A → Z)"
-msgstr "名称 (A → Z)"
-
-msgid "Name (Z → A)"
-msgstr "名称 (Z → A)"
-
-msgid "Modified (New → Old)"
-msgstr "修改时间 (新 → 旧)"
-
-msgid "Modified (Old → New)"
-msgstr "修改时间 (旧 → 新)"
-
-msgid "Created (New → Old)"
-msgstr "创建时间 (新 → 旧)"
-
-msgid "Created (Old → New)"
-msgstr "创建时间 (旧 → 新)"
 
 # Search
 msgid "Search notes…"

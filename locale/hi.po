@@ -213,3 +213,30 @@ msgstr "भाषा बदल गई"
 
 msgid "Please restart the application to apply the new language."
 msgstr "कृपया नई भाषा लागू करने के लिए एप्लिकेशन को पुनः प्रारंभ करें।"
+
+# Sticky window menu
+msgid "Pin"
+msgstr "पिन करें"
+
+# Alignment menu
+msgid "Center"
+msgstr "केंद्र"
+
+msgid "Justify"
+msgstr "समायोजित करें"
+
+# List formatting
+msgid "• Disc"
+msgstr "• डिस्क"
+
+msgid "- Dash"
+msgstr "- डैश"
+
+msgid "1,2,3... Numbers"
+msgstr "1,2,3... संख्याएं"
+
+msgid "I,II,III... Roman"
+msgstr "I,II,III... रोमन"
+
+msgid "a,b,c... Alphabetic"
+msgstr "a,b,c... वर्णमाला"

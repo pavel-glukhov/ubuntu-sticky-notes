@@ -213,3 +213,30 @@ msgstr "Dil Değiştirildi"
 
 msgid "Please restart the application to apply the new language."
 msgstr "Yeni dili uygulamak için lütfen uygulamayı yeniden başlatın."
+
+# Sticky window menu
+msgid "Pin"
+msgstr "Sabitle"
+
+# Alignment menu
+msgid "Center"
+msgstr "Ortala"
+
+msgid "Justify"
+msgstr "İki Yana Yasla"
+
+# List formatting
+msgid "• Disc"
+msgstr "• Nokta"
+
+msgid "- Dash"
+msgstr "- Çizgi"
+
+msgid "1,2,3... Numbers"
+msgstr "1,2,3... Sayılar"
+
+msgid "I,II,III... Roman"
+msgstr "I,II,III... Romen"
+
+msgid "a,b,c... Alphabetic"
+msgstr "a,b,c... Alfabetik"

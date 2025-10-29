@@ -213,3 +213,30 @@ msgstr "Langue Modifiée"
 
 msgid "Please restart the application to apply the new language."
 msgstr "Veuillez redémarrer l'application pour appliquer la nouvelle langue."
+
+# Sticky window menu
+msgid "Pin"
+msgstr "Épingler"
+
+# Alignment menu
+msgid "Center"
+msgstr "Centrer"
+
+msgid "Justify"
+msgstr "Justifier"
+
+# List formatting
+msgid "• Disc"
+msgstr "• Disque"
+
+msgid "- Dash"
+msgstr "- Tiret"
+
+msgid "1,2,3... Numbers"
+msgstr "1,2,3... Nombres"
+
+msgid "I,II,III... Roman"
+msgstr "I,II,III... Romain"
+
+msgid "a,b,c... Alphabetic"
+msgstr "a,b,c... Alphabétique"

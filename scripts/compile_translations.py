@@ -6,7 +6,8 @@ import os
 import subprocess
 from pathlib import Path
 
-LOCALE_DIR = Path(__file__).parent / "locale"
+# Go up one level from scripts/ to project root, then into locale/
+LOCALE_DIR = Path(__file__).parent.parent / "locale"
 
 def compile_translations():
     """Compile all .po files to .mo files"""

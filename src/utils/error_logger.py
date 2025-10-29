@@ -1,25 +1,37 @@
-"""
-Error logging system for Ubuntu Sticky Notes.
+"""Error logging system for Ubuntu Sticky Notes.
+
 Provides centralized error tracking with rotation and categorization.
+Implements singleton pattern for consistent logging across the application.
 """
 
+from __future__ import annotations
 import os
 import sys
 import logging
 import traceback
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 import platform
+from typing import Optional, Dict, List, Tuple
+
+# Constants
+MAX_LOG_FILE_SIZE = 10 * 1024 * 1024  # 10MB per file
+LOG_BACKUP_COUNT = 5  # Keep 5 backup files (~60MB total)
+LOG_RETENTION_DAYS = 30  # Delete logs older than 30 days
 
 
 class ErrorLogger:
-    """Centralized error logging with rotation and detailed context."""
+    """Centralized error logging with rotation and detailed context.
     
-    _instance = None
-    _initialized = False
+    Implements singleton pattern to ensure one logger instance across the app.
+    Automatically rotates log files and cleans up old logs.
+    """
     
-    def __new__(cls):
+    _instance: Optional[ErrorLogger] = None
+    _initialized: bool = False
+    
+    def __new__(cls) -> ErrorLogger:
         if cls._instance is None:
             cls._instance = super(ErrorLogger, cls).__new__(cls)
         return cls._instance
@@ -41,11 +53,11 @@ class ErrorLogger:
         # Clear existing handlers
         self.logger.handlers.clear()
         
-        # Rotating file handler (max 10MB, keep 5 backups = ~60MB total)
+        # Rotating file handler
         file_handler = RotatingFileHandler(
             self.log_file,
-            maxBytes=10 * 1024 * 1024,  # 10MB per file
-            backupCount=5,  # Keep 5 backup files (errors.log.1 through errors.log.5)
+            maxBytes=MAX_LOG_FILE_SIZE,
+            backupCount=LOG_BACKUP_COUNT,
             encoding='utf-8'
         )
         file_handler.setLevel(logging.DEBUG)

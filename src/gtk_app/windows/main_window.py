@@ -60,17 +60,17 @@ class MainWindow(Adw.ApplicationWindow):
 
 		self.db = NotesDB()
 		self.stickies = {}
-		self._notes_data = {}  # Store notes data for activation
+		self._notes_data = {}  # Cache note data for row activation
 		
-		# Sorting state: ('field', 'direction')
-		# field: 'title', 'created_at', 'updated_at'
-		# direction: 'asc', 'desc'
+		# Sorting state: (field, direction)
+		# Fields: 'title', 'created_at', 'updated_at'
+		# Directions: 'asc', 'desc'
 		self._sort_by = ('updated_at', 'desc')  # Default: newest first
 
-		# Setup list factory once
+		# Initialize UI components
 		self._setup_list_factory()
 
-		# Actions
+		# Connect signals
 		self.btn_new.connect("clicked", self.on_new_clicked)
 		self.btn_trash.connect("clicked", lambda *_: self._on_trash())
 		self.search_entry.connect("search-changed", self.on_search_changed)
@@ -207,7 +207,7 @@ class MainWindow(Adw.ApplicationWindow):
 					handler_ids = []
 					# This is a workaround - we'll just reconnect
 					return handler_ids
-				except:
+				except (AttributeError, TypeError):
 					return []
 			
 			# Simple approach: store position in widget data and use lambda
@@ -250,7 +250,7 @@ class MainWindow(Adw.ApplicationWindow):
 			from datetime import datetime
 			dt = datetime.fromisoformat(date_str)
 			return dt.strftime("%d.%m.%Y %H:%M")
-		except:
+		except (ValueError, TypeError, AttributeError):
 			return "—"
 	
 	def _reload_list(self, query: str = ""):
@@ -289,17 +289,17 @@ class MainWindow(Adw.ApplicationWindow):
 		
 		# Title sorting
 		title_section = Gio.Menu()
-		title_section.append("İsim (A → Z)", "win.sort::title_asc")
-		title_section.append("İsim (Z → A)", "win.sort::title_desc")
-		menu.append_section("İsme Göre", title_section)
+		title_section.append(_("Name (A → Z)"), "win.sort::title_asc")
+		title_section.append(_("Name (Z → A)"), "win.sort::title_desc")
+		menu.append_section(_("By Name"), title_section)
 		
 		# Date sorting
 		date_section = Gio.Menu()
-		date_section.append("Değiştirilme (Yeni → Eski)", "win.sort::updated_desc")
-		date_section.append("Değiştirilme (Eski → Yeni)", "win.sort::updated_asc")
-		date_section.append("Oluşturulma (Yeni → Eski)", "win.sort::created_desc")
-		date_section.append("Oluşturulma (Eski → Yeni)", "win.sort::created_asc")
-		menu.append_section("Tarihe Göre", date_section)
+		date_section.append(_("Modified (Newest → Oldest)"), "win.sort::updated_desc")
+		date_section.append(_("Modified (Oldest → Newest)"), "win.sort::updated_asc")
+		date_section.append(_("Created (Newest → Oldest)"), "win.sort::created_desc")
+		date_section.append(_("Created (Oldest → Newest)"), "win.sort::created_asc")
+		menu.append_section(_("By Date"), date_section)
 		
 		popover = Gtk.PopoverMenu.new_from_model(menu)
 		self.btn_sort.set_popover(popover)
@@ -372,20 +372,31 @@ class MainWindow(Adw.ApplicationWindow):
 		self.add_action(a_about)
 
 	def _on_language_changed(self, action, parameter):
-		"""Handle language change"""
+		"""Handle language change."""
 		lang_code = parameter.get_string()
 		
 		from core.i18n import set_language
 		set_language(lang_code)
 		
-		# Show restart dialog
-		dialog = Adw.MessageDialog.new(self)
-		dialog.set_heading(_("Language Changed"))
-		dialog.set_body(_("Please restart the application to apply the new language."))
-		dialog.add_response("ok", _("OK"))
-		dialog.set_default_response("ok")
-		dialog.set_close_response("ok")
-		dialog.present()
+		# Update all UI labels immediately
+		self._set_translated_labels()
+		
+		# Rebuild sort menu with new translations
+		self._setup_sort_menu()
+		
+		# Rebuild main menu with new translations
+		self._setup_menu()
+		
+		# Update all open sticky windows
+		from gtk_app.windows.sticky_window import StickyWindow
+		app = self.get_application()
+		if app:
+			for window in app.get_windows():
+				if isinstance(window, StickyWindow):
+					window.refresh_menus_for_language_change()
+		
+		# Reload list to update any date/time formatting if needed
+		self._reload_list()
 
 	def _on_about(self):
 		dlg = AboutDialog(self)

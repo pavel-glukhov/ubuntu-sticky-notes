@@ -213,3 +213,30 @@ msgstr "Язык Изменен"
 
 msgid "Please restart the application to apply the new language."
 msgstr "Пожалуйста, перезапустите приложение, чтобы применить новый язык."
+
+# Sticky window menu
+msgid "Pin"
+msgstr "Закрепить"
+
+# Alignment menu
+msgid "Center"
+msgstr "По Центру"
+
+msgid "Justify"
+msgstr "По Ширине"
+
+# List formatting
+msgid "• Disc"
+msgstr "• Диск"
+
+msgid "- Dash"
+msgstr "- Тире"
+
+msgid "1,2,3... Numbers"
+msgstr "1,2,3... Числа"
+
+msgid "I,II,III... Roman"
+msgstr "I,II,III... Римские"
+
+msgid "a,b,c... Alphabetic"
+msgstr "а,б,в... Алфавитные"

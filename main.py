@@ -55,7 +55,7 @@ def main():
 		sys.exit(1)
 	
 	try:
-		from gtk_app.gtk_application import main as gtk_main
+		from gtk_app.application import main as gtk_main
 		return gtk_main()
 	except Exception as e:
 		import traceback

@@ -1,10 +1,15 @@
 #!/bin/bash
 # =========================================================
-# Script to create a Debian package for Ubuntu Sticky Notes
+# Build Debian Package for Ubuntu Sticky Notes
+# =========================================================
+# Creates a .deb package with all application files,
+# translations, and proper dependencies.
+# Version: 2.0.0
 # =========================================================
 
 set -e
 
+# Package structure
 PACKAGE_DIR="ubuntu_sticky_notes_deb"
 DEBIAN_DIR="$PACKAGE_DIR/DEBIAN"
 USR_BIN_DIR="$PACKAGE_DIR/usr/local/bin"
@@ -12,25 +17,45 @@ USR_SHARE_DIR="$PACKAGE_DIR/usr/share"
 APPLICATIONS_DIR="$USR_SHARE_DIR/applications"
 APP_DIR="$USR_SHARE_DIR/ubuntu-sticky-notes"
 METAINFO_DIR="$USR_SHARE_DIR/metainfo"
+
+# Application metadata
 APP_INFO_JSON="src/core/app_info.json"
 APP_EXEC="ubuntu-sticky-notes"
 APP_MAIN_SCRIPT="/usr/share/ubuntu-sticky-notes/main.py"
 ICON_PATH="/usr/share/ubuntu-sticky-notes/resources/icons/app.png"
 
+# Color output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}  Ubuntu Sticky Notes - Build Package${NC}"
+echo -e "${BLUE}========================================${NC}"
+echo ""
+
 # ----------------------
-# Create necessary directories if they don't exist
+# Create directory structure
 # ----------------------
+echo "📁 Creating package directories..."
 for dir in "$DEBIAN_DIR" "$USR_BIN_DIR" "$APPLICATIONS_DIR" "$APP_DIR" "$METAINFO_DIR"; do
     [ ! -d "$dir" ] && mkdir -p "$dir"
 done
+echo "✅ Directories created"
 
 # ----------------------
-# Copy application to /usr/share/ubuntu-sticky-notes (refactored layout)
+# Copy application files to /usr/share/ubuntu-sticky-notes
 # ----------------------
+echo "📦 Copying application files..."
 cp main.py "$APP_DIR/"
 cp -r src "$APP_DIR/"
 cp -r resources "$APP_DIR/"
+cp -r locale "$APP_DIR/"  # Include compiled translations
 cp uninstall.sh "$APP_DIR/"
+cp LICENSE "$APP_DIR/"
+cp README.md "$APP_DIR/"
+echo "✅ Application files copied"
 
 # ----------------------
 # Read application info from JSON
@@ -130,16 +155,29 @@ cat > "$METAINFO_FILE" <<EOL
 EOL
 
 # ----------------------
-# Build the .deb package with flags
+# Build the .deb package
 # ----------------------
+echo ""
+echo "🔨 Building .deb package..."
 DEB_FILE="${SERVICE_NAME}_${VERSION}_${ARCHITECTURE}.deb"
-dpkg-deb --build --root-owner-group --verbose "$PACKAGE_DIR" "$DEB_FILE"
+dpkg-deb --build --root-owner-group "$PACKAGE_DIR" "$DEB_FILE"
 
 echo ""
-echo "Package built successfully: $DEB_FILE"
-echo "Installation instructions:"
-echo "  sudo dpkg -i $DEB_FILE"
-echo "  sudo apt-get install -f  # to install missing dependencies if required"
+echo -e "${GREEN}✅ Package built successfully!${NC}"
+echo -e "${BLUE}📦 File: $DEB_FILE${NC}"
 echo ""
-echo "You can launch the application from the menu or by running:"
-echo "  $APP_EXEC"
+echo -e "${YELLOW}Installation instructions:${NC}"
+echo "  sudo dpkg -i $DEB_FILE"
+echo "  sudo apt-get install -f  # Install missing dependencies if needed"
+echo ""
+echo -e "${BLUE}Launch the application:${NC}"
+echo "  • From application menu: Search for '$APP_NAME'"
+echo "  • From terminal: $APP_EXEC"
+echo ""
+echo -e "${GREEN}Package contents:${NC}"
+echo "  📁 Application: /usr/share/ubuntu-sticky-notes/"
+echo "  🚀 Executable: /usr/local/bin/$APP_EXEC"
+echo "  📱 Desktop entry: /usr/share/applications/"
+echo "  🌍 Translations: 10 languages included"
+echo "  📄 Documentation: README.md, LICENSE"
+echo ""

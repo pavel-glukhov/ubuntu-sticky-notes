@@ -154,9 +154,9 @@ class StickyWindow(Adw.ApplicationWindow):
     def _setup_menu(self):
         """Setup window menu."""
         menu = Gio.Menu()
-        menu.append("Üstte Tut", "win.keep_above")
-        menu.append("Sabitle", "win.pin_window")
-        menu.append("Ayarlar", "win.settings")
+        menu.append(_("Keep on Top"), "win.keep_above")
+        menu.append(_("Pin"), "win.pin_window")
+        menu.append(_("Settings"), "win.settings")
         
         popover = Gtk.PopoverMenu.new_from_model(menu)
         self.menu_button.set_popover(popover)
@@ -204,10 +204,10 @@ class StickyWindow(Adw.ApplicationWindow):
     def _setup_alignment_menu(self):
         """Setup alignment menu button."""
         align_menu = Gio.Menu()
-        align_menu.append("Sola Hizala", "win.align_left")
-        align_menu.append("Ortala", "win.align_center")
-        align_menu.append("Sağa Hizala", "win.align_right")
-        align_menu.append("İki Yana Yasla", "win.align_fill")
+        align_menu.append(_("Align Left"), "win.align_left")
+        align_menu.append(_("Center"), "win.align_center")
+        align_menu.append(_("Align Right"), "win.align_right")
+        align_menu.append(_("Justify"), "win.align_fill")
         align_popover = Gtk.PopoverMenu.new_from_model(align_menu)
         self.alignment_button.set_popover(align_popover)
         
@@ -231,8 +231,8 @@ class StickyWindow(Adw.ApplicationWindow):
         """Setup bullet and numbered list menus."""
         # Bullet list menu
         bullet_menu = Gio.Menu()
-        bullet_menu.append("• Nokta", "win.bullet_disc")
-        bullet_menu.append("- Çizgi", "win.bullet_dash")
+        bullet_menu.append(_("• Disc"), "win.bullet_disc")
+        bullet_menu.append(_("- Dash"), "win.bullet_dash")
         bullet_popover = Gtk.PopoverMenu.new_from_model(bullet_menu)
         self.bullet_list_button.set_popover(bullet_popover)
         
@@ -246,9 +246,9 @@ class StickyWindow(Adw.ApplicationWindow):
         
         # Numbered list menu
         numbered_menu = Gio.Menu()
-        numbered_menu.append("1,2,3... Sayılar", "win.number_arabic")
-        numbered_menu.append("I,II,III... Romen", "win.number_roman")
-        numbered_menu.append("a,b,c... Alfabetik", "win.number_alpha")
+        numbered_menu.append(_("1,2,3... Numbers"), "win.number_arabic")
+        numbered_menu.append(_("I,II,III... Roman"), "win.number_roman")
+        numbered_menu.append(_("a,b,c... Alphabetic"), "win.number_alpha")
         numbered_popover = Gtk.PopoverMenu.new_from_model(numbered_menu)
         self.numbered_list_button.set_popover(numbered_popover)
         
@@ -263,6 +263,13 @@ class StickyWindow(Adw.ApplicationWindow):
         a_alpha = Gio.SimpleAction.new("number_alpha", None)
         a_alpha.connect("activate", lambda *_: self._insert_numbered_list("alpha"))
         self.add_action(a_alpha)
+
+    def refresh_menus_for_language_change(self):
+        """Refresh all menus with new translations when language changes."""
+        # Rebuild all menus with new translations
+        self._setup_menu()
+        self._setup_alignment_menu()
+        self._setup_list_menus()
 
     def _apply_custom_css(self):
         """Apply custom CSS for rounded corners on sticky note."""

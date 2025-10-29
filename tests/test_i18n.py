@@ -5,9 +5,10 @@ Test script to verify i18n translations
 import sys
 import os
 
-# Add src to path
+# Add src to path (one directory up from tests/)
 current_dir = os.path.dirname(os.path.abspath(__file__))
-src_path = os.path.join(current_dir, "src")
+project_root = os.path.dirname(current_dir)
+src_path = os.path.join(project_root, "src")
 sys.path.insert(0, src_path)
 
 from core.i18n import init_translation, set_language, get_current_language, _
