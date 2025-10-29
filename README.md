@@ -10,9 +10,9 @@ A modern, fast, and beautiful sticky notes app for Linux, built with Python, GTK
 
 ## Screenshots
 
-- `pic/1.png`
-- `pic/2.png`
-- `pic/3.png` 
+![App](pic/1.png)
+![New Note](pic/2.png)
+![Sticky Note](pic/3.png) 
 
 
 ## Features
