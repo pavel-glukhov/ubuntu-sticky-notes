@@ -215,8 +215,18 @@ msgid "Please restart the application to apply the new language."
 msgstr "Yeni dili uygulamak için lütfen uygulamayı yeniden başlatın."
 
 # Sticky window menu
+msgid "Show Main Window"
+msgstr "Ana Pencereyi Göster"
+
 msgid "Pin"
 msgstr "Sabitle"
+
+# Main window menu
+msgid "Hide to Background"
+msgstr "Arka Plana Gizle"
+
+msgid "Quit Application"
+msgstr "Uygulamadan Çık"
 
 # Alignment menu
 msgid "Center"

@@ -215,8 +215,18 @@ msgid "Please restart the application to apply the new language."
 msgstr "Please restart the application to apply the new language."
 
 # Sticky window menu
+msgid "Show Main Window"
+msgstr "Show Main Window"
+
 msgid "Pin"
 msgstr "Pin"
+
+# Main window menu
+msgid "Hide to Background"
+msgstr "Hide to Background"
+
+msgid "Quit Application"
+msgstr "Quit Application"
 
 # Alignment menu
 msgid "Center"

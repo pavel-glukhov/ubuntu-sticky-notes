@@ -15,6 +15,12 @@
                 <property name="title">Sticky Notes</property>
               </object>
             </property>
+            <child type="start">
+              <object class="GtkButton" id="btn_quit">
+                <property name="icon-name">system-shutdown-symbolic</property>
+                <property name="tooltip-text">Uygulamadan Çık</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>

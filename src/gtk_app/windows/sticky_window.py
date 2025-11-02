@@ -17,11 +17,19 @@ from src.utils.error_logger import log_error, log_info, log_performance, log_fre
 
 
 class StickyWindow(Adw.ApplicationWindow):
-    def __init__(self, transient_for, db, note_id=None, **kwargs):
+    def __init__(self, transient_for, db, note_id=None, application=None, **kwargs):
         init_start_time = time.time()
         log_info("StickyWindow.__init__ starting", note_id=note_id)
         
         try:
+            # If no application provided, try to get from transient_for
+            if application is None and transient_for is not None:
+                application = transient_for.get_application()
+            
+            # Pass application to parent
+            if application is not None:
+                kwargs['application'] = application
+            
             super().__init__(transient_for=transient_for, **kwargs)
             log_info("StickyWindow super().__init__ complete")
             
@@ -34,6 +42,7 @@ class StickyWindow(Adw.ApplicationWindow):
         
             # Get widgets from builder
             self.text_view = builder.get_object("text_view")
+            self.btn_show_main = builder.get_object("btn_show_main")
             self.menu_button = builder.get_object("menu_button")
             self.btn_toggle_toolbar = builder.get_object("btn_toggle_toolbar")
             self.toolbar_revealer = builder.get_object("toolbar_revealer")
@@ -84,6 +93,9 @@ class StickyWindow(Adw.ApplicationWindow):
             log_info("Connecting toolbar signals")
             self.btn_toggle_toolbar.connect("toggled", self._on_toolbar_toggle)
             
+            # Connect show main button
+            self.btn_show_main.connect("clicked", self._on_show_main_clicked)
+            
             # Track cursor position to update format buttons
             self._buffer.connect("notify::cursor-position", self._on_cursor_moved)
             
@@ -114,6 +126,9 @@ class StickyWindow(Adw.ApplicationWindow):
                     self.db.set_open_state(self.note_id, 1)
                 except Exception as e:
                     log_error("Failed to mark note as open", exception=e, note_id=note_id)
+            
+            # Connect close-request to mark note as closed
+            self.connect("close-request", self._on_close_request)
             
             init_duration = time.time() - init_start_time
             log_performance("StickyWindow.__init__ COMPLETE", init_duration, note_id=note_id)
@@ -161,7 +176,7 @@ class StickyWindow(Adw.ApplicationWindow):
         popover = Gtk.PopoverMenu.new_from_model(menu)
         self.menu_button.set_popover(popover)
         
-        # Actions (placeholder - will be implemented later)
+        # Actions
         a_keep_above = Gio.SimpleAction.new("keep_above", None)
         a_keep_above.connect("activate", self._on_keep_above)
         self.add_action(a_keep_above)
@@ -381,7 +396,60 @@ class StickyWindow(Adw.ApplicationWindow):
         finally:
             self._updating_format_ui = False
 
-    # Menu handlers
+    # Window lifecycle handlers
+    def _on_close_request(self, window):
+        """Handle window close - save state and mark as closed."""
+        try:
+            # Save one last time before closing
+            self._save_now()
+            
+            # Mark note as closed in database
+            if self.note_id:
+                self.db.set_open_state(self.note_id, 0)
+                log_info("Marked note as closed", note_id=self.note_id)
+            
+            # Check if this is the last open window
+            # If main window is hidden and this is the last sticky note, quit the app
+            app = self.get_application()
+            if app:
+                # Schedule check after window closes
+                from gi.repository import GLib
+                def check_remaining_windows():
+                    from gtk_app.windows.sticky_window import StickyWindow
+                    from gtk_app.windows.main_window import MainWindow
+                    
+                    # Count windows
+                    sticky_count = 0
+                    main_visible = False
+                    
+                    for win in app.get_windows():
+                        if isinstance(win, StickyWindow):
+                            sticky_count += 1
+                        elif isinstance(win, MainWindow) and win.is_visible():
+                            main_visible = True
+                    
+                    # If no main window visible and this was the last sticky note, quit
+                    if sticky_count == 0 and not main_visible:
+                        log_info("No windows remaining, quitting application")
+                        app.quit()
+                    
+                    return False  # Remove idle callback
+                
+                GLib.idle_add(check_remaining_windows)
+                
+        except Exception as e:
+            log_error("Error in _on_close_request", exception=e, note_id=self.note_id)
+        
+        # Return False to allow the window to close normally
+        return False
+    
+    # Button handlers
+    def _on_show_main_clicked(self, _btn):
+        """Show or restore the main window."""
+        app = self.get_application()
+        if app and hasattr(app, 'show_main_window'):
+            app.show_main_window()
+    
     def _on_keep_above(self, *_):
         """Keep window above others - placeholder."""
         print("Keep above - To be implemented")
@@ -527,7 +595,7 @@ class StickyWindow(Adw.ApplicationWindow):
                 })
             
             if self.note_id:
-                # We don't track x/y/w/h here yet; keep previous values
+                # Keep existing position and size from database
                 row = self.db.get(self.note_id)
                 if row:
                     x, y, w, h = row["x"], row["y"], row["w"], row["h"]

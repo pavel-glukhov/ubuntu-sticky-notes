@@ -27,6 +27,7 @@ class MainWindow(Adw.ApplicationWindow):
 		builder.add_from_file(ui_file)
 		
 		# Get widgets from builder
+		self.btn_quit = builder.get_object("btn_quit")
 		self.btn_new = builder.get_object("btn_new")
 		self.btn_trash = builder.get_object("btn_trash")
 		self.btn_sort = builder.get_object("btn_sort")
@@ -71,6 +72,7 @@ class MainWindow(Adw.ApplicationWindow):
 		self._setup_list_factory()
 
 		# Connect signals
+		self.btn_quit.connect("clicked", self._on_quit_clicked)
 		self.btn_new.connect("clicked", self.on_new_clicked)
 		self.btn_trash.connect("clicked", lambda *_: self._on_trash())
 		self.search_entry.connect("search-changed", self.on_search_changed)
@@ -495,6 +497,12 @@ class MainWindow(Adw.ApplicationWindow):
 	def _on_trash(self):
 		win = TrashWindow(self.get_application(), self.db, main_window=self)
 		win.present()
+	
+	def _on_quit_clicked(self, _btn):
+		"""Handle quit button click - trigger app quit action."""
+		app = self.get_application()
+		if app:
+			app.quit()
 
 	# Signal handlers
 	def on_new_clicked(self, _btn):
@@ -538,7 +546,7 @@ class MainWindow(Adw.ApplicationWindow):
 				# Use idle_add with higher priority and delay
 				def open_sticky_window():
 					print(f"[DEBUG] Opening StickyWindow for note {note_id}")
-					sticky = StickyWindow(self, self.db, note_id=note_id)
+					sticky = StickyWindow(self, self.db, note_id=note_id, application=self.get_application())
 					print(f"[DEBUG] StickyWindow created, presenting...")
 					sticky.present()
 					print(f"[DEBUG] StickyWindow presented successfully")
@@ -570,7 +578,7 @@ class MainWindow(Adw.ApplicationWindow):
 			# Open window after dialog is completely closed
 			def open_sticky_window():
 				print(f"[DEBUG] Opening StickyWindow for note {note_id}")
-				sticky = StickyWindow(self, self.db, note_id=note_id)
+				sticky = StickyWindow(self, self.db, note_id=note_id, application=self.get_application())
 				print(f"[DEBUG] StickyWindow created, presenting...")
 				sticky.present()
 				print(f"[DEBUG] StickyWindow presented successfully")
@@ -589,7 +597,7 @@ class MainWindow(Adw.ApplicationWindow):
 		if position in self._notes_data:
 			note = self._notes_data[position]
 			note_id = note['id']
-			sticky = StickyWindow(self, self.db, note_id=note_id)
+			sticky = StickyWindow(self, self.db, note_id=note_id, application=self.get_application())
 			sticky.present()
 	
 	def _on_delete_note(self, _btn, position):
@@ -599,10 +607,27 @@ class MainWindow(Adw.ApplicationWindow):
 			note_id = note['id']
 			
 			try:
+				# Close the sticky window if it's open
+				self._close_sticky_window_for_note(note_id)
+				
+				# Move to trash
 				self.db.move_to_trash(note_id)
 				self._reload_list()
 			except Exception as e:
 				print(f"Error moving note to trash: {e}")
+	
+	def _close_sticky_window_for_note(self, note_id):
+		"""Close sticky window for a specific note if it's open."""
+		from gtk_app.windows.sticky_window import StickyWindow
+		
+		app = self.get_application()
+		if app:
+			# Find and close the sticky window for this note
+			for window in list(app.get_windows()):
+				if isinstance(window, StickyWindow):
+					if hasattr(window, 'note_id') and window.note_id == note_id:
+						window.close()
+						break
 	
 	def _on_share_note(self, _btn, position):
 		"""Share note (placeholder for now)."""

@@ -11,6 +11,12 @@
         <child>
           <object class="AdwHeaderBar" id="headerbar">
             <child type="start">
+              <object class="GtkButton" id="btn_show_main">
+                <property name="icon-name">go-home-symbolic</property>
+                <property name="tooltip-text">Ana Pencereyi Göster</property>
+              </object>
+            </child>
+            <child type="start">
               <object class="GtkToggleButton" id="btn_toggle_toolbar">
                 <property name="icon-name">format-text-rich-symbolic</property>
                 <property name="tooltip-text">Format Menüsü</property>
