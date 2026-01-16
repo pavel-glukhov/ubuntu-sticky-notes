@@ -78,7 +78,6 @@ class StickyWindow(QtWidgets.QWidget):
 
         self.text_edit.customContextMenuRequested.connect(self.show_context_menu)
         self.text_edit.textChanged.connect(self.on_text_changed)
-
         self.btn_close.clicked.connect(self.close)
         self.btn_close.setText("✖")
         self.btn_add.clicked.connect(self.on_add_clicked)
