@@ -82,18 +82,22 @@ class Ui_StickyWindow(object):
         # ---------------- Formatting Buttons ----------------
         # Bold
         self.btn_bold = QtWidgets.QPushButton("𝐁")
+        self.btn_bold.setCheckable(True)
         self.btn_bold.setFixedSize(button_size, button_size)
         self.btn_bold.setStyleSheet(self.button_style_common + "font-weight: bold;")
         # Italic
         self.btn_italic = QtWidgets.QPushButton("𝑰")
+        self.btn_italic.setCheckable(True)
         self.btn_italic.setFixedSize(button_size, button_size)
         self.btn_italic.setStyleSheet(self.button_style_common)
         # Underline
         self.btn_underline = QtWidgets.QPushButton("U̲")
+        self.btn_underline.setCheckable(True)
         self.btn_underline.setFixedSize(button_size, button_size)
         self.btn_underline.setStyleSheet(self.button_style_common)
         # Strike-through
         self.btn_strike = QtWidgets.QPushButton("̶S̶")
+        self.btn_strike.setCheckable(True)
         self.btn_strike.setFixedSize(button_size, button_size)
         self.btn_strike.setStyleSheet(self.button_style_common)
         # List / Bullet
@@ -122,7 +126,7 @@ class Ui_StickyWindow(object):
 
         # line under color button
         self.color_indicator = QtWidgets.QFrame(line_container)
-        self.color_indicator.setFixedSize(line_width, 3)  # длина полоски
+        self.color_indicator.setFixedSize(line_width, 3)
         self.color_indicator.setStyleSheet("background-color: black; border-radius: 1px;")
         line_layout.addWidget(self.color_indicator)
 
@@ -134,12 +138,54 @@ class Ui_StickyWindow(object):
         self.setup_color_palette()
         self.btn_color.setMenu(self.color_menu)
 
+        # ---------------- Font Size ComboBox ----------------
+        self.combo_font_size = QtWidgets.QComboBox(parent=self.formatting_bar)
+        self.combo_font_size.setFixedSize(75, button_size)
+
+        font_sizes = ["8", "10", "12", "14", "16", "18", "20", "24", "28", "32"]
+        for size in font_sizes:
+            self.combo_font_size.addItem(f"Font: {size}", size)
+
+        self.combo_font_size.setCurrentIndex(2)  # Font 12
+
+        self.combo_font_size.lineEdit = QtWidgets.QLineEdit()  # Создаем, но не включаем editable
+
+        self.combo_font_size.setStyleSheet("""
+                    QComboBox {
+                        background: transparent;
+                        border: none;
+                        border-radius: 3px;
+                        font-size: 13px;
+                        color: #555;
+                        padding-left: 5px;
+                        text-align: center;
+                    }
+                    QComboBox:hover { 
+                        background-color: rgba(0, 0, 0, 0.08); 
+                        color: #000;
+                    }
+                    QComboBox::drop-down { border: 0px; width: 0px; }
+                    QComboBox::down-arrow { image: none; }
+
+                    QComboBox QAbstractItemView {
+                        border: 1px solid #ccc;
+                        background-color: white;
+                        selection-background-color: rgba(0, 0, 0, 0.1);
+                        selection-color: #000;
+                        outline: none;
+                    }
+                """)
+        for i in range(self.combo_font_size.count()):
+            self.combo_font_size.setItemData(i, QtCore.Qt.AlignmentFlag.AlignCenter,
+                                             QtCore.Qt.ItemDataRole.TextAlignmentRole)
+
         self.formattingLayout.addWidget(self.btn_bold)
         self.formattingLayout.addWidget(self.btn_italic)
         self.formattingLayout.addWidget(self.btn_underline)
         self.formattingLayout.addWidget(self.btn_strike)
         self.formattingLayout.addWidget(self.btn_list)
         self.formattingLayout.addWidget(self.btn_color)
+        self.formattingLayout.addWidget(self.combo_font_size)
         self.formattingLayout.addStretch()
 
         self.verticalLayout.addWidget(self.formatting_bar)
