@@ -29,8 +29,10 @@ class Ui_StickyWindow(object):
                     }
                     QPushButton:hover { background-color: rgba(0, 0, 0, 0.1); }
                 """
+
         button_size = 28
         line_width = 18
+
         self.button_style_common = """
             QPushButton { 
                 background: transparent; 
@@ -69,8 +71,37 @@ class Ui_StickyWindow(object):
         self.verticalLayout.addWidget(self.header_bar_panel)
 
         self.text_edit = QtWidgets.QTextEdit(parent=StickyWindow)
+
         self.text_edit.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
-        self.text_edit.setStyleSheet("background: transparent; border: none; font-size: 12pt; padding: 10px;")
+        self.text_edit.setStyleSheet("""
+                    QTextEdit {
+                        background: transparent;
+                        border: none;
+                        font-size: 12pt;
+                        padding: 10px;
+                    }
+                    QScrollBar:vertical {
+                        border: none;
+                        background: transparent;
+                        width: 4px; /* Очень тонкая полоса */
+                        margin: 0px;
+                    }
+                    QScrollBar::handle:vertical {
+                        background: rgba(0, 0, 0, 0.2);
+                        min-height: 20px;
+                        border-radius: 2px;
+                    }
+                    QScrollBar::handle:vertical:hover {
+                        background: rgba(0, 0, 0, 0.4);
+                    }
+                    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                        height: 0px;
+                    }
+                    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                        background: none;
+                    }
+                """)
+
         self.text_edit.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.verticalLayout.addWidget(self.text_edit)
 
