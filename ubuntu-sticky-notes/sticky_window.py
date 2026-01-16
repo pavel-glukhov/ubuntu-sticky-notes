@@ -57,7 +57,6 @@ class StickyWindow(QtWidgets.QWidget):
             flags |= QtCore.Qt.WindowType.WindowStaysOnTopHint
         self.setWindowFlags(flags)
 
-        # Internal state tracking
         self._last_geo = None
         self._last_content = None
         self._last_color = None
@@ -86,12 +85,32 @@ class StickyWindow(QtWidgets.QWidget):
         self.btn_add.setText("➕")
         self.btn_pin.clicked.connect(self.on_pin_clicked)
 
+        self.ui.btn_bold.clicked.connect(self.toggle_bold)
+        self.ui.btn_italic.clicked.connect(self.toggle_italic)
+        self.ui.btn_underline.clicked.connect(self.toggle_underline)
+        self.ui.btn_strike.clicked.connect(self.toggle_strike)
+        self.ui.btn_list.clicked.connect(self.toggle_list)
+
+        if hasattr(self.ui, 'btn_text_color'):
+            self.ui.btn_text_color.clicked.connect(self.show_text_color_menu)
+
+
         self.update_pin_button()
 
         self.autosave_timer = QtCore.QTimer(self)
         self.autosave_timer.setInterval(AUTOSAVE_INTERVAL_MS)
         self.autosave_timer.timeout.connect(self.save)
         self.autosave_timer.start()
+
+        if hasattr(self.ui, "color_menu"):
+            for action in self.ui.color_menu.actions():
+                if isinstance(action, QtWidgets.QWidgetAction):
+                    palette_widget = action.defaultWidget()
+                    if palette_widget:
+                        for btn in palette_widget.findChildren(QtWidgets.QPushButton):
+                            color = btn.property("color_val")
+                            if color:
+                                btn.clicked.connect(lambda checked, c=color: self.change_text_color(c))
 
     def update_pin_button(self):
         """
@@ -144,12 +163,52 @@ class StickyWindow(QtWidgets.QWidget):
             self.textChanged.emit(self.note_id, content)
             self.save()
 
+    def _create_mini_palette(self, parent_menu):
+        """
+                Create a compact horizontal layout with 6 primary colors for the context menu.
+
+                Args:
+                    parent_menu (QMenu): The parent menu to be closed when a color is selected.
+
+                Returns:
+                    QWidget: A widget containing the color palette grid.
+                """
+        palette_widget = QtWidgets.QWidget()
+        layout = QtWidgets.QGridLayout(palette_widget)
+        layout.setContentsMargins(10, 4, 10, 4)
+        layout.setSpacing(6)
+
+        main_colors = [
+            "#000000", "#FF0000", "#0000FF",
+            "#008000", "#FFD700", "#808080"
+        ]
+
+        for i, color_hex in enumerate(main_colors):
+            btn = QtWidgets.QPushButton()
+            btn.setFixedSize(18, 18)
+            btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {color_hex};
+                    border: 1px solid #CCC;
+                    border-radius: 2px;
+                }}
+                QPushButton:hover {{
+                    border: 1px solid #666;
+                }}
+            """)
+
+            btn.clicked.connect(lambda checked, c=color_hex: [
+                self.change_text_color(c),
+                parent_menu.close()
+            ])
+            layout.addWidget(btn, 0, i)
+
+        return palette_widget
+
     def show_context_menu(self, pos):
         """
-        Show a custom context menu with editing and note actions.
-
-        Args:
-            pos (QPoint): Position relative to text_edit where menu is opened.
+        Show a custom context menu with editing, note actions and a graphical palette.
         """
         menu = QtWidgets.QMenu(self)
 
@@ -162,20 +221,25 @@ class StickyWindow(QtWidgets.QWidget):
         italic_action = menu.addAction("Italic (Ctrl+I)")
         strike_action = menu.addAction("Strike (Shift+S)")
         list_action = menu.addAction("Bullet List (Shift+L)")
-        menu.addSeparator()
 
-        top_action = menu.addAction(
-            "📍 Unpin from Top" if self._always_on_top else "📌 Pin to Top"
-        )
-        menu.addSeparator()
+        menu.addSection("📝 Text Color")
+        palette_action = QtWidgets.QWidgetAction(menu)
+        palette_action.setDefaultWidget(self._create_mini_palette(menu))
+        menu.addAction(palette_action)
 
+        menu.addSeparator()
         color_menu = menu.addMenu("🎨 Background Color")
         for name, color in COLOR_MAP.items():
             action = color_menu.addAction(name)
             action.triggered.connect(lambda checked, c=color: self.change_color(c))
-        menu.addSeparator()
 
+        menu.addSeparator()
+        top_action = menu.addAction(
+            "📍 Unpin from Top" if self._always_on_top else "📌 Pin to Top"
+        )
+        menu.addSeparator()
         close_action = menu.addAction("❌ Close Sticker")
+
         action = menu.exec(self.text_edit.mapToGlobal(pos))
 
         if action == copy_action:
@@ -250,43 +314,78 @@ class StickyWindow(QtWidgets.QWidget):
         if not self._loading:
             self.save()
 
+    def _apply_format_and_reset_selection(self, fmt: QtGui.QTextCharFormat):
+        """
+        Apply the specified char format to the selection, clear the selection,
+        and move the cursor to the end of the formatted text.
+
+        Args:
+            fmt (QTextCharFormat): The format to apply to the current selection.
+        """
+        cursor = self.text_edit.textCursor()
+        if cursor.hasSelection():
+            end_pos = cursor.selectionEnd()
+            cursor.mergeCharFormat(fmt)
+            cursor.clearSelection()
+            cursor.setPosition(end_pos)
+            self.text_edit.setTextCursor(cursor)
+
+        self.text_edit.setFocus()
+
     def toggle_bold(self):
         """
-        Toggle bold formatting for selected text.
+        Toggle bold formatting for the selected text and reset cursor position.
         """
         cursor = self.text_edit.textCursor()
         if not cursor.hasSelection():
+            self.text_edit.setFocus()
             return
+
         fmt = QtGui.QTextCharFormat()
-        current_weight = cursor.charFormat().fontWeight()
-        fmt.setFontWeight(
-            QtGui.QFont.Weight.Normal
-            if current_weight > QtGui.QFont.Weight.Normal
-            else QtGui.QFont.Weight.Bold
-        )
-        cursor.mergeCharFormat(fmt)
+        is_bold = cursor.charFormat().fontWeight() > QtGui.QFont.Weight.Normal
+        fmt.setFontWeight(QtGui.QFont.Weight.Normal if is_bold else QtGui.QFont.Weight.Bold)
+
+        self._apply_format_and_reset_selection(fmt)
 
     def toggle_italic(self):
         """
-        Toggle italic formatting for selected text.
+        Toggle italic formatting for the selected text and reset cursor position.
         """
         cursor = self.text_edit.textCursor()
         if not cursor.hasSelection():
+            self.text_edit.setFocus()
             return
+
         fmt = QtGui.QTextCharFormat()
         fmt.setFontItalic(not cursor.charFormat().fontItalic())
-        cursor.mergeCharFormat(fmt)
+
+        self._apply_format_and_reset_selection(fmt)
+
+    def toggle_underline(self):
+        """
+        Toggle underline formatting for the selected text and reset cursor position.
+        """
+        cursor = self.text_edit.textCursor()
+        if not cursor.hasSelection():
+            self.text_edit.setFocus()
+            return
+        fmt = QtGui.QTextCharFormat()
+        fmt.setFontUnderline(not cursor.charFormat().fontUnderline())
+        self._apply_format_and_reset_selection(fmt)
 
     def toggle_strike(self):
         """
-        Toggle strikethrough formatting for selected text.
+        Toggle strikethrough formatting for the selected text and reset cursor position.
         """
         cursor = self.text_edit.textCursor()
         if not cursor.hasSelection():
+            self.text_edit.setFocus()
             return
+
         fmt = QtGui.QTextCharFormat()
         fmt.setFontStrikeOut(not cursor.charFormat().fontStrikeOut())
-        cursor.mergeCharFormat(fmt)
+
+        self._apply_format_and_reset_selection(fmt)
 
     def toggle_list(self):
         """
@@ -299,6 +398,18 @@ class StickyWindow(QtWidgets.QWidget):
             cursor.setBlockFormat(block_fmt)
         else:
             cursor.createList(QtGui.QTextListFormat.Style.ListDisc)
+        self.text_edit.setFocus()
+
+    def change_text_color(self, hex_color: str):
+        """
+        Change the text color (foreground) of the selected text.
+
+        Args:
+            hex_color (str): Hex color code for the text.
+        """
+        fmt = QtGui.QTextCharFormat()
+        fmt.setForeground(QtGui.QColor(hex_color))
+        self._apply_format_and_reset_selection(fmt)
 
     def moveEvent(self, event):
         """
