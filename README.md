@@ -2,10 +2,10 @@
 
 Simple sticky notes application built with Python and PyQt6 for Ubuntu.
 
-Version: 1.3.1
+Version: 1.4.1
 _______________
 
-![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/example_1.3.0.png)
+![example of app](https://github.com/pavel-glukhov/ubuntu_sticky_notes/blob/main/pic/example_1.4.1.png)
 
 ## ✨ Features
 
@@ -13,7 +13,7 @@ _______________
   Create, edit, move and resize notes that are automatically saved.
 
 - 🎨 **Customization**  
-  Change background colors and format text (bold, italic, strikethrough, bullet lists, text color).
+  Change background colors and format text (bold, italic, strikethrough, bullet lists, text color, font size).
 
 - 📌 **Pin on Top**  
   Keep individual notes or all notes always visible above other windows.
@@ -33,14 +33,14 @@ _______________
 
 ## Download:
 You can download deb packet here:
-https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/tag/1.3.1
+https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/tag/1.4.1
 ______________________________________________________________________________________
 ## Installation:
 ```bash
-curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/1.3.1/ubuntu-sticky-notes_1.3.1_all.deb
+curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/1.4.1/ubuntu-sticky-notes_1.4.1_all.deb
 sudo apt update
 sudo apt install -y python3-pyqt6
-sudo dpkg -i ubuntu-sticky-notes_1.3.1_all.deb
+sudo dpkg -i ubuntu-sticky-notes_1.4.1_all.deb
 ```
 
 ### ⚠️ Important
