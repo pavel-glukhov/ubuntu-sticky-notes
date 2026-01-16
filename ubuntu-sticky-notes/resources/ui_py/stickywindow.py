@@ -1,4 +1,4 @@
-from PyQt6 import QtCore, QtWidgets, QtGui
+from PyQt6 import QtCore, QtWidgets
 
 
 class Ui_StickyWindow(object):
@@ -10,14 +10,12 @@ class Ui_StickyWindow(object):
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setSpacing(0)
 
-        # --- ВЕРХНЯЯ ПАНЕЛЬ (Высота уменьшена до 24px) ---
         self.header_bar_panel = QtWidgets.QWidget(parent=StickyWindow)
         self.header_bar_panel.setFixedHeight(24)
         self.headerBarLayout = QtWidgets.QHBoxLayout(self.header_bar_panel)
         self.headerBarLayout.setContentsMargins(5, 0, 5, 0)
         self.headerBarLayout.setSpacing(0)
 
-        # Общий стиль для кнопок верхней панели
         header_btn_style = """
             QPushButton { 
                 background: transparent; 
@@ -28,7 +26,6 @@ class Ui_StickyWindow(object):
             QPushButton:hover { background-color: rgba(0, 0, 0, 0.1); }
         """
 
-        # Кнопка добавления нового стикера (возвращен дизайн)
         self.btn_add = QtWidgets.QPushButton("+")
         self.btn_add.setFixedSize(24, 24)
         self.btn_add.setStyleSheet(header_btn_style + "font-size: 18px; font-weight: bold;")
@@ -68,12 +65,12 @@ class Ui_StickyWindow(object):
             QPushButton::menu-indicator { image: none; }
         """
 
-        self.btn_bold = QtWidgets.QPushButton("B")
+        self.btn_bold = QtWidgets.QPushButton("𝐁")
         self.btn_bold.setCheckable(True)
         self.btn_bold.setFixedSize(28, 28)
         self.btn_bold.setStyleSheet(button_style + "font-weight: bold;")
 
-        self.btn_italic = QtWidgets.QPushButton("𝑖")
+        self.btn_italic = QtWidgets.QPushButton("𝑰")
         self.btn_italic.setCheckable(True)
         self.btn_italic.setFixedSize(28, 28)
         self.btn_italic.setStyleSheet(button_style + "font-family: 'Serif'; font-size: 16px;")
@@ -88,11 +85,11 @@ class Ui_StickyWindow(object):
         self.btn_strike.setFixedSize(28, 28)
         self.btn_strike.setStyleSheet(button_style)
 
-        self.btn_list = QtWidgets.QPushButton("\u22EE")
+        self.btn_list = QtWidgets.QPushButton("☰")
         self.btn_list.setFixedSize(28, 28)
         self.btn_list.setStyleSheet(button_style + "font-size: 18px;")
 
-        self.btn_color = QtWidgets.QPushButton("A")
+        self.btn_color = QtWidgets.QPushButton("🎨")
         self.btn_color.setFixedSize(28, 28)
         self.btn_color.setStyleSheet(button_style + "font-weight: bold; border-bottom: 3px solid #000;")
 

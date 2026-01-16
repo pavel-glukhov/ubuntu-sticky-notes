@@ -110,8 +110,10 @@ class StickyWindow(QtWidgets.QWidget):
                         for btn in palette_widget.findChildren(QtWidgets.QPushButton):
                             color = btn.property("color_val")
                             if color:
-                                btn.clicked.connect(lambda checked, c=color: self.change_text_color(c))
-
+                                btn.clicked.connect(lambda checked, c=color: [
+                                    self.change_text_color(c),
+                                    self.ui.color_menu.close()
+                                ])
     def update_pin_button(self):
         """
         Update the display of the pin button according to always-on-top state.
@@ -402,14 +404,25 @@ class StickyWindow(QtWidgets.QWidget):
 
     def change_text_color(self, hex_color: str):
         """
-        Change the text color (foreground) of the selected text.
-
-        Args:
-            hex_color (str): Hex color code for the text.
+        Change the text color of the selection or set it for the next typed characters,
+        then return focus to the editor and close any open menus.
         """
+        color = QtGui.QColor(hex_color)
         fmt = QtGui.QTextCharFormat()
-        fmt.setForeground(QtGui.QColor(hex_color))
-        self._apply_format_and_reset_selection(fmt)
+        fmt.setForeground(color)
+
+        cursor = self.text_edit.textCursor()
+
+        if cursor.hasSelection():
+            self._apply_format_and_reset_selection(fmt)
+        else:
+            self.text_edit.setCurrentCharFormat(fmt)
+
+        self.text_edit.setFocus()
+
+        for widget in QtWidgets.QApplication.topLevelWidgets():
+            if isinstance(widget, QtWidgets.QMenu):
+                widget.close()
 
     def moveEvent(self, event):
         """
