@@ -1,4 +1,4 @@
-from PyQt6 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets, QtGui
 
 
 class Ui_StickyWindow(object):
@@ -16,15 +16,38 @@ class Ui_StickyWindow(object):
         self.headerBarLayout.setContentsMargins(5, 0, 5, 0)
         self.headerBarLayout.setSpacing(0)
 
+
         header_btn_style = """
+                    QPushButton { 
+                        background: transparent; 
+                        border: none; 
+                        font-size: 14px; 
+                        color: #555; 
+                        padding: 0px;
+                        margin: 0px; 
+                        text-align: center;
+                    }
+                    QPushButton:hover { background-color: rgba(0, 0, 0, 0.1); }
+                """
+        button_size = 28
+        line_width = 18
+        self.button_style_common = """
             QPushButton { 
                 background: transparent; 
                 border: none; 
-                font-size: 14px; 
-                color: #555; 
+                border-radius: 3px; 
+                font-size: 16px; 
+                color: #333; 
+                padding: 0px;     
+                margin: 0px; 
+                qproperty-iconSize: 18px;
+                text-align: center;
             }
-            QPushButton:hover { background-color: rgba(0, 0, 0, 0.1); }
+            QPushButton:hover { background-color: rgba(0, 0, 0, 0.08); }
+            QPushButton:checked { background-color: rgba(0, 0, 0, 0.15); }
+            QPushButton::menu-indicator { image: none; }
         """
+        # ---------------- Header Buttons ----------------
 
         self.btn_add = QtWidgets.QPushButton("+")
         self.btn_add.setFixedSize(24, 24)
@@ -45,53 +68,65 @@ class Ui_StickyWindow(object):
 
         self.verticalLayout.addWidget(self.header_bar_panel)
 
-        # --- ТЕКСТОВОЕ ПОЛЕ ---
         self.text_edit = QtWidgets.QTextEdit(parent=StickyWindow)
         self.text_edit.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.text_edit.setStyleSheet("background: transparent; border: none; font-size: 12pt; padding: 10px;")
         self.text_edit.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.verticalLayout.addWidget(self.text_edit)
 
-        # --- НИЖНЯЯ ПАНЕЛЬ ФОРМАТИРОВАНИЯ ---
         self.formatting_bar = QtWidgets.QWidget(parent=StickyWindow)
         self.formattingLayout = QtWidgets.QHBoxLayout(self.formatting_bar)
         self.formattingLayout.setContentsMargins(5, 2, 5, 5)
         self.formattingLayout.setSpacing(2)
 
-        button_style = """
-            QPushButton { background: transparent; border: none; border-radius: 3px; font-size: 14px; color: #333; }
-            QPushButton:hover { background-color: rgba(0, 0, 0, 0.08); }
-            QPushButton:checked { background-color: rgba(0, 0, 0, 0.15); }
-            QPushButton::menu-indicator { image: none; }
-        """
-
+        # ---------------- Formatting Buttons ----------------
+        # Bold
         self.btn_bold = QtWidgets.QPushButton("𝐁")
-        self.btn_bold.setCheckable(True)
-        self.btn_bold.setFixedSize(28, 28)
-        self.btn_bold.setStyleSheet(button_style + "font-weight: bold;")
-
+        self.btn_bold.setFixedSize(button_size, button_size)
+        self.btn_bold.setStyleSheet(self.button_style_common + "font-weight: bold;")
+        # Italic
         self.btn_italic = QtWidgets.QPushButton("𝑰")
-        self.btn_italic.setCheckable(True)
-        self.btn_italic.setFixedSize(28, 28)
-        self.btn_italic.setStyleSheet(button_style + "font-family: 'Serif'; font-size: 16px;")
-
+        self.btn_italic.setFixedSize(button_size, button_size)
+        self.btn_italic.setStyleSheet(self.button_style_common)
+        # Underline
         self.btn_underline = QtWidgets.QPushButton("U̲")
-        self.btn_underline.setCheckable(True)
-        self.btn_underline.setFixedSize(28, 28)
-        self.btn_underline.setStyleSheet(button_style)
-
+        self.btn_underline.setFixedSize(button_size, button_size)
+        self.btn_underline.setStyleSheet(self.button_style_common)
+        # Strike-through
         self.btn_strike = QtWidgets.QPushButton("̶S̶")
-        self.btn_strike.setCheckable(True)
-        self.btn_strike.setFixedSize(28, 28)
-        self.btn_strike.setStyleSheet(button_style)
-
+        self.btn_strike.setFixedSize(button_size, button_size)
+        self.btn_strike.setStyleSheet(self.button_style_common)
+        # List / Bullet
         self.btn_list = QtWidgets.QPushButton("☰")
-        self.btn_list.setFixedSize(28, 28)
-        self.btn_list.setStyleSheet(button_style + "font-size: 18px;")
+        self.btn_list.setFixedSize(button_size, button_size)
+        self.btn_list.setStyleSheet(self.button_style_common)
+        # ---------------- Color Button ----------------
+        self.btn_color = QtWidgets.QPushButton()
+        self.btn_color.setFixedSize(button_size, button_size)
+        self.btn_color.setStyleSheet(self.button_style_common)
+        self.btn_color.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
 
-        self.btn_color = QtWidgets.QPushButton("🎨")
-        self.btn_color.setFixedSize(28, 28)
-        self.btn_color.setStyleSheet(button_style + "font-weight: bold; border-bottom: 3px solid #000;")
+        layout_color = QtWidgets.QVBoxLayout(self.btn_color)
+        layout_color.setContentsMargins(0, 0, 0, 0)
+        layout_color.setSpacing(0)
+        layout_color.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+        self.label_a = QtWidgets.QLabel("A", parent=self.btn_color)
+        self.label_a.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout_color.addWidget(self.label_a)
+
+        line_container = QtWidgets.QWidget(self.btn_color)
+        line_layout = QtWidgets.QHBoxLayout(line_container)
+        line_layout.setContentsMargins(0, 0, 0, 0)
+        line_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+        # line under color button
+        self.color_indicator = QtWidgets.QFrame(line_container)
+        self.color_indicator.setFixedSize(line_width, 3)  # длина полоски
+        self.color_indicator.setStyleSheet("background-color: black; border-radius: 1px;")
+        line_layout.addWidget(self.color_indicator)
+
+        layout_color.addWidget(line_container)
 
         self.color_menu = QtWidgets.QMenu(self.btn_color)
         self.color_menu.setStyleSheet("QMenu { border: 1px solid #ccc; background: white; padding: 0px; }")
@@ -111,7 +146,8 @@ class Ui_StickyWindow(object):
 
     def setup_color_palette(self):
         color_widget = QtWidgets.QWidget()
-        color_widget.setStyleSheet("background: white; border: none; outline: none;")
+        color_widget.setFixedSize(160, 160)
+        color_widget.setStyleSheet("background: white; border: none;")
 
         grid = QtWidgets.QGridLayout(color_widget)
         grid.setContentsMargins(6, 6, 6, 6)
