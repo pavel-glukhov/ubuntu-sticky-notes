@@ -1,136 +1,74 @@
-import os
-
-from config import get_app_paths
-from notes_db import NotesDB
-from PyQt6 import QtCore, QtGui, QtWidgets
-from resources.ui_py.trashwindow import Ui_TrashWindow
-
-paths = get_app_paths()
-UI_PATH = paths["UI_DIR"]
+from gi.repository import Gtk, Adw, Gdk, GObject
 
 
-class TrashWindow(QtWidgets.QWidget):
-    """
-    Trash window for managing deleted sticky notes.
-
-    Provides a list of deleted notes with options to restore,
-    permanently delete, or reopen a note.
-    """
-
-    def __init__(self, db: NotesDB, main_window=None):
-        """
-        Initialize the TrashWindow.
-
-        Args:
-            db (NotesDB): Notes database instance.
-            main_window (QWidget, optional): Reference to the main window
-                for refreshing the list or opening restored notes.
-        """
-        super().__init__()
+class TrashWindow(Gtk.Window):
+    def __init__(self, db, main_window=None):
+        super().__init__(title="Trash Bin", default_width=350, default_height=500)
         self.db = db
         self.main_window = main_window
 
-        self.ui = Ui_TrashWindow()
-        self.ui.setupUi(self)
-        self.list_widget = self.ui.list_widget
+        self.root_box = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=10,
+            margin_start=15,
+            margin_end=15,
+            margin_top=15,
+            margin_bottom=15
+        )
+        self.set_child(self.root_box)
 
-        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
-        self.list_widget.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
-        self.list_widget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
-        self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
+        self.list_box = Gtk.ListBox(show_separators=True, css_classes=["boxed-list"])
+        scrolled = Gtk.ScrolledWindow(child=self.list_box, vexpand=True)
+        self.root_box.append(scrolled)
 
-        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key.Key_Delete), self, self.delete_selected_notes)
+        btn_clear = Gtk.Button(label="Empty Trash", css_classes=["destructive-action"])
+        btn_clear.connect("clicked", self.on_empty_trash)
+        self.root_box.append(btn_clear)
+
+        self.refresh_list()
 
     def refresh_list(self):
-        """
-        Refresh the trash list with all deleted notes from the database.
+        # Удаляем старые элементы
+        while child := self.list_box.get_first_child():
+            self.list_box.remove(child)
 
-        - Uses the note title if available.
-        - If the title is missing, extracts a plain text snippet from content.
-        - Each note is displayed with its deletion timestamp and color marker.
-        """
-        self.list_widget.clear()
         for note in self.db.all_trash():
-            doc = QtGui.QTextDocument()
-            doc.setHtml(note["content"])
-            plain_text = doc.toPlainText()
-            snippet = plain_text[:15].replace("\n", " ")
+            row = Gtk.ListBoxRow()
+            hbox = Gtk.Box(
+                orientation=Gtk.Orientation.HORIZONTAL,
+                spacing=12,
+                margin_start=10,
+                margin_end=10,
+                margin_top=10,
+                margin_bottom=10
+            )
 
-            title = note["title"] if note["title"] else snippet
+            dot = Gtk.Box(width_request=12, height_request=12, css_classes=["color-dot"])
+            dot.set_css_classes(["color-dot"])
+            dot.set_name(f"dot_{note['id']}")
 
-            item = QtWidgets.QListWidgetItem(f"{title} ({note['deleted_at']})")
-            item.setData(QtCore.Qt.ItemDataRole.UserRole, note["id"])
-            item.setData(QtCore.Qt.ItemDataRole.UserRole + 1, note["content"])
-            item.setData(QtCore.Qt.ItemDataRole.UserRole + 2, note["color"])
-            item.setData(QtCore.Qt.ItemDataRole.UserRole + 3, note["deleted_at"])
-            item.setData(QtCore.Qt.ItemDataRole.UserRole + 4, note["title"])
+            label = Gtk.Label(label=f"{note['title'] or 'Untitled'}", xalign=0)
+            date_label = Gtk.Label(label=note['deleted_at'], css_classes=["caption"])
 
-            pixmap = QtGui.QPixmap(16, 16)
-            pixmap.fill(QtCore.Qt.GlobalColor.transparent)
-            painter = QtGui.QPainter(pixmap)
-            painter.setBrush(QtGui.QColor(note["color"]))
-            painter.setPen(QtGui.QColor("#A0A0A0"))
-            painter.drawEllipse(0, 0, 15, 15)
-            painter.end()
-            item.setIcon(QtGui.QIcon(pixmap))
+            btn_restore = Gtk.Button(icon_name="edit-undo-symbolic", has_frame=False)
+            btn_restore.connect("clicked", lambda _, nid=note['id']: self.restore_note(nid))
 
-            self.list_widget.addItem(item)
+            hbox.append(dot)
+            hbox.append(label)
+            hbox.append(Gtk.Box(hexpand=True))  # Spacer
+            hbox.append(date_label)
+            hbox.append(btn_restore)
 
-    def show_context_menu(self, pos):
-        """
-        Display the context menu for selected notes in the trash list.
+            row.set_child(hbox)
+            self.list_box.append(row)
 
-        Args:
-            pos (QPoint): Mouse position relative to the list widget.
-        """
-        selected_items = self.list_widget.selectedItems()
-        if not selected_items:
-            return
+    def restore_note(self, note_id):
+        self.db.restore_from_trash(note_id)
+        self.refresh_list()
+        if self.main_window:
+            self.main_window.refresh_list()
 
-        menu = QtWidgets.QMenu()
-        restore_action = menu.addAction("🔙 Restore")
-        open_action = menu.addAction("📂 Open (first selected)")
-        delete_action = menu.addAction("❌ Delete Permanently (Del)")
-
-        action = menu.exec(self.list_widget.mapToGlobal(pos))
-        note_ids = [item.data(QtCore.Qt.ItemDataRole.UserRole) for item in selected_items]
-
-        if action == restore_action:
-            for note_id in note_ids:
-                self.db.restore_from_trash(note_id)
-            self.list_widget.clearSelection()
-            if self.main_window:
-                self.main_window.refresh_list()
-            self.refresh_list()
-
-        elif action == delete_action:
-            self.delete_selected_notes()
-
-        elif action == open_action and self.main_window and note_ids:
-            self.main_window.open_note(note_ids[0])
-
-    def delete_selected_notes(self):
-        """
-        Permanently delete all selected notes after confirmation.
-
-        Prompts the user with a confirmation dialog.
-        If confirmed, removes notes from the database and refreshes the list.
-        """
-        selected_items = self.list_widget.selectedItems()
-        if not selected_items:
-            return
-
-        reply = QtWidgets.QMessageBox.question(
-            self,
-            "Delete Notes",
-            f"Are you sure you want to permanently delete {len(selected_items)} note(s)?",
-            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
-            QtWidgets.QMessageBox.StandardButton.No
-        )
-
-        if reply == QtWidgets.QMessageBox.StandardButton.Yes:
-            for item in selected_items:
-                note_id = item.data(QtCore.Qt.ItemDataRole.UserRole)
-                self.db.delete_permanently(note_id)
-
-            self.refresh_list()
+    def on_empty_trash(self, btn):
+        for note in self.db.all_trash():
+            self.db.delete_permanently(note['id'])
+        self.refresh_list()

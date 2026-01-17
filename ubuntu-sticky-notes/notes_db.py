@@ -222,6 +222,17 @@ class NotesDB:
                 (key, value)
             )
 
+    def update_color(self, note_id: int, color: str):
+        """
+        Update only the color of a note.
+
+        Args:
+            note_id (int): Note ID.
+            color (str): New HEX color string.
+        """
+        with self.conn:
+            self.conn.execute("UPDATE notes SET color = ? WHERE id = ?", (color, note_id))
+
     def set_open_state(self, note_id, state: int):
         """
         Persist whether a note is open or closed.
@@ -253,3 +264,14 @@ class NotesDB:
         """
         with self.conn:
             self.conn.execute("UPDATE notes SET title = ? WHERE id = ?", (title, note_id))
+
+    def set_always_on_top(self, note_id: int, state: int):
+        """
+        Set the always_on_top flag for a specific note.
+
+        Args:
+            note_id (int): Note ID.
+            state (int): 1 for pinned (top), 0 for normal.
+        """
+        with self.conn:
+            self.conn.execute("UPDATE notes SET always_on_top = ? WHERE id = ?", (state, note_id))

@@ -1,634 +1,522 @@
-from config import AUTOSAVE_INTERVAL_MS, COLOR_MAP, get_app_paths
-from notes_db import NotesDB
-from PyQt6 import QtCore, QtGui, QtWidgets
-from resources.ui_py.stickywindow import Ui_StickyWindow
-paths = get_app_paths()
-UI_PATH = paths["UI_DIR"]
+import gi
+import json
+from gi.repository import Gtk, Gdk, GLib, GObject, Pango, PangoCairo
+from pygments.lexers import css
+
+gi.require_version('Gtk', '4.0')
+gi.require_version('Adw', '1')
+
+STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
+TEXT_COLORS = [
+    '#000000', '#424242', '#D32F2F', '#C2185B',
+    '#7B1FA2', '#303F9F', '#1976D2', '#0288D1',
+    '#0097A7', '#00796B', '#388E3C', '#689F38',
+    '#AFB42B', '#FBC02D', '#FFA000', '#E64A19'
+]
+FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 24, 32, 48, 72]
+ALLOWED_TAGS = {"bold", "italic", "underline", "strikethrough"}
 
 
-class StickyWindow(QtWidgets.QWidget):
-    """
-    A sticky note window with rich text editing, formatting, autosave, drag & resize,
-    custom context menu, and persistent database storage.
+class StickyWindow(Gtk.Window):
+    def __init__(self, db, note_id=None, main_window=None):
+        super().__init__(decorated=False, default_width=300, default_height=380)
+        self.add_css_class("sticky-window")
 
-    Signals:
-        closed (int): Emitted when the sticky note is closed with its note ID.
-        textChanged (int, str): Emitted when note content changes (ID, content).
-        colorChanged (int, str): Emitted when background color changes (ID, hex color).
-        newNoteRequested (): Emitted when the user clicks the add button to create a new note.
-    """
-
-    closed = QtCore.pyqtSignal(int)
-    textChanged = QtCore.pyqtSignal(int, str)
-    colorChanged = QtCore.pyqtSignal(int, str)
-    newNoteRequested = QtCore.pyqtSignal()  # Signal for "➕" button
-
-    def __init__(self, db: NotesDB, note_id=None, always_on_top=False, main_window=None):
-        """
-        Initialize the sticky note window.
-
-        Args:
-            db (NotesDB): Database instance for storing and retrieving note data.
-            note_id (int, optional): ID of the note. If None, a new note will be created.
-            always_on_top (bool, optional): Whether the sticky is always on top.
-            main_window (QWidget, optional): Reference to main window for creating new notes.
-        """
-        super().__init__()
         self.db = db
         self.note_id = note_id
-        self._always_on_top = bool(always_on_top)
         self.main_window = main_window
-
-        self.ui = Ui_StickyWindow()
-        self.ui.setupUi(self)
-        self.text_edit = self.ui.text_edit
-        self.btn_close = self.ui.btn_close
-        self.btn_add = self.ui.btn_add
-        self.btn_pin = self.ui.btn_pin
-        self.header_bar_panel = self.ui.header_bar_panel
-
-        self.size_grip = QtWidgets.QSizeGrip(self)
-        self.size_grip.setFixedSize(15, 15)
-
-        flags = QtCore.Qt.WindowType.Window | QtCore.Qt.WindowType.FramelessWindowHint
-        if self._always_on_top:
-            flags |= QtCore.Qt.WindowType.WindowStaysOnTopHint
-        self.setWindowFlags(flags)
-
-        self._last_geo = None
-        self._last_content = None
-        self._last_color = None
-        self._last_always_on_top = 0
         self._loading = True
-        self._drag_pos = None
-        self.margin = 15
-        self.color = "#FFF59D"
+        self.current_color = "#FFF59D"
+        self.default_font_size = 12
+        self.is_pinned = False
 
-        # Keyboard shortcuts for formatting
-        shortcuts = {
-            "Ctrl+B": self.toggle_bold,
-            "Ctrl+I": self.toggle_italic,
-            "Ctrl+Shift+S": self.toggle_strike,
-            "Ctrl+Shift+L": self.toggle_list,
-        }
-        for key, slot in shortcuts.items():
-            QtGui.QShortcut(QtGui.QKeySequence(key), self, slot)
-
-        self.text_edit.customContextMenuRequested.connect(self.show_context_menu)
-        self.text_edit.textChanged.connect(self.on_text_changed)
-        self.text_edit.cursorPositionChanged.connect(self.update_format_buttons)
-        self.ui.btn_color.clicked.connect(self.show_text_color_menu)
-        self.btn_close.clicked.connect(self.close)
-        self.btn_close.setText("✖")
-        self.btn_add.clicked.connect(self.on_add_clicked)
-        self.btn_add.setText("➕")
-        self.btn_pin.clicked.connect(self.on_pin_clicked)
-
-        self.ui.btn_bold.clicked.connect(self.toggle_bold)
-        self.ui.btn_italic.clicked.connect(self.toggle_italic)
-        self.ui.btn_underline.clicked.connect(self.toggle_underline)
-        self.ui.btn_strike.clicked.connect(self.toggle_strike)
-        self.ui.btn_list.clicked.connect(self.toggle_list)
-        self.ui.combo_font_size.currentTextChanged.connect(self.change_font_size)
-
-        if hasattr(self.ui, 'btn_text_color'):
-            self.ui.btn_text_color.clicked.connect(self.show_text_color_menu)
-
-
-        self.update_pin_button()
-
-        self.autosave_timer = QtCore.QTimer(self)
-        self.autosave_timer.setInterval(AUTOSAVE_INTERVAL_MS)
-        self.autosave_timer.timeout.connect(self.save)
-        self.autosave_timer.start()
-
-        if hasattr(self.ui, "color_menu"):
-            for action in self.ui.color_menu.actions():
-                if isinstance(action, QtWidgets.QWidgetAction):
-                    palette_widget = action.defaultWidget()
-                    if palette_widget:
-                        for btn in palette_widget.findChildren(QtWidgets.QPushButton):
-                            color = btn.property("color_val")
-                            if color:
-                                btn.clicked.connect(lambda checked, c=color: [
-                                    self.change_text_color(c),
-                                    self.ui.color_menu.close()
-                                ])
-    def update_pin_button(self):
-        """
-        Update the display of the pin button according to always-on-top state.
-        """
-        if self._always_on_top:
-            self.btn_pin.setText("📍")
-        else:
-            self.btn_pin.setText("📌")
-
-    def on_add_clicked(self):
-        """
-        Create a new sticky note via the main window.
-        """
-        if self.main_window and hasattr(self.main_window, "create_note"):
-            self.main_window.create_note()
-
-    def on_pin_clicked(self):
-        """
-        Toggle pinning the sticky note on top.
-        """
-        self.set_always_on_top(not self._always_on_top)
-        self.update_pin_button()
-
-    def set_always_on_top(self, flag: bool):
-        """
-        Set the sticky note to always-on-top or normal mode.
-
-        Args:
-            flag (bool): True to keep the sticky on top, False to remove.
-        """
-        self._always_on_top = bool(flag)
-        current = int(self.windowFlags())
-        top_hint = int(QtCore.Qt.WindowType.WindowStaysOnTopHint)
-        if self._always_on_top:
-            new_flags = current | top_hint
-        else:
-            new_flags = current & ~top_hint
-        self.setWindowFlags(QtCore.Qt.WindowType(new_flags))
-        self.show()
-        self.raise_()
-        self.activateWindow()
-
-    def on_text_changed(self):
-        """
-        Handle text changes: emit textChanged signal and save to database if not loading.
-        """
-        if not self._loading and self.note_id:
-            content = self.text_edit.toPlainText()
-            self.textChanged.emit(self.note_id, content)
-            self.save()
-
-    def show_text_color_menu(self):
-        if hasattr(self.ui, 'color_menu'):
-            pos = self.ui.btn_color.mapToGlobal(QtCore.QPoint(0, self.ui.btn_color.height()))
-            self.ui.color_menu.exec(pos)
-
-    def update_format_buttons(self):
-        cursor = self.text_edit.textCursor()
-        fmt = cursor.charFormat()
-
-        self.ui.btn_bold.blockSignals(True)
-        self.ui.btn_italic.blockSignals(True)
-        self.ui.btn_underline.blockSignals(True)
-        self.ui.btn_strike.blockSignals(True)
-        self.ui.combo_font_size.blockSignals(True)
-
-        self.ui.btn_bold.setChecked(fmt.fontWeight() >= QtGui.QFont.Weight.Bold)
-        self.ui.btn_italic.setChecked(fmt.fontItalic())
-        self.ui.btn_underline.setChecked(fmt.fontUnderline())
-        self.ui.btn_strike.setChecked(fmt.fontStrikeOut())
-
-        current_size = int(fmt.fontPointSize()) if fmt.fontPointSize() > 0 else 12
-        index = self.ui.combo_font_size.findText(f"Font: {current_size}")
-        if index != -1:
-            self.ui.combo_font_size.setCurrentIndex(index)
-
-        self.ui.btn_bold.blockSignals(False)
-        self.ui.btn_italic.blockSignals(False)
-        self.ui.btn_underline.blockSignals(False)
-        self.ui.btn_strike.blockSignals(False)
-        self.ui.combo_font_size.blockSignals(False)
-
-        color = fmt.foreground().color()
-        if hasattr(self.ui, 'color_indicator'):
-            self.ui.color_indicator.setStyleSheet(
-                f"background-color: {color.name()}; border-radius: 1px;"
-            )
-
-    def _create_mini_palette(self, parent_menu):
-        """
-                Create a compact horizontal layout with 6 primary colors for the context menu.
-
-                Args:
-                    parent_menu (QMenu): The parent menu to be closed when a color is selected.
-
-                Returns:
-                    QWidget: A widget containing the color palette grid.
-                """
-        palette_widget = QtWidgets.QWidget()
-        layout = QtWidgets.QGridLayout(palette_widget)
-        layout.setContentsMargins(10, 4, 10, 4)
-        layout.setSpacing(6)
-
-        main_colors = [
-            "#000000", "#FF0000", "#0000FF",
-            "#008000", "#FFD700", "#808080"
-        ]
-
-        for i, color_hex in enumerate(main_colors):
-            btn = QtWidgets.QPushButton()
-            btn.setFixedSize(18, 18)
-            btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
-            btn.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {color_hex};
-                    border: 1px solid #CCC;
+        self.window_css_provider = Gtk.CssProvider()
+        css_data = """
+                .format-btn-tiny {
+                    padding: 0px; margin: 0px;
+                    min-height: 20px; min-width: 20px;
                     border-radius: 2px;
-                }}
-                QPushButton:hover {{
-                    border: 1px solid #666;
-                }}
-            """)
+                    font-size: 10px;
+                    background: transparent;
+                    color: rgba(0,0,0,0.7);
+                    border: none;
+                }
+                .format-btn-tiny:hover { background: rgba(0,0,0,0.05); color: black; }
 
-            btn.clicked.connect(lambda checked, c=color_hex: [
-                self.change_text_color(c),
-                parent_menu.close()
-            ])
-            layout.addWidget(btn, 0, i)
+                .compact-format-bar { padding: 1px; background: rgba(255,255,255,0.4); }
 
-        return palette_widget
+                .header-btn-subtle {
+                    opacity: 0; transition: opacity 0.2s ease;
+                    padding: 0 4px; margin: 0 1px;
+                    min-height: 20px; min-width: 20px;
+                    background: transparent; border: none; color: rgba(0,0,0,0.5);
+                }
+                .sticky-window:hover .header-btn-subtle { opacity: 1; }
+                .header-btn-subtle:hover { background: rgba(0,0,0,0.1); color: black; }
 
-    def show_context_menu(self, pos):
-        """
-        Show a custom context menu with editing, note actions and a graphical palette.
-        """
-        menu = QtWidgets.QMenu(self)
+                .menu-box { padding: 10px; }
+                .menu-label { font-size: 10px; font-weight: bold; color: grey; margin-bottom: 5px; }
+                .menu-row-btn { background: transparent; border: none; padding: 5px; border-radius: 4px; }
+                .menu-row-btn:hover { background: rgba(0,0,0,0.05); }
 
-        copy_action = menu.addAction("📋 Copy (Ctrl+C)")
-        paste_action = menu.addAction("📥 Paste (Ctrl+V)")
-        select_all_action = menu.addAction("🔲 Select All (Ctrl+A)")
-        menu.addSeparator()
-
-        bold_action = menu.addAction("Bold (Ctrl+B)")
-        italic_action = menu.addAction("Italic (Ctrl+I)")
-        strike_action = menu.addAction("Strike (Shift+S)")
-        list_action = menu.addAction("Bullet List (Shift+L)")
-
-        menu.addSection("📝 Text Color")
-        palette_action = QtWidgets.QWidgetAction(menu)
-        palette_action.setDefaultWidget(self._create_mini_palette(menu))
-        menu.addAction(palette_action)
-
-        menu.addSeparator()
-
-        size_menu = menu.addMenu("📏 Font Size")
-        sizes = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32]
-
-        current_size = self.text_edit.fontPointSize()
-
-        for size in sizes:
-            action = size_menu.addAction(f"{size} pt")
-            action.setCheckable(True)
-            if int(current_size) == size:
-                action.setChecked(True)
-            action.triggered.connect(lambda checked, s=size: self.change_font_size(s))
-
-        menu.addSeparator()
-
-        color_menu = menu.addMenu("🎨 Background Color")
-        for name, color in COLOR_MAP.items():
-            action = color_menu.addAction(name)
-            action.triggered.connect(lambda checked, c=color: self.change_color(c))
-
-        menu.addSeparator()
-        top_action = menu.addAction(
-            "📍 Unpin from Top" if self._always_on_top else "📌 Pin to Top"
-        )
-        menu.addSeparator()
-        close_action = menu.addAction("❌ Close Sticker")
-
-        action = menu.exec(self.text_edit.mapToGlobal(pos))
-
-        if action == copy_action:
-            self.text_edit.copy()
-        elif action == paste_action:
-            self.text_edit.paste()
-        elif action == select_all_action:
-            self.text_edit.selectAll()
-        elif action == bold_action:
-            self.toggle_bold()
-        elif action == italic_action:
-            self.toggle_italic()
-        elif action == strike_action:
-            self.toggle_strike()
-        elif action == list_action:
-            self.toggle_list()
-        elif action == top_action:
-            self.set_always_on_top(not self._always_on_top)
-        elif action == close_action:
-            self.close()
-
-    def change_color(self, color: str):
-        """
-        Change the background color of the sticky note.
-
-        Args:
-            color (str): New hex color code.
-        """
-        self.color = color
-        self.text_edit.setStyleSheet(
-            f"background-color: {color}; border: none; font-size: 12pt;"
+                /* СТИЛЬ ДЛЯ СООБЩЕНИЯ (TOAST) */
+                .toast-msg {
+                    background-color: #262626; /* Темно-серый фон */
+                    color: #ffffff;            /* Белый текст */
+                    border-radius: 20px;       /* Округлые края (таблетка) */
+                    padding: 8px 16px;         /* Отступы внутри */
+                    margin: 20px;              /* Отступы от краев */
+                    font-size: 13px;
+                    font-weight: bold;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3); /* Тень для читаемости */
+                }
+                """
+        self.window_css_provider.load_from_data(css_data.encode())
+        self.get_style_context().add_provider(
+            self.window_css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_USER
         )
 
-        header_color = self.darken_color(color, 0.06)
-        self.header_bar_panel.setStyleSheet(f"background-color: {header_color};")
+        self.overlay = Gtk.Overlay()
+        self.set_child(self.overlay)
 
-        self.update()
+        self.main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.main_box.add_css_class("sticky-main-area")
+        self.overlay.set_child(self.main_box)
+
+        self.setup_header()
+        self.setup_text_area()
+        self.setup_tags()
+        self.setup_formatting_bar()
+        self.setup_resize_handle()
+
+        self.load_from_db()
+        self._loading = False
+
+        GLib.timeout_add(2000, self.save)
+        self.connect("close-request", self._on_close_requested)
+        self.connect("map", self._on_map)
+        self.buffer.connect("notify::cursor-position", self.on_cursor_moved)
+
+    def show_toast(self, message):
+        """Показывает красивое сообщение по центру окна"""
+        lbl = Gtk.Label(label=message)
+        lbl.add_css_class("toast-msg")
+
+        lbl.set_halign(Gtk.Align.CENTER)
+        lbl.set_valign(Gtk.Align.CENTER)
+
+        self.overlay.add_overlay(lbl)
+
+        def _remove():
+            self.overlay.remove_overlay(lbl)
+            return False
+
+        GLib.timeout_add(2000, _remove)
+    def set_keep_above(self, state: bool):
+        self.is_pinned = state
+
+
+    def _on_map(self, widget):
+        self.set_keep_above(self.is_pinned)
+
+    def setup_header(self):
+        self.header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        self.header_box.set_size_request(-1, 24)
+        self.header_box.add_css_class("compact-header")
+
+        btn_add = Gtk.Button(label="+", has_frame=False)
+        btn_add.add_css_class("header-btn-subtle")
+        btn_add.connect("clicked", self._on_add_clicked)
+        self.header_box.append(btn_add)
+
+        spacer = Gtk.Box(hexpand=True)
+        spacer.set_can_target(True)
+        header_drag = Gtk.GestureDrag()
+        header_drag.connect("drag-begin", self._on_header_drag_begin)
+        spacer.add_controller(header_drag)
+        self.header_box.append(spacer)
+
+        btn_menu = Gtk.MenuButton(has_frame=False)
+        btn_menu.set_icon_name("open-menu-symbolic")
+        btn_menu.add_css_class("header-btn-subtle")
+        self.setup_main_menu(btn_menu)
+        self.header_box.append(btn_menu)
+
+        btn_close = Gtk.Button(label="✕", has_frame=False)
+        btn_close.add_css_class("header-btn-subtle")
+        btn_close.connect("clicked", self._on_close_clicked)
+        self.header_box.append(btn_close)
+
+        self.main_box.append(self.header_box)
+
+    def setup_main_menu(self, btn):
+        popover = Gtk.Popover()
+        main_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        main_vbox.add_css_class("menu-box")
+
+        lbl_color = Gtk.Label(label="Color", xalign=0)
+        lbl_color.add_css_class("menu-label")
+        main_vbox.append(lbl_color)
+
+        grid = Gtk.Grid(column_spacing=6, row_spacing=6)
+        for i, color in enumerate(STICKY_COLORS):
+            b = Gtk.Button()
+            b.set_size_request(26, 26)
+            cp = Gtk.CssProvider()
+            cp.load_from_data(
+                f"button {{ background-color: {color}; border-radius: 13px; border: 1px solid rgba(0,0,0,0.1); padding: 0; }}".encode())
+            b.get_style_context().add_provider(cp, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            b.connect("clicked", lambda _, c=color: (self.apply_color(c), popover.popdown()))
+            grid.attach(b, i % 4, i // 4, 1, 1)
+        main_vbox.append(grid)
+
+        main_vbox.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
+
+        self.box_pin_content = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.img_pin = Gtk.Image()
+        self.lbl_pin = Gtk.Label()
+        self.box_pin_content.append(self.img_pin)
+        self.box_pin_content.append(self.lbl_pin)
+
+        btn_pin = Gtk.Button(has_frame=False)
+        btn_pin.set_child(self.box_pin_content)
+        btn_pin.add_css_class("menu-row-btn")
+        self.box_pin_content.set_halign(Gtk.Align.START)
+
+        btn_pin.connect("clicked", lambda _: (self.toggle_pin(), popover.popdown()))
+        main_vbox.append(btn_pin)
+
+        box_print = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        box_print.append(Gtk.Image.new_from_icon_name("printer-symbolic"))
+        box_print.append(Gtk.Label(label="Print note"))
+        box_print.set_halign(Gtk.Align.START)
+
+        btn_print = Gtk.Button(has_frame=False)
+        btn_print.set_child(box_print)
+        btn_print.add_css_class("menu-row-btn")
+        btn_print.connect("clicked", lambda _: (self.on_print_clicked(None), popover.popdown()))
+        main_vbox.append(btn_print)
+
+        popover.set_child(main_vbox)
+        btn.set_popover(popover)
+
+        self.update_pin_ui()
+
+    def update_pin_ui(self):
+        if self.is_pinned:
+            self.img_pin.set_from_icon_name("view-pin-remove-symbolic")
+            self.lbl_pin.set_text("Unpin note")
+        else:
+            self.img_pin.set_from_icon_name("view-pin-symbolic")
+            self.lbl_pin.set_text("Pin note")
+
+    def toggle_pin(self):
+        """Переключает режим и показывает уведомление"""
+        self.is_pinned = not self.is_pinned
+
+        self.update_pin_ui()
 
         if not self._loading:
-            self.save()
-            if self.note_id:
-                self.colorChanged.emit(self.note_id, color)
+            try:
+                self.db.set_always_on_top(self.note_id, 1 if self.is_pinned else 0)
+            except Exception:
+                pass
 
-    def change_font_size(self):
-        size_val = self.ui.combo_font_size.currentData()
+        if self.is_pinned:
+            self.show_toast("Wayland doesn't support pinning")
 
-        if size_val is None:
-            text = self.ui.combo_font_size.currentText()
-            size_val = text.replace("Font: ", "").strip()
+    def setup_text_area(self):
+        self.text_view = Gtk.TextView(wrap_mode=Gtk.WrapMode.WORD_CHAR)
+        self.text_view.add_css_class("sticky-text-edit")
+        self.buffer = self.text_view.get_buffer()
 
+        self.buffer.connect("changed", self._on_buffer_changed)
+
+        self.scrolled = Gtk.ScrolledWindow(child=self.text_view, vexpand=True)
+        self.main_box.append(self.scrolled)
+
+    def _on_buffer_changed(self, buffer):
+        """Вызывается при каждом нажатии клавиши"""
+        if self.main_window:
+            content = self._serialize_buffer()
+            self.main_window.update_card_text(self.note_id, content)
+
+    def _serialize_buffer(self):
+        """
+        Превращает содержимое буфера (текст + теги) в HEX-строку JSON.
+        Это копия логики сохранения, но без записи в БД.
+        """
+        import json
+        start_iter = self.buffer.get_start_iter()
+        end_iter = self.buffer.get_end_iter()
+
+        segments = []
+
+        while not start_iter.equal(end_iter):
+            next_iter = start_iter.copy()
+            if not next_iter.forward_to_tag_toggle(None):
+                next_iter = end_iter
+
+            text = self.buffer.get_text(start_iter, next_iter, True)
+
+            active_tags = []
+            tags = start_iter.get_tags()
+            for tag in tags:
+                active_tags.append(tag.get_property("name"))
+
+            if text:
+                segments.append({"text": text, "tags": active_tags})
+
+            start_iter = next_iter
+
+        if not segments:
+            segments = [{"text": "", "tags": []}]
+
+        json_str = json.dumps(segments)
+        return json_str.encode('utf-8').hex()
+
+    def setup_formatting_bar(self):
+        self.format_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        self.format_bar.add_css_class("compact-format-bar")
+
+        formats = [("<b>B</b>", "bold"), ("<i>I</i>", "italic"), ("<u>U</u>", "underline"),
+                   ("<s>S</s>", "strikethrough")]
+        for label, tag_name in formats:
+            btn = Gtk.Button(has_frame=False)
+            lbl = Gtk.Label(label=label, use_markup=True)
+            btn.set_child(lbl)
+            btn.add_css_class("format-btn-tiny")
+            btn.connect("clicked", lambda _, t=tag_name: self.apply_format(t))
+            self.format_bar.append(btn)
+
+        sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+        sep.set_margin_start(4);
+        sep.set_margin_end(4)
+        self.format_bar.append(sep)
+
+        btn_text_color = Gtk.MenuButton(has_frame=False)
+        btn_text_color.set_child(Gtk.Label(label='<span foreground="#444">A</span>', use_markup=True))
+        btn_text_color.add_css_class("format-btn-tiny")
+        self.setup_text_color_popover(btn_text_color)
+        self.format_bar.append(btn_text_color)
+
+        self.btn_font_size = Gtk.MenuButton(label=str(self.default_font_size), has_frame=False)
+        self.btn_font_size.add_css_class("format-btn-tiny")
+        self.setup_font_size_popover(self.btn_font_size)
+        self.format_bar.append(self.btn_font_size)
+
+        self.main_box.append(self.format_bar)
+
+    def on_cursor_moved(self, buffer, pspec):
+        cursor_iter = buffer.get_iter_at_mark(buffer.get_insert())
+        tags = cursor_iter.get_tags()
+        current_size = self.default_font_size
+        for tag in tags:
+            name = tag.get_property("name")
+            if name and name.startswith("font_size_"):
+                try:
+                    current_size = int(name.replace("font_size_", ""))
+                except ValueError:
+                    pass
+        self.btn_font_size.set_label(str(current_size))
+
+    def setup_tags(self):
+        self.tag_table = self.buffer.get_tag_table()
+        self.buffer.create_tag("bold", weight=Pango.Weight.BOLD)
+        self.buffer.create_tag("italic", style=Pango.Style.ITALIC)
+        self.buffer.create_tag("underline", underline=Pango.Underline.SINGLE)
+        self.buffer.create_tag("strikethrough", strikethrough=True)
+        for color in TEXT_COLORS: self.buffer.create_tag(f"text_color_{color}", foreground=color)
+        for size in FONT_SIZES: self.buffer.create_tag(f"font_size_{size}", size=size * Pango.SCALE)
+
+    def save(self):
+        if self._loading: return True
+        segments = []
+        iter_curr = self.buffer.get_start_iter()
+        iter_end = self.buffer.get_end_iter()
+        while not iter_curr.equal(iter_end):
+            iter_next = iter_curr.copy()
+            if not iter_next.forward_to_tag_toggle(None): iter_next = iter_end
+            text = self.buffer.get_text(iter_curr, iter_next, False)
+            if text:
+                tags = iter_curr.get_tags()
+                tag_names = [t.props.name for t in tags if t.props.name and (
+                            t.props.name in ALLOWED_TAGS or t.props.name.startswith(("text_color_", "font_size_")))]
+                segments.append({"text": text, "tags": tag_names})
+            iter_curr = iter_next
         try:
-            size = float(size_val)
-            fmt = QtGui.QTextCharFormat()
-            fmt.setFontPointSize(size)
-
-            cursor = self.text_edit.textCursor()
-            if cursor.hasSelection():
-                cursor.mergeCharFormat(fmt)
-                self.text_edit.setTextCursor(cursor)
-            else:
-                self.text_edit.mergeCurrentCharFormat(fmt)
-
-            self.text_edit.setFocus()
-        except (ValueError, TypeError):
+            json_str = json.dumps(segments)
+            hex_data = json_str.encode('utf-8').hex()
+            self.db.update(self.note_id, hex_data, 0, 0, self.get_width(), self.get_height(), self.current_color,
+                           1 if self.is_pinned else 0)
+        except Exception:
             pass
-
-    @staticmethod
-    def darken_color(hex_color: str, factor: float = 0.1) -> str:
-        """
-        Darken a color by a given factor.
-
-        Args:
-            hex_color (str): Original hex color code.
-            factor (float): Proportion to darken (0.1 = 10%).
-
-        Returns:
-            str: Darkened color hex code.
-        """
-        color = QtGui.QColor(hex_color)
-        h, s, v, a = color.getHsv()
-        v = max(0, int(v * (1 - factor)))
-        darker = QtGui.QColor()
-        darker.setHsv(h, s, v, a)
-        return darker.name()
-
-    def resizeEvent(self, event):
-        """
-        Handle resize events: adjust the size grip and save state.
-        """
-        self.size_grip.move(
-            self.width() - self.size_grip.width(),
-            self.height() - self.size_grip.height(),
-        )
-        super().resizeEvent(event)
-        if not self._loading:
-            self.save()
-
-    def _apply_format_and_reset_selection(self, fmt: QtGui.QTextCharFormat):
-        """
-        Apply the specified char format to the selection, clear the selection,
-        and move the cursor to the end of the formatted text.
-
-        Args:
-            fmt (QTextCharFormat): The format to apply to the current selection.
-        """
-        cursor = self.text_edit.textCursor()
-        if cursor.hasSelection():
-            end_pos = cursor.selectionEnd()
-            cursor.mergeCharFormat(fmt)
-            cursor.clearSelection()
-            cursor.setPosition(end_pos)
-            self.text_edit.setTextCursor(cursor)
-
-        self.text_edit.setFocus()
-
-    def toggle_bold(self):
-        """
-        Toggle bold formatting for the selected text and reset cursor position.
-        """
-        cursor = self.text_edit.textCursor()
-        fmt = QtGui.QTextCharFormat()
-        is_bold = cursor.charFormat().fontWeight() >= QtGui.QFont.Weight.Bold
-        fmt.setFontWeight(QtGui.QFont.Weight.Normal if is_bold else QtGui.QFont.Weight.Bold)
-
-        if cursor.hasSelection():
-            self._apply_format_and_reset_selection(fmt)
-        else:
-            self.text_edit.mergeCurrentCharFormat(fmt)
-        self.text_edit.setFocus()
-
-    def toggle_italic(self):
-        """
-        Toggle italic formatting for the selected text and reset cursor position.
-        """
-        cursor = self.text_edit.textCursor()
-        fmt = QtGui.QTextCharFormat()
-        fmt.setFontItalic(not cursor.charFormat().fontItalic())
-
-        if cursor.hasSelection():
-            self._apply_format_and_reset_selection(fmt)
-        else:
-            self.text_edit.mergeCurrentCharFormat(fmt)
-        self.text_edit.setFocus()
-
-    def toggle_underline(self):
-        """
-        Toggle underline formatting for the selected text and reset cursor position.
-        """
-        cursor = self.text_edit.textCursor()
-        fmt = QtGui.QTextCharFormat()
-        fmt.setFontUnderline(not cursor.charFormat().fontUnderline())
-
-        if cursor.hasSelection():
-            self._apply_format_and_reset_selection(fmt)
-        else:
-            self.text_edit.mergeCurrentCharFormat(fmt)
-        self.text_edit.setFocus()
-
-    def toggle_strike(self):
-        """
-        Toggle strikethrough formatting for the selected text and reset cursor position.
-        """
-        cursor = self.text_edit.textCursor()
-        fmt = QtGui.QTextCharFormat()
-        fmt.setFontStrikeOut(not cursor.charFormat().fontStrikeOut())
-
-        if cursor.hasSelection():
-            self._apply_format_and_reset_selection(fmt)
-        else:
-            self.text_edit.mergeCurrentCharFormat(fmt)
-        self.text_edit.setFocus()
-
-    def toggle_list(self):
-        """
-        Toggle bullet list formatting for the current paragraph.
-        """
-        cursor = self.text_edit.textCursor()
-        if cursor.currentList():
-            block_fmt = cursor.blockFormat()
-            block_fmt.setObjectIndex(-1)
-            cursor.setBlockFormat(block_fmt)
-        else:
-            cursor.createList(QtGui.QTextListFormat.Style.ListDisc)
-        self.text_edit.setFocus()
-
-    def change_text_color(self, hex_color: str):
-        """
-        Change the text color of the selection or set it for the next typed characters,
-        then return focus to the editor and close any open menus.
-        """
-        color = QtGui.QColor(hex_color)
-        fmt = QtGui.QTextCharFormat()
-        fmt.setForeground(color)
-
-        cursor = self.text_edit.textCursor()
-
-        if cursor.hasSelection():
-            self._apply_format_and_reset_selection(fmt)
-        else:
-            self.text_edit.setCurrentCharFormat(fmt)
-
-        self.text_edit.setFocus()
-
-        for widget in QtWidgets.QApplication.topLevelWidgets():
-            if isinstance(widget, QtWidgets.QMenu):
-                widget.close()
-
-    def moveEvent(self, event):
-        """
-        Save note position when moved.
-        """
-        super().moveEvent(event)
-        if not self._loading:
-            self.save()
-
-    def paintEvent(self, event):
-        """
-        Paint the sticky note background color and border.
-        """
-        painter = QtGui.QPainter(self)
-        painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, False)
-
-        painter.setBrush(QtGui.QColor(self.color))
-        painter.setPen(QtCore.Qt.PenStyle.NoPen)
-        painter.drawRect(self.rect())
-
-        pen = QtGui.QPen(QtGui.QColor(160, 160, 160, 60))  # серый с прозрачностью 60/255
-        pen.setWidth(1)
-        painter.setPen(pen)
-        painter.drawRect(self.rect().adjusted(0, 0, -1, -1))
-
-    def mousePressEvent(self, event):
-        """
-        Handle mouse press for moving the sticky note window.
-        Supports Wayland system move if available.
-        """
-        if event.button() == QtCore.Qt.MouseButton.LeftButton:
-            platform = QtWidgets.QApplication.platformName()
-            if platform == "wayland":
-                handle = self.windowHandle()
-                if handle:
-                    handle.startSystemMove()
-            else:
-                self._drag_pos = (
-                    event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-                )
-            event.accept()
-
-    def mouseMoveEvent(self, event):
-        """
-        Handle mouse dragging to move the sticky window.
-        """
-        if event.buttons() == QtCore.Qt.MouseButton.LeftButton and self._drag_pos:
-            if QtWidgets.QApplication.platformName() in ["xcb", "windows"]:
-                self.move(event.globalPosition().toPoint() - self._drag_pos)
-            event.accept()
-
-    def mouseReleaseEvent(self, event):
-        """
-        Save window position when mouse is released after dragging.
-        """
-        if event.button() == QtCore.Qt.MouseButton.LeftButton:
-            if self._drag_pos:
-                self.save()
-            self._drag_pos = None
-        super().mouseReleaseEvent(event)
+        return True
 
     def load_from_db(self):
-        """
-        Load note content, geometry, background color, and top state from the database.
-        """
         if self.note_id:
             row = self.db.get(self.note_id)
             if row:
-                self.text_edit.setHtml(row["content"])
-                self.color = row["color"] or self.color
-                self.change_color(self.color)
-                self.setGeometry(
-                    row["x"] or 300,
-                    row["y"] or 200,
-                    row["w"] or 260,
-                    row["h"] or 200,
-                )
-                self.set_always_on_top(bool(row["always_on_top"] or 0))
-                self.update_pin_button()
+                self._loading = True
+                content = row["content"] or ""
+                self.buffer.set_text("")
+                try:
+                    json_bytes = bytes.fromhex(content)
+                    segments = json.loads(json_bytes.decode('utf-8'))
+                    iter_pos = self.buffer.get_start_iter()
+                    for seg in segments:
+                        text = seg.get("text", "")
+                        tags = seg.get("tags", [])
+                        if tags:
+                            self.buffer.insert_with_tags_by_name(iter_pos, text, *tags)
+                        else:
+                            self.buffer.insert(iter_pos, text)
+                except Exception:
+                    self.buffer.set_text(content.replace("<br>", "\n"))
 
-    def showEvent(self, event):
-        """
-        Handle widget show: load from database and mark as open.
-        """
-        super().showEvent(event)
-        self._loading = True
-        self.load_from_db()
-        if self.note_id:
-            self.db.set_open_state(self.note_id, 1)
-        self._loading = False
+                self.apply_color(row["color"] or "#FFF59D")
 
-    def save(self):
-        """
-        Save current state (content, geometry, color, top flag) to the database.
-        Avoids saving if nothing changed.
-        """
-        x, y, w, h = self.x(), self.y(), self.width(), self.height()
-        content = self.text_edit.toHtml()
-        always_on_top_int = 1 if self._always_on_top else 0
-        if (
-            self._last_geo == (x, y, w, h)
-            and self._last_content == content
-            and self._last_color == self.color
-            and self._last_always_on_top == always_on_top_int
-        ):
-            return
-        self._last_geo = (x, y, w, h)
-        self._last_content = content
-        self._last_color = self.color
-        self._last_always_on_top = always_on_top_int
-        if self.note_id:
-            self.db.update(
-                self.note_id, content, x, y, w, h, self.color, always_on_top_int
-            )
-        else:
-            self.note_id = self.db.add(
-                content, x, y, w, h, self.color, always_on_top_int
-            )
+                pinned = row["always_on_top"]
+                self.is_pinned = bool(pinned)
+                self.update_pin_ui()
 
-    def closeEvent(self, event):
-        """
-        Save note state and mark as closed in the database when the window is closed.
+                self._loading = False
 
-        Args:
-            event (QCloseEvent): Close event triggered by the window.
+    def setup_text_color_popover(self, btn):
+        popover = Gtk.Popover()
+        grid = Gtk.Grid(column_spacing=2, row_spacing=2)
+        grid.set_margin_top(4);
+        grid.set_margin_bottom(4);
+        grid.set_margin_start(4);
+        grid.set_margin_end(4)
+        for i, color in enumerate(TEXT_COLORS):
+            b = Gtk.Button()
+            b.set_size_request(20, 20)
+            cp = Gtk.CssProvider()
+            cp.load_from_data(
+                f"button {{ background-color: {color}; border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); min-height: 20px; min-width: 20px; padding: 0; }}".encode())
+            b.get_style_context().add_provider(cp, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            b.connect("clicked", lambda _, c=color: (self.apply_text_color(c), popover.popdown()))
+            grid.attach(b, i % 4, i // 4, 1, 1)
+        popover.set_child(grid)
+        btn.set_popover(popover)
+
+    def apply_text_color(self, hex_color):
+        res = self.buffer.get_selection_bounds()
+        if res:
+            start, end = res
+            for color in TEXT_COLORS: self.buffer.remove_tag_by_name(f"text_color_{color}", start, end)
+            self.buffer.apply_tag_by_name(f"text_color_{hex_color}", start, end)
+        self.text_view.grab_focus()
+
+    def apply_font_size(self, size):
+        res = self.buffer.get_selection_bounds()
+        if res:
+            start, end = res
+            for s in FONT_SIZES: self.buffer.remove_tag_by_name(f"font_size_{s}", start, end)
+            self.buffer.apply_tag_by_name(f"font_size_{size}", start, end)
+        self.btn_font_size.set_label(str(size))
+        self.text_view.grab_focus()
+
+    def setup_font_size_popover(self, btn):
+        popover = Gtk.Popover()
+        scrolled = Gtk.ScrolledWindow(max_content_height=200, propagate_natural_height=True)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        for size in FONT_SIZES:
+            b = Gtk.Button(label=f"{size}", has_frame=False)
+            b.add_css_class("format-btn-tiny")
+            b.connect("clicked", lambda _, s=size: (self.apply_font_size(s), popover.popdown()))
+            vbox.append(b)
+        scrolled.set_child(vbox)
+        popover.set_child(scrolled)
+        btn.set_popover(popover)
+
+    def apply_format(self, tag_name):
+        res = self.buffer.get_selection_bounds()
+        if res:
+            start, end = res
+            tag = self.tag_table.lookup(tag_name)
+            if start.has_tag(tag):
+                self.buffer.remove_tag(tag, start, end)
+            else:
+                self.buffer.apply_tag(tag, start, end)
+        self.text_view.grab_focus()
+
+    def apply_color(self, hex_color):
+        self.current_color = hex_color
+
+        css = f"""
+            window.sticky-window {{ 
+                background-color: {hex_color}; 
+                border-radius: 12px; 
+                border: 1px solid rgba(0,0,0,0.1); 
+            }}
+            .sticky-text-edit, 
+            .sticky-text-edit text, 
+            textview, 
+            text {{ 
+                background-color: transparent; 
+                background-image: none; 
+                color: #1a1a1a; 
+            }}
+            scrolledwindow {{
+                background-color: transparent;
+                border: none;
+            }}
+            .sticky-main-area {{ 
+                background-color: transparent; 
+                margin: 0; 
+            }}
         """
-        self.save()
-        if self.note_id:
-            self.db.set_open_state(self.note_id, 0)
-            self.closed.emit(self.note_id)
-        event.ignore()
-        self.hide()
+
+        self.window_css_provider.load_from_data(css.encode('utf-8'))
+
+        if self.main_window:
+            self.main_window.update_card_color_live(self.note_id, hex_color)
+
+    def setup_resize_handle(self):
+        self.resize_handle = Gtk.Box()
+        self.resize_handle.set_size_request(15, 15)
+        self.resize_handle.set_halign(Gtk.Align.END);
+        self.resize_handle.set_valign(Gtk.Align.END)
+        self.resize_handle.set_cursor(Gdk.Cursor.new_from_name("se-resize", None))
+        resize_drag = Gtk.GestureDrag()
+        resize_drag.connect("drag-begin", self._on_resize_drag_begin)
+        self.resize_handle.add_controller(resize_drag)
+        self.overlay.add_overlay(self.resize_handle)
+
+    def _on_header_drag_begin(self, gesture, x, y):
+        surface = self.get_native().get_surface()
+        if surface: surface.begin_move(gesture.get_device(), Gdk.BUTTON_PRIMARY, x, y, Gdk.CURRENT_TIME)
+
+    def _on_resize_drag_begin(self, gesture, x, y):
+        surface = self.get_native().get_surface()
+        if surface: surface.begin_resize(Gdk.SurfaceEdge.SOUTH_EAST, gesture.get_device(), Gdk.BUTTON_PRIMARY, x, y,
+                                         Gdk.CURRENT_TIME)
+
+    def _on_add_clicked(self, button):
+        if self.main_window: self.main_window.create_note()
+
+    def _on_close_clicked(self, button):
+        self.close()
+
+    def _on_close_requested(self, window):
+        if self.main_window and self.note_id in self.main_window.stickies:
+            del self.main_window.stickies[self.note_id]
+        return False
+
+    def on_print_clicked(self, _):
+        print_op = Gtk.PrintOperation()
+        print_op.connect("draw-page", self._draw_page)
+        print_op.set_n_pages(1)
+        print_op.run(Gtk.PrintOperationAction.PRINT_DIALOG, self)
+
+    def _draw_page(self, operation, context, page_nr):
+        cr = context.get_cairo_context()
+        layout = context.create_pango_layout()
+        start, end = self.buffer.get_bounds()
+        text = self.buffer.get_text(start, end, False)
+        layout.set_text(text, -1)
+        layout.set_width(int(context.get_width() * Pango.SCALE))
+        PangoCairo.show_layout(cr, layout)

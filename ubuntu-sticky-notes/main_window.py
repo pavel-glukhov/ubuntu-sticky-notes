@@ -1,477 +1,309 @@
-import os
-
-from config import COLOR_MAP, get_app_paths
-from notes_db import NotesDB
-from PyQt6 import QtCore, QtGui, QtWidgets
+import re
+import json
+import html as html_lib
+from gi.repository import Gtk, Adw, Gio, GObject, GLib, Pango
 from sticky_window import StickyWindow
-from trash_window import TrashWindow
-from resources.ui_py.mainwindow import Ui_MainWindow
-paths = get_app_paths()
-UI_PATH = paths["UI_DIR"]
-ICONS_PATH = paths["ICONS_DIR"]
+from datetime import datetime
+
+STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
 
 
-class NoFocusDelegate(QtWidgets.QStyledItemDelegate):
-    """QStyledItemDelegate that prevents focus rectangle from appearing on QListWidget items."""
+class NoteCard(Gtk.Box):
+    def __init__(self, note, db):
+        super().__init__(orientation=Gtk.Orientation.VERTICAL)
+        self.note_id = note["id"]
 
-    def paint(self, painter, option, index):
-        """Paints the item without focus rectangle.
+        self.set_margin_top(0)
+        self.set_margin_bottom(0)
+        self.set_margin_start(0)
+        self.set_margin_end(0)
 
-        Args:
-            painter (QtGui.QPainter): Painter used to draw the item.
-            option (QtWidgets.QStyleOptionViewItem): Style options for the item.
-            index (QtCore.QModelIndex): Index of the item.
+        self.set_hexpand(True)
+        self.set_vexpand(False)
+
+        self.card_canvas = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.card_canvas.add_css_class("sticky-paper-card")
+
+        self.card_canvas.set_size_request(-1, 50)
+        self.card_canvas.set_overflow(Gtk.Overflow.HIDDEN)
+        self.append(self.card_canvas)
+
+
+        markup_text = self._generate_markup(note["content"])
+
+        self.label = Gtk.Label()
+        self.label.set_use_markup(True)
+        self.label.set_markup(markup_text)
+
+        self.label.set_wrap(True)
+        self.label.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+        self.label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.label.set_lines(5)  # Ограничение в 5 строк
+
+        self.label.set_xalign(0)  # Текст слева
+        self.label.set_yalign(0)  # Текст сверху
+        self.label.set_valign(Gtk.Align.START)
+
+        self.label.set_margin_top(12)
+        self.label.set_margin_bottom(12)
+        self.label.set_margin_start(15)
+        self.label.set_margin_end(15)
+
+        self.card_canvas.append(self.label)
+
+        self.update_color(note["color"])
+        self.setup_gestures()
+
+    def _generate_markup(self, raw_content):
+        if not raw_content: return ""
+        try:
+            json_bytes = bytes.fromhex(raw_content)
+            segments = json.loads(json_bytes.decode('utf-8'))
+            full_markup = "";
+            line_count = 0
+            for seg in segments:
+                text = seg.get("text", "")
+                lines_in_seg = text.split('\n')
+                if line_count >= 5: break
+                if line_count + len(lines_in_seg) - 1 >= 5:
+                    allowed = 5 - line_count
+                    text = "\n".join(lines_in_seg[:allowed])
+                    line_count = 5
+                else:
+                    line_count += len(lines_in_seg) - 1
+
+                safe_text = html_lib.escape(text)
+                tags = seg.get("tags", [])
+                st, et = "", ""
+                for tag in tags:
+                    if tag == "bold":
+                        st += "<b>"; et = "</b>" + et
+                    elif tag == "italic":
+                        st += "<i>"; et = "</i>" + et
+                    elif tag == "underline":
+                        st += "<u>"; et = "</u>" + et
+                    elif tag == "strikethrough":
+                        st += "<s>"; et = "</s>" + et
+                    elif tag.startswith("text_color_"):
+                        c = tag.replace("text_color_", "")
+                        st += f'<span foreground="{c}">';
+                        et = "</span>" + et
+                full_markup += f"{st}{safe_text}{et}"
+            return full_markup.rstrip()
+        except:
+            l = str(raw_content).split('\n')
+            return html_lib.escape("\n".join(l[:5])).rstrip()
+
+    def update_color(self, hex_color):
+        if not hex_color: hex_color = "#FFF59D"
+        provider = Gtk.CssProvider()
+        css = f"""
+        .sticky-paper-card {{ 
+            background-color: {hex_color}; 
+            border-radius: 0px; /* В списке обычно прямые углы или совсем легкие */
+            min-height: 50px;
+            /* Никаких ограничений по ширине */
+        }}
         """
-        option.state &= ~QtWidgets.QStyle.StateFlag.State_Selected
-        super().paint(painter, option, index)
+        provider.load_from_data(css.encode())
+        self.card_canvas.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+    def setup_gestures(self):
+        click = Gtk.GestureClick()
+        click.connect("released", lambda *args: self.get_native().open_note(self.note_id))
+        self.add_controller(click)
+        menu = Gtk.GestureClick(button=3)
+        menu.connect("pressed",
+                     lambda g, n, x, y: self.get_native().create_combined_context_menu(self.note_id, self.card_canvas))
+        self.add_controller(menu)
 
 
-class ReorderableListWidget(QtWidgets.QListWidget):
-    """QListWidget subclass that supports reordering items.
-
-    Signals:
-        orderChanged: Emitted when the order of items changes.
-    """
-    orderChanged = QtCore.pyqtSignal()
-
-
-class MainWindow(QtWidgets.QMainWindow):
-    """Main window for managing sticky notes.
-
-    Attributes:
-        db (NotesDB): Database interface for notes.
-        stickies (dict): Mapping from note IDs to StickyWindow instances.
-        trash_window (TrashWindow): Window for managing deleted notes.
-    """
-
-    def __init__(self):
-        """Initializes the main window, loads UI, sets up signals and keyboard shortcuts."""
-        super().__init__()
-        self.db = NotesDB()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.list_widget = self.ui.list_widget
-        self.search_bar = self.ui.search_bar
-        self.new_action = self.ui.new_action
-        self.bin_action = self.ui.bin_action
-
-
-        old_list_widget = self.list_widget
-        self.list_widget = ReorderableListWidget()
-        self.list_widget.setObjectName("list_widget")
-        self.search_bar.textChanged.connect(self.filter_list)
-        self._setup_list_widget()
-        self._replace_old_list_widget(old_list_widget)
-        self.setWindowTitle("Ubuntu Sticky Notes")
-        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, True)
-        self._setup_toolbar_actions()
-        self._setup_shortcuts()
-
+class MainWindow(Adw.ApplicationWindow):
+    def __init__(self, db, **kwargs):
+        super().__init__(title="Sticky Notes", default_width=400, default_height=600, **kwargs)
+        self.db = db
         self.stickies = {}
-        self.trash_window = TrashWindow(self.db, main_window=self)
+
+        from gi.repository import Gdk
+        css_provider = Gtk.CssProvider()
+        css = """
+        flowbox { padding: 0px; background: transparent; }
+        flowboxchild { padding: 0px; margin: 0px; border: none; min-width: 0px; outline: none; }
+        /* Убираем фон самого окна, чтобы было чисто */
+        window.background { background-color: #ffffff; } 
+        """
+        css_provider.load_from_data(css.encode())
+        Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider,
+                                                  Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+        self.setup_actions()
+        self.root_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.set_content(self.root_box)
+
+        header_bar = Adw.HeaderBar()
+        header_bar.set_show_end_title_buttons(True)
+
+        btn_new = Gtk.Button(icon_name="list-add-symbolic")
+        btn_new.add_css_class("flat")
+        btn_new.connect("clicked", lambda _: self.create_note())
+        header_bar.pack_start(btn_new)
+
+        btn_trash = Gtk.Button(icon_name="user-trash-symbolic")
+        btn_trash.add_css_class("flat")
+        btn_trash.connect("clicked", self.on_show_trash)
+        header_bar.pack_end(btn_trash)
+
+        self.root_box.append(header_bar)
+
+        self.search_entry = Gtk.SearchEntry(placeholder_text="Search...")
+        self.search_entry.set_margin_start(10)
+        self.search_entry.set_margin_end(10)
+        self.search_entry.set_margin_top(10)
+        self.search_entry.set_margin_bottom(10)
+        self.search_entry.connect("search-changed", self.on_search)
+        self.root_box.append(self.search_entry)
+
+        self.flowbox = Gtk.FlowBox(
+            valign=Gtk.Align.START,
+            selection_mode=Gtk.SelectionMode.NONE
+        )
+
+        scrolled = Gtk.ScrolledWindow(child=self.flowbox, vexpand=True)
+        scrolled.set_has_frame(False)
+        self.root_box.append(scrolled)
+
         self.refresh_list()
-
-    def _setup_list_widget(self):
-        """Configures the QListWidget used to display sticky notes."""
-        self.list_widget.setItemDelegate(NoFocusDelegate())
-        self.list_widget.setViewMode(QtWidgets.QListView.ViewMode.IconMode)
-        self.list_widget.setResizeMode(QtWidgets.QListView.ResizeMode.Adjust)
-        self.list_widget.setSpacing(10)
-        self.list_widget.setUniformItemSizes(True)
-        self.list_widget.setWrapping(True)
-        self.list_widget.setFlow(QtWidgets.QListView.Flow.LeftToRight)
-        self.list_widget.setGridSize(QtCore.QSize(135, 135))
-        self.list_widget.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
-        self.list_widget.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
-        self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
-        self.list_widget.itemDoubleClicked.connect(self.open_note)
-        self.list_widget.itemSelectionChanged.connect(self.refresh_selection)
-        self.list_widget.setAttribute(QtCore.Qt.WidgetAttribute.WA_MacShowFocusRect, False)
-        self.list_widget.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
-
-        self.list_widget.setDragEnabled(False)
-        self.list_widget.setAcceptDrops(False)
-        self.list_widget.setDragDropMode(QtWidgets.QAbstractItemView.DragDropMode.NoDragDrop)
-        self.list_widget.setDefaultDropAction(QtCore.Qt.DropAction.IgnoreAction)
-
-        self.list_widget.setStyleSheet("""
-            QListWidget::item {
-                background: transparent;
-                border: none;
-            }
-            QListWidget::item:selected {
-                background: transparent;
-                border: none;
-            }
-        """)
-
-    def _replace_old_list_widget(self, old_list_widget):
-        """Replaces the old QListWidget in the UI with the new one.
-
-        Args:
-            old_list_widget (QtWidgets.QListWidget): The previous list widget to replace.
-        """
-        parent_layout = old_list_widget.parentWidget().layout()
-        index = parent_layout.indexOf(old_list_widget)
-        parent_layout.removeWidget(old_list_widget)
-        old_list_widget.deleteLater()
-        parent_layout.insertWidget(index, self.list_widget)
-
-    def _setup_toolbar_actions(self):
-        """Sets up toolbar actions with icons and connections."""
-        self.new_action.setIcon(QtGui.QIcon(os.path.join(ICONS_PATH, "new.png")))
-        self.bin_action.setIcon(QtGui.QIcon(os.path.join(ICONS_PATH, "bin.png")))
-        self.new_action.triggered.connect(self.create_note)
-        self.bin_action.triggered.connect(self.open_trash)
-
-    def _setup_shortcuts(self):
-        """Defines keyboard shortcuts for note operations."""
-        QtGui.QShortcut(QtGui.QKeySequence("Shift+O"), self, self.open_selected_note)
-        QtGui.QShortcut(QtGui.QKeySequence("Shift+N"), self, self.create_note)
-        QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key.Key_Delete), self, self.delete_selected_notes)
-        rename_shortcut = QtGui.QShortcut(QtGui.QKeySequence("Shift+R"), self)
-        rename_shortcut.activated.connect(self.rename_selected_note)
-
-    def closeEvent(self, event):
-        """Overrides the close event to hide the window instead of closing.
-
-        Args:
-            event (QtGui.QCloseEvent): Close event.
-        """
-        event.ignore()
-        self.hide()
-
-    def _create_list_item_widget(self, title: str, color: str) -> QtWidgets.QWidget:
-        """Creates a card widget representing a sticky note.
-
-        Args:
-            title (str): Note title to display.
-            color (str): Background color for the note card.
-
-        Returns:
-            QtWidgets.QWidget: A QWidget representing the sticky note card.
-        """
-        widget = QtWidgets.QWidget()
-        widget.setFixedSize(135, 135)
-        layout = QtWidgets.QVBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        color_frame = QtWidgets.QFrame()
-        color_frame.setFixedSize(120, 120)
-        color_frame.setStyleSheet(f"background-color: {color}; border-radius: 6px;")
-        widget._color_frame = color_frame
-
-        selection_frame = QtWidgets.QFrame(color_frame)
-        selection_frame.setGeometry(0, 0, 120, 120)
-        selection_frame.setStyleSheet("border: 2px solid #0078d7; border-radius: 6px;")
-        selection_frame.setVisible(False)
-        widget._selection_frame = selection_frame
-
-        frame_layout = QtWidgets.QVBoxLayout(color_frame)
-        frame_layout.setContentsMargins(5, 5, 5, 5)
-        frame_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-
-        title_label = QtWidgets.QLabel(title)
-        title_label.setWordWrap(True)
-        title_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
-        title_label.setStyleSheet("font-size: 10pt; font-weight: bold; color: #000000;")
-        title_label.setSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Expanding)
-
-        frame_layout.addWidget(title_label)
-        layout.addWidget(color_frame, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
-        widget._title_label = title_label
-
-        return widget
 
     def refresh_list(self):
-        """Clears and repopulates the note list from the database."""
-        self.list_widget.clear()
-        notes = sorted(self.db.all_notes(full=True), key=lambda n: (n["title"] or "").lower())
+        while child := self.flowbox.get_first_child():
+            self.flowbox.remove(child)
 
+        self.flowbox.set_homogeneous(False)
+        self.flowbox.set_max_children_per_line(1)
+        self.flowbox.set_min_children_per_line(1)
+
+        self.flowbox.set_halign(Gtk.Align.FILL)
+        self.flowbox.set_valign(Gtk.Align.START)
+
+
+        self.flowbox.set_column_spacing(0)
+        self.flowbox.set_row_spacing(10)
+
+        self.flowbox.set_margin_top(5)
+        self.flowbox.set_margin_bottom(10)
+        self.flowbox.set_margin_start(10)
+        self.flowbox.set_margin_end(10)
+
+        notes = self.db.all_notes(full=True)
         for note in notes:
-            note_id = note["id"]
-            title = note["title"] or "Untitled"
-            color = note["color"] or "#FFF59D"
-            content = note["content"] or ""
+            card = NoteCard(note, self.db)
+            self.flowbox.append(card)
 
-            item = QtWidgets.QListWidgetItem()
-            item.setData(QtCore.Qt.ItemDataRole.UserRole, note_id)
-            item.setData(QtCore.Qt.ItemDataRole.UserRole + 1, title)
-            item.setData(QtCore.Qt.ItemDataRole.UserRole + 3, content)
+            flow_child = card.get_parent()
+            if flow_child:
+                flow_child.set_margin_top(0);
+                flow_child.set_margin_bottom(0)
+                flow_child.set_margin_start(0);
+                flow_child.set_margin_end(0)
+                flow_child.set_can_focus(False)
 
-            widget = self._create_list_item_widget(title, color)
-            item.setSizeHint(widget.sizeHint())
-
-            self.list_widget.addItem(item)
-            self.list_widget.setItemWidget(item, widget)
-
-        self.filter_list()
-
-    def refresh_selection(self):
-        """Updates selection frames for all note widgets based on their selection state."""
-        for i in range(self.list_widget.count()):
-            item = self.list_widget.item(i)
-            widget = self.list_widget.itemWidget(item)
-            if widget and hasattr(widget, "_selection_frame"):
-                widget._selection_frame.setVisible(item.isSelected())
+                flow_child.set_hexpand(True)
+                flow_child.set_halign(Gtk.Align.FILL)
 
     def create_note(self):
-        """Creates a new sticky note, opens its window, and adds it to the list."""
         note_id = self.db.add()
-        sticky = StickyWindow(self.db, note_id, always_on_top=False, main_window=self)
-        sticky.newNoteRequested.connect(self.create_note)
-        sticky.closed.connect(self.refresh_list)
-        sticky.textChanged.connect(self.on_sticky_text_changed)
-        sticky.colorChanged.connect(self.on_sticky_color_changed)
-        self.stickies[note_id] = sticky
-        sticky.show()
         self.refresh_list()
+        self.open_note(note_id)
 
-    def rename_selected_note(self):
-        """Renames the first selected note if any."""
-        selected_items = self.list_widget.selectedItems()
-        if selected_items:
-            self.rename_note(selected_items[0])
-
-    def open_selected_note(self):
-        """Opens all selected notes."""
-        selected_items = self.list_widget.selectedItems()
-        for item in selected_items:
-            self.open_note(item)
-
-    def delete_selected_notes(self):
-        """Deletes all selected notes after user confirmation."""
-        selected_items = self.list_widget.selectedItems()
-        if not selected_items:
-            return
-
-        note_ids = [item.data(QtCore.Qt.ItemDataRole.UserRole) for item in selected_items]
-
-        reply = QtWidgets.QMessageBox.question(
-            self,
-            "Delete Notes",
-            f"Are you sure you want to delete the selected {len(note_ids)} note(s)?",
-            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
-            QtWidgets.QMessageBox.StandardButton.No,
-        )
-        if reply != QtWidgets.QMessageBox.StandardButton.Yes:
-            return
-
-        for note_id in note_ids:
-            if note_id in self.stickies:
-                self.stickies[note_id].close()
-                del self.stickies[note_id]
-            self.db.move_to_trash(note_id)
-
-        self.refresh_list()
-        if self.trash_window.isVisible():
-            self.trash_window.refresh_list()
-
-    def filter_list(self):
-        """Filters the notes displayed based on the search bar text."""
-        query = (self.search_bar.text() or "").lower().strip()
-        for i in range(self.list_widget.count()):
-            item = self.list_widget.item(i)
-            title = (item.data(QtCore.Qt.ItemDataRole.UserRole + 1) or "").lower()
-            content_html = item.data(QtCore.Qt.ItemDataRole.UserRole + 3) or ""
-            doc = QtGui.QTextDocument()
-            doc.setHtml(content_html)
-            content = doc.toPlainText().lower().strip()
-
-            item.setHidden(query not in title and query not in content)
-
-    def open_note(self, item_or_id):
-        """Opens a sticky note window for a given item or note ID.
-
-        If the sticky window is already open, brings it to front; otherwise,
-        creates a new window.
-
-        Args:
-            item_or_id (QtWidgets.QListWidgetItem | int): The note item or note ID.
-        """
-        if isinstance(item_or_id, QtWidgets.QListWidgetItem):
-            note_id = item_or_id.data(QtCore.Qt.ItemDataRole.UserRole)
-        else:
-            note_id = item_or_id
-
-        sticky = self.stickies.get(note_id)
-        if not sticky:
-            sticky = StickyWindow(self.db, note_id, always_on_top=False, main_window=self)
-            sticky.closed.connect(self.refresh_list)
-            sticky.textChanged.connect(self.on_sticky_text_changed)
-            sticky.colorChanged.connect(self.on_sticky_color_changed)
-            self.stickies[note_id] = sticky
-
-        sticky.load_from_db()
-        sticky.showNormal()
-        sticky.raise_()
-        sticky.activateWindow()
-
-    def on_sticky_text_changed(self, note_id, content):
-        """Updates the list widget when a sticky note's text changes.
-
-        Args:
-            note_id (int): The note ID.
-            content (str): Updated HTML content of the note.
-        """
-        for i in range(self.list_widget.count()):
-            item = self.list_widget.item(i)
-            if item.data(QtCore.Qt.ItemDataRole.UserRole) == note_id:
-                item.setData(QtCore.Qt.ItemDataRole.UserRole + 3, content)
-                title = item.data(QtCore.Qt.ItemDataRole.UserRole + 1)
-                if not title:
-                    doc = QtGui.QTextDocument()
-                    doc.setHtml(content)
-                    snippet = doc.toPlainText()[:15].replace("\n", " ")
-                    widget = self.list_widget.itemWidget(item)
-                    if widget and hasattr(widget, "_text_label"):
-                        widget._text_label.setText(f"{snippet}...")
-                break
-        self.filter_list()
-
-    def on_sticky_color_changed(self, note_id, color):
-        """Updates the note color in the list when a sticky note changes.
-
-        Args:
-            note_id (int): Note ID.
-            color (str): New color.
-        """
-        for i in range(self.list_widget.count()):
-            item = self.list_widget.item(i)
-            if item.data(QtCore.Qt.ItemDataRole.UserRole) == note_id:
-                item.setData(QtCore.Qt.ItemDataRole.UserRole + 2, color)
-                widget = self.list_widget.itemWidget(item)
-                if widget and hasattr(widget, "_color_frame"):
-                    widget._color_frame.setStyleSheet(f"background-color: {color}; border-radius: 6px;")
-                break
-
-    def show_context_menu(self, pos):
-        """Shows the context menu for the selected notes."""
-        selected_items = self.list_widget.selectedItems()
-        menu = QtWidgets.QMenu()
-
-        rename_action = None
-        open_action = None
-        delete_action = None
-
-        if selected_items:
-            if len(selected_items) > 1:
-                open_action = menu.addAction("📂 Open (Shift + O)")
-                delete_action = menu.addAction("🗑 Delete (Del)")
-            elif len(selected_items) == 1:
-                open_action = menu.addAction("📂 Open (Shift + O)")
-                rename_action = menu.addAction("✏️ Rename (Shift + R)")
-                color_menu = menu.addMenu("🎨 Change Color")
-                delete_action = menu.addAction("🗑 Delete (Del)")
-                item = selected_items[0]
-                for name, color in COLOR_MAP.items():
-                    action = color_menu.addAction(name)
-                    action.triggered.connect(
-                        lambda checked, c=color, i=item: self.change_item_color(i, c)
-                    )
-
-        action = menu.exec(self.list_widget.mapToGlobal(pos))
-        if action is None:
-            return
-        if action == open_action:
-            self.open_selected_note()
-        elif rename_action and action == rename_action:
-            self.rename_note(selected_items[0])
-        elif action == delete_action:
-            self.delete_selected_notes()
-
-    def rename_note(self, item: QtWidgets.QListWidgetItem):
-        """Renames a note.
-
-        Args:
-            item (QtWidgets.QListWidgetItem): The item to rename.
-        """
-        note_id = item.data(QtCore.Qt.ItemDataRole.UserRole)
-        old_title = item.data(QtCore.Qt.ItemDataRole.UserRole + 1) or ""
-        new_title, ok = QtWidgets.QInputDialog.getText(
-            self, "Rename Note", "Enter new title:", text=old_title
-        )
-        if ok and new_title.strip():
-            new_title = new_title.strip()
-            self.db.update_title(note_id, new_title)
-            item.setData(QtCore.Qt.ItemDataRole.UserRole + 1, new_title)
-            widget = self.list_widget.itemWidget(item)
-            if widget and hasattr(widget, "_title_label"):
-                widget._title_label.setText(new_title)
-                widget._title_label.adjustSize()
-            self.refresh_list()
-
-    def set_always_on_top(self, flag: bool):
-        """Sets all windows to stay on top.
-
-        Args:
-            flag (bool): True to stay on top.
-        """
-        self.always_on_top = bool(flag)
-        self.db.set_setting("always_on_top", "1" if self.always_on_top else "0")
-        self.setWindowFlag(QtCore.Qt.WindowType.WindowStaysOnTopHint, self.always_on_top)
-        self.show()
-        self.raise_()
-        self.activateWindow()
-        for sticky in self.stickies.values():
-            sticky.set_always_on_top(self.always_on_top)
-        for i in range(self.list_widget.count()):
-            item = self.list_widget.item(i)
-            widget = self.list_widget.itemWidget(item)
-            if widget and hasattr(widget, "_check_label"):
-                widget._check_label.setVisible(self.always_on_top)
-
-    def change_item_color(self, item, color):
-        """Changes the color of a note.
-
-        Args:
-            item (QtWidgets.QListWidgetItem): Note item.
-            color (str): New color.
-        """
-        note_id = item.data(QtCore.Qt.ItemDataRole.UserRole)
+    def open_note(self, note_id):
         if note_id in self.stickies:
-            self.stickies[note_id].change_color(color)
-        else:
-            cur_content = item.data(QtCore.Qt.ItemDataRole.UserRole + 1)
-            row = self.db.get(note_id)
-            if row:
-                x, y, w, h = row["x"] or 300, row["y"] or 200, row["w"] or 260, row["h"] or 200
-                self.db.update(note_id, cur_content, x, y, w, h, color)
-            self.refresh_list()
+            self.stickies[note_id].present()
+            return
+        new_sticky = StickyWindow(self.db, note_id, self)
+        self.stickies[note_id] = new_sticky
+        new_sticky.present()
 
-    def delete_note_with_confirmation(self, item):
-        """Deletes a note with confirmation dialog.
+    def on_search(self, entry):
+        query = entry.get_text().lower()
+        child = self.flowbox.get_first_child()
+        while child:
+            card = child.get_child()
+            lbl = card.label
+            if query in lbl.get_text().lower():
+                child.set_visible(True)
+            else:
+                child.set_visible(False)
+            child = child.get_next_sibling()
 
-        Args:
-            item (QtWidgets.QListWidgetItem): The item to delete.
-        """
-        note_id = item.data(QtCore.Qt.ItemDataRole.UserRole)
-        reply = QtWidgets.QMessageBox.question(
-            self,
-            "Delete Note",
-            "Are you sure you want to delete the selected note?",
-            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
-            QtWidgets.QMessageBox.StandardButton.No,
-        )
-        if reply == QtWidgets.QMessageBox.StandardButton.Yes:
-            if note_id in self.stickies:
-                self.stickies[note_id].close()
-                del self.stickies[note_id]
-            self.db.move_to_trash(note_id)
-            self.refresh_list()
-            if self.trash_window.isVisible():
-                self.trash_window.refresh_list()
+    def update_card_text(self, note_id, serialized_content):
+        """Мгновенно обновляет текст карточки"""
+        child = self.flowbox.get_first_child()
+        while child:
+            card = child.get_child()
+            if isinstance(card, NoteCard) and card.note_id == note_id:
+                new_markup = card._generate_markup(serialized_content)
+                card.label.set_markup(new_markup)
+                break
+            child = child.get_next_sibling()
 
-    def open_trash(self):
-        """Opens the trash window."""
-        self.trash_window.refresh_list()
-        self.trash_window.showNormal()
+    def update_card_color_live(self, note_id, color):
+        """Мгновенно красит карточку"""
+        child = self.flowbox.get_first_child()
+        while child:
+            card = child.get_child()
+            if isinstance(card, NoteCard) and card.note_id == note_id:
+                card.update_color(color)
+                break
+            child = child.get_next_sibling()
 
-    def open_all_stickies(self):
-        """Opens all sticky notes in the list."""
-        for note_id in [
-            item.data(QtCore.Qt.ItemDataRole.UserRole)
-            for item in self.list_widget.findItems("", QtCore.Qt.MatchFlag.MatchContains)
-        ]:
-            self.open_note(note_id)
+    def on_show_trash(self, btn):
+        from trash_window import TrashWindow
+        TrashWindow(self.db, self).present()
+
+    def on_action_delete_manual(self, note_id):
+        self.db.move_to_trash(note_id)
+        if note_id in self.stickies: self.stickies[note_id].close()
+        self.refresh_list()
+
+    def setup_actions(self):
+        action_delete = Gio.SimpleAction.new("delete_note", GLib.VariantType.new("i"))
+        action_delete.connect("activate", lambda a, v: self.on_action_delete_manual(v.get_int32()))
+        self.add_action(action_delete)
+
+    def create_combined_context_menu(self, note_id, target_widget):
+        popover = Gtk.Popover()
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+
+        vbox.set_margin_top(8)
+        vbox.set_margin_bottom(8)
+        vbox.set_margin_start(8)
+        vbox.set_margin_end(8)
+
+        grid = Gtk.Grid(column_spacing=8, row_spacing=8, halign=Gtk.Align.CENTER)
+        for i, color in enumerate(STICKY_COLORS):
+            b = Gtk.Button()
+            b.set_size_request(28, 28)
+            cp = Gtk.CssProvider()
+            cp.load_from_data(
+                f"button {{ background-color: {color}; border-radius: 14px; min-width: 28px; min-height: 28px; padding: 0; }}".encode())
+            b.get_style_context().add_provider(cp, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            b.connect("clicked", lambda _, c=color: self.update_note_color(note_id, c, target_widget, popover))
+            grid.attach(b, i % 2, i // 2, 1, 1)
+
+        vbox.append(grid)
+        vbox.append(Gtk.Separator())
+
+        btn_del = Gtk.Button(label="Move to Trash", has_frame=False)
+        btn_del.connect("clicked", lambda _: (self.on_action_delete_manual(note_id), popover.popdown()))
+        vbox.append(btn_del)
+
+        popover.set_child(vbox)
+        popover.set_parent(target_widget)
+        popover.popup()
+
+
+    def update_note_color(self, note_id, color, widget, popover):
+        self.db.update_color(note_id, color)
+        self.refresh_list()
+        if note_id in self.stickies: self.stickies[note_id].apply_color(color)
+        popover.popdown()

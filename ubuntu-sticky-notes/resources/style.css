@@ -1,0 +1,114 @@
+/* Базовое окно всегда прозрачное для поддержки теней и скруглений */
+/* Возвращаем базовый вид окна */
+window.sticky-window {
+    background-color: #FFF59D; /* Наш классический желтый */
+    border-radius: 12px;
+}
+
+/* Убираем все внешние тени и маргины, которые делали его прозрачным */
+.sticky-main-area {
+    margin: 0;
+    background: transparent;
+}
+
+/* Заголовок */
+.header-panel {
+    background: rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.header-btn {
+    min-width: 28px;
+    min-height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+}
+
+.header-btn:hover {
+    background-color: rgba(0,0,0,0.1);
+}
+
+/* Текстовая область */
+.sticky-text-edit {
+    padding: 4px 12px;
+}
+
+textview text {
+    background-color: transparent;
+    font-size: 15px;
+}
+/* Убеждаемся, что всё внутри стикера прозрачное */
+.sticky-text-edit,
+textview,
+textview text {
+    background-color: transparent;
+    border: none;
+}
+/* Убираем рамки у прокрутки */
+scrolledwindow {
+    background-color: transparent;
+    border: none;
+}
+
+/* Панель форматирования */
+.format-bar {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    padding: 6px;
+}
+
+/* Исправление двойной кнопки и лишних рамок */
+.format-btn,
+menubutton.format-btn button {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 4px 8px;
+    color: #444;
+}
+
+.format-btn:hover,
+menubutton.format-btn button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+}
+
+/* Поповер выбора цвета */
+popover > contents {
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+popover grid {
+    border: none;
+}
+
+/* Убираем фокусные рамки вокруг кнопок */
+button:focus, button:active {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Делаем скроллбар менее заметным (как на стикерах) */
+scrolledwindow scrollbar {
+    opacity: 0.3;
+    transition: opacity 200ms;
+}
+scrolledwindow scrollbar:hover {
+    opacity: 1;
+}
+
+.note-card {
+    min-width: 150px;
+    min-height: 150px;
+}
+
+.note-card label {
+    font-size: 10px;
+    line-height: 1.1;
+}
