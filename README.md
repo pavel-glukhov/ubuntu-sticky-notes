@@ -37,7 +37,7 @@ https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/tag/v1.4.1
 ______________________________________________________________________________________
 ## Installation:
 ```bash
-curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/tag/v1.4.1/ubuntu-sticky-notes_1.4.1_all.deb
+curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v1.4.1/ubuntu-sticky-notes_1.4.1_all.deb
 sudo apt update
 sudo apt install -y python3-pyqt6
 sudo dpkg -i ubuntu-sticky-notes_1.4.1_all.deb
