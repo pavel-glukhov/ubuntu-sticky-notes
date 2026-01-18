@@ -73,10 +73,11 @@ EOL
 # Create DEBIAN/postinst to check PyQt6
 # ----------------------
 cat > "$DEBIAN_DIR/postinst" <<'EOL'
+cat > "$DEBIAN_DIR/postinst" <<'EOL'
 #!/bin/bash
-# Check if PyQt6 is installed after package installation
-if ! python3 -c "import PyQt6" &>/dev/null; then
-    echo "PyQt6 is not installed. Please run: sudo apt install -y python3-pyqt6"
+# Проверка наличия PyGObject (GTK bindings)
+if ! python3 -c "import gi" &>/dev/null; then
+    echo "Warning: python3-gi is not installed. Please run: sudo apt install python3-gi python3-adwaita"
 fi
 EOL
 chmod +x "$DEBIAN_DIR/postinst"
@@ -95,7 +96,8 @@ Terminal=false
 Type=Application
 Categories=Utility;
 StartupNotify=true
-StartupWMClass=$APP_NAME
+# ВАЖНО: StartupWMClass должен СТРОГО совпадать с GLib.set_prgname() в main.py
+StartupWMClass=$SERVICE_NAME
 EOL
 
 # ----------------------

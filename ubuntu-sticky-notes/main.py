@@ -1,161 +1,249 @@
-import os
 import sys
+import os
+from datetime import datetime
 
-from about_window import AboutDialog
-from config import get_app_paths
-from main_window import MainWindow
-from PyQt6 import QtCore, QtGui, QtWidgets
-from sticky_window import StickyWindow
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
-paths = get_app_paths()
-APP_ICON_PATH = paths["APP_ICON_PATH"]
-APP_INFO = paths["APP_INFO"]
+try:
+    from config.config_manager import ConfigManager
 
+    config = ConfigManager.load()
 
-def init_tray(window: MainWindow, app: QtWidgets.QApplication):
-    """
-    Initialize the system tray icon and context menu.
-
-    Provides quick access to:
-        - Restoring previous state.
-        - Opening or hiding all sticky notes.
-        - Showing notes list.
-        - Creating a new sticky note.
-        - About dialog.
-        - Exiting the application.
-    """
-    tray_icon = QtWidgets.QSystemTrayIcon(
-        QtGui.QIcon(APP_ICON_PATH) if os.path.exists(APP_ICON_PATH) else QtGui.QIcon.fromTheme("note"),
-        app,
-    )
-
-    tray_menu = QtWidgets.QMenu()
-    tray_menu.addAction("📘 Open Previous State", lambda: open_previous_state(window))
-    tray_menu.addAction("📗 Open All Stickers", lambda: open_all_stickies(window))
-    tray_menu.addAction("🗂 Hide All Stickers", lambda: hide_all_stickies(window))
-    tray_menu.addSeparator()
-    tray_menu.addAction("📒 Show Notes List", window.showNormal)
-    tray_menu.addAction("🆕 Open New Sticker", window.create_note)
-    tray_menu.addSeparator()
-
-    about_action = tray_menu.addAction("About")
-    about_action.triggered.connect(lambda: AboutDialog().exec())
-    tray_menu.addSeparator()
-
-    def exit_app():
-        for sticky in window.stickies.values():
-            if sticky.isVisible():
-                sticky.save()
-                if sticky.note_id:
-                    window.db.set_open_state(sticky.note_id, 1)
-            else:
-                if sticky.note_id:
-                    window.db.set_open_state(sticky.note_id, 0)
-
-        if hasattr(window.db, "close"):
-            window.db.close()
-        app.quit()
-        QtWidgets.QApplication.exit(0)
-
-    tray_menu.addAction("Exit", exit_app)
-
-    tray_icon.setToolTip("Ubuntu Sticky Notes")
-    tray_icon.setContextMenu(tray_menu)
-    tray_icon.setVisible(True)
-
-    def toggle_main_window():
-        if window.isVisible() and not window.isMinimized():
-            window.hide()
-        else:
-            window.showNormal()
-            window.raise_()
-            window.activateWindow()
-
-    def on_tray_activated(reason):
-        if reason in (
-            QtWidgets.QSystemTrayIcon.ActivationReason.Trigger,
-            QtWidgets.QSystemTrayIcon.ActivationReason.DoubleClick,
-        ):
-            toggle_main_window()
-
-    tray_icon.activated.connect(on_tray_activated)
-    tray_icon.show()
-
-
-def show_main_window(window: QtWidgets.QMainWindow):
-    """
-    Bring the main window to the foreground.
-
-    Ensures the window is visible and active, restoring if minimized.
-    """
-    if window.isHidden() or window.isMinimized():
-        window.showNormal()
+    if "--x11" in sys.argv or config.get("backend") == "x11":
+        os.environ["GDK_BACKEND"] = "x11"
+        print("SYSTEM: Environment forced to X11")
     else:
-        window.show()
+        os.environ["GDK_BACKEND"] = "wayland"
+        print("SYSTEM: Environment set to Wayland")
+except Exception as e:
+    print(f"CRITICAL: Config pre-init error: {e}")
 
-    window.raise_()
-    window.activateWindow()
+import threading
+import subprocess
+import gi
 
+gi.require_version('Gtk', '4.0')
+gi.require_version('Adw', '1')
 
-def open_previous_state(window: MainWindow):
-    """
-    Restore and open all sticky notes that were previously open.
-    """
-    for note_id in window.db.get_open_notes():
-        sticky = window.stickies.get(note_id)
-        if sticky and sticky.isVisible():
-            continue
-        if not sticky:
-            sticky = StickyWindow(window.db, note_id)
-            sticky.closed.connect(window.refresh_list)
-            sticky.textChanged.connect(window.on_sticky_text_changed)
-            sticky.colorChanged.connect(window.on_sticky_color_changed)
-            window.stickies[note_id] = sticky
-        sticky.load_from_db()
-        sticky.show()
-        sticky.raise_()
-        sticky.activateWindow()
+from gi.repository import Gtk, Adw, Gdk, GLib
+from db.db_controller import NotesDB
+from config.config import get_app_paths, load_app_info
+from views.main_view.main_view import MainWindow
 
 
-def open_all_stickies(window: MainWindow):
-    """
-    Open all sticky notes from the main window's list.
-    """
-    for i in range(window.list_widget.count()):
-        item = window.list_widget.item(i)
-        window.open_note(item)
+class StickyApp(Adw.Application):
+    APP_INFO = load_app_info()
+    def __init__(self):
+        super().__init__(application_id=self.APP_INFO.get('service_name'))
 
+        self.config = ConfigManager.load()
+        db_path = self.config.get("db_path")
 
-def hide_all_stickies(window: MainWindow):
-    """
-    Hide all currently open sticky notes.
-    """
-    for sticky in window.stickies.values():
-        sticky.hide()
+        if not db_path:
+            paths = get_app_paths()
+            db_path = paths["DB_PATH"]
 
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        self.db = NotesDB(path=db_path)
 
-def main():
-    """
-    Application entry point.
+        self.win = None
+        self.tray_process = None
 
-    Handles platform quirks (e.g., Wayland vs X11),
-    initializes QApplication, main window, and system tray.
-    """
-    if sys.platform.startswith("linux") and "WAYLAND_DISPLAY" in os.environ:
-        os.environ["QT_QPA_PLATFORM"] = "xcb"
+    def load_css(self):
+        """Loads custom CSS styles."""
+        paths = get_app_paths()
+        css_path = paths.get("STYLE_CSS")
 
-    app = QtWidgets.QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(False)
-    app.setApplicationName(APP_INFO.get("app_name", "Sticky Notes"))
+        if css_path and os.path.exists(css_path):
+            css_provider = Gtk.CssProvider()
+            try:
+                css_provider.load_from_path(css_path)
+                Gtk.StyleContext.add_provider_for_display(
+                    Gdk.Display.get_default(),
+                    css_provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+                )
+                print(f"DEBUG: CSS loaded from {css_path}")
+            except Exception as e:
+                print(f"ERROR: CSS loading failed: {e}")
 
-    def init_app():
-        window = MainWindow()
-        window.hide()
-        init_tray(window, app)
+    def apply_ui_scale(self):
+        try:
+            raw_scale = self.config.get("ui_scale", 1.0)
+            scale = float(str(raw_scale)[:4])
 
-    QtCore.QTimer.singleShot(0, init_app)
-    sys.exit(app.exec())
+            if not (0.5 <= scale <= 2.0): scale = 1.0
+        except (ValueError, TypeError):
+            scale = 1.0
+
+        new_dpi = int(96 * scale * 1024)
+        settings = Gtk.Settings.get_default()
+        if settings:
+            settings.set_property("gtk-xft-dpi", new_dpi)
+
+        custom_css = f"""
+        * {{ 
+            -gtk-icon-size: {int(16 * scale)}px; 
+        }}
+        .sticky-text-edit {{
+            font-size: {int(12 * scale)}pt;
+        }}
+        """
+        provider = Gtk.CssProvider()
+        provider.load_from_data(custom_css.encode())
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        print(f"SYSTEM: UI Scale applied: {scale}")
+
+    def apply_custom_scale_css(self, scale):
+        css = f"""
+        * {{ 
+            -gtk-icon-size: {int(16 * scale)}px;
+        }}
+        .sticky-window {{
+            font-size: {10 * scale}pt;
+        }}
+        """
+        provider = Gtk.CssProvider()
+        provider.load_from_data(css.encode())
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
+    def do_activate(self):
+        """Инициализация главного окна приложения."""
+        self.config = ConfigManager.load()
+        self.apply_ui_scale()
+
+        display = Gdk.Display.get_default()
+        print(f"DEBUG: Actual running backend: {display.__class__.__name__}")
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        icons_dir = os.path.join(base_dir, "resources", "icons")
+
+        if os.path.exists(icons_dir):
+            icon_theme = Gtk.IconTheme.get_for_display(display)
+            icon_theme.add_search_path(icons_dir)
+
+            Gtk.Window.set_default_icon_name("app")
+
+        self.load_css()
+
+        if not self.win:
+            self.win = MainWindow(self.db, application=self)
+            self.win.connect("close-request", self.on_window_close_request)
+            self.start_tray_subprocess()
+
+        self.win.present()
+
+    def on_window_close_request(self, window):
+        """Hides the window instead of closing it (minimize to tray)."""
+        window.set_visible(False)
+        return True
+
+    def start_tray_subprocess(self):
+        """Starts the GTK3 tray icon as a separate process to avoid library conflicts."""
+        script_path = os.path.join(os.path.dirname(__file__), "tray.py")
+        env = os.environ.copy()
+        # Ensure tray knows which display to use
+        if "GDK_BACKEND" in os.environ:
+            del env["GDK_BACKEND"]  # Let tray decide its own backend (usually X11)
+
+        self.tray_process = subprocess.Popen(
+            [sys.executable, script_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            bufsize=1,
+            env=env
+        )
+
+        self.monitor_thread = threading.Thread(target=self.monitor_tray_output, daemon=True)
+        self.monitor_thread.start()
+
+    def monitor_tray_output(self):
+        """Monitors commands sent from the tray process via stdout."""
+        if not self.tray_process or not self.tray_process.stdout:
+            return
+
+        try:
+            for line in iter(self.tray_process.stdout.readline, ''):
+                cmd = line.strip()
+                if not cmd: continue
+
+                if cmd == "quit":
+                    GLib.idle_add(self.quit_app)
+                elif cmd == "show_main":
+                    GLib.idle_add(self.show_main_window)
+                elif cmd == "open_all":
+                    GLib.idle_add(self.open_all_stickers)
+                elif cmd == "about":
+                    GLib.idle_add(self.show_about_dialog)
+        except Exception as e:
+            print(f"DEBUG: Tray monitor thread terminated: {e}")
+
+    def show_main_window(self):
+        if self.win:
+            self.win.set_visible(True)
+            self.win.present()
+
+    def open_all_stickers(self):
+        """Opens all existing stickers from the database."""
+        notes = self.db.all_notes(full=False)
+        for note in notes:
+            self.win.open_note(note['id'])
+
+    def show_about_dialog(self):
+        if not self.win: return
+
+        paths = get_app_paths()
+        info = paths.get("APP_INFO", {})
+
+        dialog = Adw.AboutWindow(
+            transient_for=self.win if self.win.get_visible() else None,
+            application_name=info.get("app_name"),
+            version=info.get("version"),
+            developer_name=info.get("author"),
+            license_type=Gtk.License.MIT_X11,
+            website=info.get("website"),
+            comments=info.get("description"),
+            application_icon="app"
+        )
+
+        # Set developers list (replaces debug info for contact)
+        author = info.get("author")
+        email = info.get("email")
+        if email:
+            dialog.set_developers([f"{author} <{email}>"])
+        else:
+            dialog.set_developers([author])
+        dialog.set_copyright(f"© {datetime.now().year} {author}")
+        dialog.present()
+
+    def quit_app(self):
+        """Safely shuts down the tray process and the application."""
+        if self.tray_process:
+            self.tray_process.terminate()
+
+        if self.win:
+            for note_id in list(self.win.stickies.keys()):
+                win = self.win.stickies.get(note_id)
+                if win: win.close()
+            self.win.destroy()
+
+        self.quit()
 
 
 if __name__ == "__main__":
-    main()
+    APP_INFO = load_app_info()
+    GLib.set_prgname(APP_INFO.get('service_name'))
+    GLib.set_application_name(APP_INFO.get('app_name'))
+    app = StickyApp()
+    sys.exit(app.run(sys.argv))
