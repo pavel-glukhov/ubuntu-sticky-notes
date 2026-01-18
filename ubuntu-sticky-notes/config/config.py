@@ -1,6 +1,6 @@
 import json
 import os
-from config_manager import ConfigManager
+from config.config_manager import ConfigManager
 
 # ========================
 # Path Constants (System)
@@ -9,12 +9,12 @@ from config_manager import ConfigManager
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Resource Paths
-RESOURCES_DIR = os.path.join(BASE_DIR, "resources")
+RESOURCES_DIR = os.path.join(BASE_DIR, "../resources")
 ICONS_DIR = os.path.join(RESOURCES_DIR, "icons")
 STYLE_CSS = os.path.join(RESOURCES_DIR, "style.css")
 
 # Metadata
-APP_INFO_FILE = os.path.join(BASE_DIR, "app_info.json")
+APP_INFO_FILE = os.path.join(BASE_DIR, "../app_info.json")
 
 # Intervals and Settings
 AUTOSAVE_INTERVAL_MS = 2000

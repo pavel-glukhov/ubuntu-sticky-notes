@@ -1,6 +1,6 @@
 from gi.repository import Gtk, Adw, Gio, GObject, GLib, Pango, Gdk
-from note_card import NoteCard
-from sticky_window import StickyWindow
+from views.main_view.note_card import NoteCard
+from sticky.sticky_window import StickyWindow
 from views.settings_view import SettingsView
 from views.trash_view import TrashView
 

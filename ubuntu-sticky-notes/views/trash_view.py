@@ -1,5 +1,5 @@
 from gi.repository import Gtk, Adw, Gdk, GObject
-from note_card import NoteCard  # Импортируем нашу общую карточку
+from views.main_view.note_card import NoteCard  # Импортируем нашу общую карточку
 
 
 class TrashView(Gtk.Box):

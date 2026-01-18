@@ -9,7 +9,7 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 try:
-    from config_manager import ConfigManager
+    from config.config_manager import ConfigManager
 
     config = ConfigManager.load()
 
@@ -32,10 +32,10 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Adw, Gdk, GLib
-from notes_db import NotesDB
-from config import get_app_paths
+from db.db_controller import NotesDB
+from config.config import get_app_paths
 # Import MainWindow after environment is ready
-from views.main_view import MainWindow
+from views.main_view.main_view import MainWindow
 
 
 class StickyApp(Adw.Application):

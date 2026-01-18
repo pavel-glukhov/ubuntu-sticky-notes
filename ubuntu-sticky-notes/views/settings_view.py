@@ -1,5 +1,5 @@
 from gi.repository import Gtk, Adw, Gio
-from config_manager import ConfigManager
+from config.config_manager import ConfigManager
 
 
 class SettingsView(Gtk.Box):
