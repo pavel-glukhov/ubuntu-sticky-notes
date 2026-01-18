@@ -21,7 +21,7 @@ _______________
 
 ## Download:
 You can download the beta deb package here:
-https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/2.0.0~beta1/ubuntu-sticky-notes_2.0.0~beta1_all.deb
+https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/2.0.0-beta1/ubuntu-sticky-notes_2.0.0~beta1_all.deb
 ______________________________________________________________________________________
 
 ## Installation:
@@ -30,7 +30,7 @@ To install version 2.0.0-beta, run the following commands in your terminal:
 
 ```bash
 # 1. Download the package
-curl -O -L [https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/2.0.0~beta1/ubuntu-sticky-notes_2.0.0~beta1_all.deb](https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/2.0.0~beta1/ubuntu-sticky-notes_2.0.0~beta1_all.deb)
+curl -O -L [https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/2.0.0-beta1/ubuntu-sticky-notes_2.0.0~beta1_all.deb](https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/2.0.0-beta1/ubuntu-sticky-notes_2.0.0~beta1_all.deb)
 
 # 2. Update and install system dependencies (GTK4 & Libadwaita)
 sudo apt update
