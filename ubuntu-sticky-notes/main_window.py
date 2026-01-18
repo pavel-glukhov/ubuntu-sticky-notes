@@ -4,123 +4,13 @@ import html as html_lib
 from gi.repository import Gtk, Adw, Gio, GObject, GLib, Pango
 from sticky_window import StickyWindow
 from datetime import datetime
-
+from trash_window import TrashView
+from note_card import NoteCard
 STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
-
-
-class NoteCard(Gtk.Box):
-    def __init__(self, note, db):
-        super().__init__(orientation=Gtk.Orientation.VERTICAL)
-        self.note_id = note["id"]
-
-        self.set_margin_top(0)
-        self.set_margin_bottom(0)
-        self.set_margin_start(0)
-        self.set_margin_end(0)
-
-        self.set_hexpand(True)
-        self.set_vexpand(False)
-
-        self.card_canvas = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.card_canvas.add_css_class("sticky-paper-card")
-
-        self.card_canvas.set_size_request(-1, 50)
-        self.card_canvas.set_overflow(Gtk.Overflow.HIDDEN)
-        self.append(self.card_canvas)
-
-
-        markup_text = self._generate_markup(note["content"])
-
-        self.label = Gtk.Label()
-        self.label.set_use_markup(True)
-        self.label.set_markup(markup_text)
-
-        self.label.set_wrap(True)
-        self.label.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
-        self.label.set_ellipsize(Pango.EllipsizeMode.END)
-        self.label.set_lines(5)  # Ограничение в 5 строк
-
-        self.label.set_xalign(0)  # Текст слева
-        self.label.set_yalign(0)  # Текст сверху
-        self.label.set_valign(Gtk.Align.START)
-
-        self.label.set_margin_top(12)
-        self.label.set_margin_bottom(12)
-        self.label.set_margin_start(15)
-        self.label.set_margin_end(15)
-
-        self.card_canvas.append(self.label)
-
-        self.update_color(note["color"])
-        self.setup_gestures()
-
-    def _generate_markup(self, raw_content):
-        if not raw_content: return ""
-        try:
-            json_bytes = bytes.fromhex(raw_content)
-            segments = json.loads(json_bytes.decode('utf-8'))
-            full_markup = "";
-            line_count = 0
-            for seg in segments:
-                text = seg.get("text", "")
-                lines_in_seg = text.split('\n')
-                if line_count >= 5: break
-                if line_count + len(lines_in_seg) - 1 >= 5:
-                    allowed = 5 - line_count
-                    text = "\n".join(lines_in_seg[:allowed])
-                    line_count = 5
-                else:
-                    line_count += len(lines_in_seg) - 1
-
-                safe_text = html_lib.escape(text)
-                tags = seg.get("tags", [])
-                st, et = "", ""
-                for tag in tags:
-                    if tag == "bold":
-                        st += "<b>"; et = "</b>" + et
-                    elif tag == "italic":
-                        st += "<i>"; et = "</i>" + et
-                    elif tag == "underline":
-                        st += "<u>"; et = "</u>" + et
-                    elif tag == "strikethrough":
-                        st += "<s>"; et = "</s>" + et
-                    elif tag.startswith("text_color_"):
-                        c = tag.replace("text_color_", "")
-                        st += f'<span foreground="{c}">';
-                        et = "</span>" + et
-                full_markup += f"{st}{safe_text}{et}"
-            return full_markup.rstrip()
-        except:
-            l = str(raw_content).split('\n')
-            return html_lib.escape("\n".join(l[:5])).rstrip()
-
-    def update_color(self, hex_color):
-        if not hex_color: hex_color = "#FFF59D"
-        provider = Gtk.CssProvider()
-        css = f"""
-        .sticky-paper-card {{ 
-            background-color: {hex_color}; 
-            border-radius: 0px; /* В списке обычно прямые углы или совсем легкие */
-            min-height: 50px;
-            /* Никаких ограничений по ширине */
-        }}
-        """
-        provider.load_from_data(css.encode())
-        self.card_canvas.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
-
-    def setup_gestures(self):
-        click = Gtk.GestureClick()
-        click.connect("released", lambda *args: self.get_native().open_note(self.note_id))
-        self.add_controller(click)
-        menu = Gtk.GestureClick(button=3)
-        menu.connect("pressed",
-                     lambda g, n, x, y: self.get_native().create_combined_context_menu(self.note_id, self.card_canvas))
-        self.add_controller(menu)
-
 
 class MainWindow(Adw.ApplicationWindow):
     def __init__(self, db, **kwargs):
-        super().__init__(title="Sticky Notes", default_width=400, default_height=600, **kwargs)
+        super().__init__(title="Ubuntu Sticky Notes", default_width=400, default_height=600, **kwargs)
         self.db = db
         self.stickies = {}
 
@@ -137,9 +27,19 @@ class MainWindow(Adw.ApplicationWindow):
                                                   Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         self.setup_actions()
-        self.root_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        self.set_content(self.root_box)
 
+        # === ИНТЕГРАЦИЯ STACK ===
+        # Создаем стек для переключения страниц
+        self.stack = Gtk.Stack()
+        self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+        self.stack.set_transition_duration(300)
+
+        self.set_content(self.stack)
+
+        # === СТРАНИЦА 1: ГЛАВНАЯ (MAIN) ===
+        self.main_page_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+
+        # Переносим HeaderBar в main_page_box
         header_bar = Adw.HeaderBar()
         header_bar.set_show_end_title_buttons(True)
 
@@ -153,16 +53,18 @@ class MainWindow(Adw.ApplicationWindow):
         btn_trash.connect("clicked", self.on_show_trash)
         header_bar.pack_end(btn_trash)
 
-        self.root_box.append(header_bar)
+        self.main_page_box.append(header_bar)
 
+        # Переносим SearchEntry в main_page_box
         self.search_entry = Gtk.SearchEntry(placeholder_text="Search...")
         self.search_entry.set_margin_start(10)
         self.search_entry.set_margin_end(10)
         self.search_entry.set_margin_top(10)
         self.search_entry.set_margin_bottom(10)
         self.search_entry.connect("search-changed", self.on_search)
-        self.root_box.append(self.search_entry)
+        self.main_page_box.append(self.search_entry)
 
+        # Переносим FlowBox в main_page_box
         self.flowbox = Gtk.FlowBox(
             valign=Gtk.Align.START,
             selection_mode=Gtk.SelectionMode.NONE
@@ -170,10 +72,29 @@ class MainWindow(Adw.ApplicationWindow):
 
         scrolled = Gtk.ScrolledWindow(child=self.flowbox, vexpand=True)
         scrolled.set_has_frame(False)
-        self.root_box.append(scrolled)
+        self.main_page_box.append(scrolled)
+
+        # Добавляем главную страницу в стек
+        self.stack.add_named(self.main_page_box, "main")
+
+        # === СТРАНИЦА 2: КОРЗИНА (TRASH) ===
+        self.trash_view = TrashView(self.db, on_back_callback=self.go_back_to_main)
+        self.stack.add_named(self.trash_view, "trash")
 
         self.refresh_list()
 
+    # === МЕТОДЫ НАВИГАЦИИ ===
+    def on_show_trash(self, btn):
+        """Переключает на экран корзины"""
+        self.trash_view.refresh_list()
+        self.stack.set_visible_child_name("trash")
+
+    def go_back_to_main(self):
+        """Возвращает на главный экран"""
+        self.refresh_list()
+        self.stack.set_visible_child_name("main")
+
+    # === СТАНДАРТНЫЕ МЕТОДЫ ===
     def refresh_list(self):
         while child := self.flowbox.get_first_child():
             self.flowbox.remove(child)
@@ -184,7 +105,6 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.flowbox.set_halign(Gtk.Align.FILL)
         self.flowbox.set_valign(Gtk.Align.START)
-
 
         self.flowbox.set_column_spacing(0)
         self.flowbox.set_row_spacing(10)
@@ -256,10 +176,6 @@ class MainWindow(Adw.ApplicationWindow):
                 break
             child = child.get_next_sibling()
 
-    def on_show_trash(self, btn):
-        from trash_window import TrashWindow
-        TrashWindow(self.db, self).present()
-
     def on_action_delete_manual(self, note_id):
         self.db.move_to_trash(note_id)
         if note_id in self.stickies: self.stickies[note_id].close()
@@ -300,7 +216,6 @@ class MainWindow(Adw.ApplicationWindow):
         popover.set_child(vbox)
         popover.set_parent(target_widget)
         popover.popup()
-
 
     def update_note_color(self, note_id, color, widget, popover):
         self.db.update_color(note_id, color)

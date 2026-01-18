@@ -1,7 +1,6 @@
 import gi
 import json
 from gi.repository import Gtk, Gdk, GLib, GObject, Pango, PangoCairo
-from pygments.lexers import css
 
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
@@ -29,6 +28,10 @@ class StickyWindow(Gtk.Window):
         self.current_color = "#FFF59D"
         self.default_font_size = 12
         self.is_pinned = False
+
+        # Переменные для хранения размеров при загрузке
+        self.saved_width = 300
+        self.saved_height = 380
 
         self.window_css_provider = Gtk.CssProvider()
         css_data = """
@@ -95,6 +98,7 @@ class StickyWindow(Gtk.Window):
 
         GLib.timeout_add(2000, self.save)
         self.connect("close-request", self._on_close_requested)
+        # Подключаем событие отображения окна для восстановления размеров
         self.connect("map", self._on_map)
         self.buffer.connect("notify::cursor-position", self.on_cursor_moved)
 
@@ -113,12 +117,17 @@ class StickyWindow(Gtk.Window):
             return False
 
         GLib.timeout_add(2000, _remove)
+
     def set_keep_above(self, state: bool):
         self.is_pinned = state
 
-
     def _on_map(self, widget):
+        """Вызывается, когда окно отображается на экране"""
         self.set_keep_above(self.is_pinned)
+
+        # Применяем сохраненные размеры
+        if self.saved_width > 0 and self.saved_height > 0:
+            self.set_default_size(self.saved_width, self.saved_height)
 
     def setup_header(self):
         self.header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
@@ -184,7 +193,7 @@ class StickyWindow(Gtk.Window):
         btn_pin.add_css_class("menu-row-btn")
         self.box_pin_content.set_halign(Gtk.Align.START)
 
-        btn_pin.connect("clicked", lambda _: (self.toggle_pin(), popover.popdown()))
+        btn_pin.connect("clicked", lambda _,: (self.toggle_pin(), popover.popdown()))
         main_vbox.append(btn_pin)
 
         box_print = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -195,7 +204,7 @@ class StickyWindow(Gtk.Window):
         btn_print = Gtk.Button(has_frame=False)
         btn_print.set_child(box_print)
         btn_print.add_css_class("menu-row-btn")
-        btn_print.connect("clicked", lambda _: (self.on_print_clicked(None), popover.popdown()))
+        btn_print.connect("clicked", lambda _,: (self.on_print_clicked(None), popover.popdown()))
         main_vbox.append(btn_print)
 
         popover.set_child(main_vbox)
@@ -212,17 +221,13 @@ class StickyWindow(Gtk.Window):
             self.lbl_pin.set_text("Pin note")
 
     def toggle_pin(self):
-        """Переключает режим и показывает уведомление"""
         self.is_pinned = not self.is_pinned
-
         self.update_pin_ui()
-
         if not self._loading:
             try:
                 self.db.set_always_on_top(self.note_id, 1 if self.is_pinned else 0)
             except Exception:
                 pass
-
         if self.is_pinned:
             self.show_toast("Wayland doesn't support pinning")
 
@@ -230,56 +235,34 @@ class StickyWindow(Gtk.Window):
         self.text_view = Gtk.TextView(wrap_mode=Gtk.WrapMode.WORD_CHAR)
         self.text_view.add_css_class("sticky-text-edit")
         self.buffer = self.text_view.get_buffer()
-
         self.buffer.connect("changed", self._on_buffer_changed)
-
         self.scrolled = Gtk.ScrolledWindow(child=self.text_view, vexpand=True)
         self.main_box.append(self.scrolled)
 
     def _on_buffer_changed(self, buffer):
-        """Вызывается при каждом нажатии клавиши"""
         if self.main_window:
             content = self._serialize_buffer()
             self.main_window.update_card_text(self.note_id, content)
 
     def _serialize_buffer(self):
-        """
-        Превращает содержимое буфера (текст + теги) в HEX-строку JSON.
-        Это копия логики сохранения, но без записи в БД.
-        """
         import json
         start_iter = self.buffer.get_start_iter()
         end_iter = self.buffer.get_end_iter()
-
         segments = []
-
         while not start_iter.equal(end_iter):
             next_iter = start_iter.copy()
-            if not next_iter.forward_to_tag_toggle(None):
-                next_iter = end_iter
-
+            if not next_iter.forward_to_tag_toggle(None): next_iter = end_iter
             text = self.buffer.get_text(start_iter, next_iter, True)
-
-            active_tags = []
-            tags = start_iter.get_tags()
-            for tag in tags:
-                active_tags.append(tag.get_property("name"))
-
-            if text:
-                segments.append({"text": text, "tags": active_tags})
-
+            active_tags = [t.get_property("name") for t in start_iter.get_tags()]
+            if text: segments.append({"text": text, "tags": active_tags})
             start_iter = next_iter
-
-        if not segments:
-            segments = [{"text": "", "tags": []}]
-
+        if not segments: segments = [{"text": "", "tags": []}]
         json_str = json.dumps(segments)
         return json_str.encode('utf-8').hex()
 
     def setup_formatting_bar(self):
         self.format_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         self.format_bar.add_css_class("compact-format-bar")
-
         formats = [("<b>B</b>", "bold"), ("<i>I</i>", "italic"), ("<u>U</u>", "underline"),
                    ("<s>S</s>", "strikethrough")]
         for label, tag_name in formats:
@@ -289,7 +272,6 @@ class StickyWindow(Gtk.Window):
             btn.add_css_class("format-btn-tiny")
             btn.connect("clicked", lambda _, t=tag_name: self.apply_format(t))
             self.format_bar.append(btn)
-
         sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
         sep.set_margin_start(4);
         sep.set_margin_end(4)
@@ -305,7 +287,6 @@ class StickyWindow(Gtk.Window):
         self.btn_font_size.add_css_class("format-btn-tiny")
         self.setup_font_size_popover(self.btn_font_size)
         self.format_bar.append(self.btn_font_size)
-
         self.main_box.append(self.format_bar)
 
     def on_cursor_moved(self, buffer, pspec):
@@ -332,6 +313,7 @@ class StickyWindow(Gtk.Window):
 
     def save(self):
         if self._loading: return True
+        # Сохранение контента...
         segments = []
         iter_curr = self.buffer.get_start_iter()
         iter_end = self.buffer.get_end_iter()
@@ -342,14 +324,29 @@ class StickyWindow(Gtk.Window):
             if text:
                 tags = iter_curr.get_tags()
                 tag_names = [t.props.name for t in tags if t.props.name and (
-                            t.props.name in ALLOWED_TAGS or t.props.name.startswith(("text_color_", "font_size_")))]
+                        t.props.name in ALLOWED_TAGS or t.props.name.startswith(("text_color_", "font_size_")))]
                 segments.append({"text": text, "tags": tag_names})
             iter_curr = iter_next
         try:
             json_str = json.dumps(segments)
             hex_data = json_str.encode('utf-8').hex()
-            self.db.update(self.note_id, hex_data, 0, 0, self.get_width(), self.get_height(), self.current_color,
-                           1 if self.is_pinned else 0)
+
+            # --- СОХРАНЕНИЕ РАЗМЕРОВ ---
+            # Получаем текущие размеры окна
+            current_width = self.get_width()
+            current_height = self.get_height()
+
+            # Обновляем запись в БД
+            # Порядок аргументов update: note_id, content, x, y, w, h, color, always_on_top
+            self.db.update(
+                self.note_id,
+                hex_data,
+                0, 0,  # X, Y (пропускаем в Wayland)
+                current_width,
+                current_height,
+                self.current_color,
+                1 if self.is_pinned else 0
+            )
         except Exception:
             pass
         return True
@@ -377,10 +374,25 @@ class StickyWindow(Gtk.Window):
 
                 self.apply_color(row["color"] or "#FFF59D")
 
-                pinned = row["always_on_top"]
-                self.is_pinned = bool(pinned)
-                self.update_pin_ui()
+                # --- ИСПРАВЛЕННАЯ ЗАГРУЗКА РАЗМЕРОВ ---
+                # Используем ключи 'w' и 'h' и безопасный доступ
+                try:
+                    w = row['w']
+                    h = row['h']
+                    self.saved_width = w if w and w > 0 else 300
+                    self.saved_height = h if h and h > 0 else 380
+                except (IndexError, KeyError):
+                    self.saved_width = 300
+                    self.saved_height = 380
 
+                # Загрузка флага pinned
+                try:
+                    pinned = row["always_on_top"]
+                    self.is_pinned = bool(pinned)
+                except (IndexError, KeyError):
+                    self.is_pinned = False
+
+                self.update_pin_ui()
                 self._loading = False
 
     def setup_text_color_popover(self, btn):
@@ -445,33 +457,19 @@ class StickyWindow(Gtk.Window):
 
     def apply_color(self, hex_color):
         self.current_color = hex_color
-
         css = f"""
             window.sticky-window {{ 
                 background-color: {hex_color}; 
                 border-radius: 12px; 
                 border: 1px solid rgba(0,0,0,0.1); 
             }}
-            .sticky-text-edit, 
-            .sticky-text-edit text, 
-            textview, 
-            text {{ 
-                background-color: transparent; 
-                background-image: none; 
-                color: #1a1a1a; 
+            .sticky-text-edit, .sticky-text-edit text, textview, text {{ 
+                background-color: transparent; background-image: none; color: #1a1a1a; 
             }}
-            scrolledwindow {{
-                background-color: transparent;
-                border: none;
-            }}
-            .sticky-main-area {{ 
-                background-color: transparent; 
-                margin: 0; 
-            }}
+            scrolledwindow {{ background-color: transparent; border: none; }}
+            .sticky-main-area {{ background-color: transparent; margin: 0; }}
         """
-
         self.window_css_provider.load_from_data(css.encode('utf-8'))
-
         if self.main_window:
             self.main_window.update_card_color_live(self.note_id, hex_color)
 
