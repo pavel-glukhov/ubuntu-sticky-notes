@@ -1,11 +1,13 @@
 import re
 import json
 import html as html_lib
-from gi.repository import Gtk, Adw, Gio, GObject, GLib, Pango
+from gi.repository import Gtk, Adw, Gio, GObject, GLib, Pango, Gdk
 from sticky_window import StickyWindow
 from datetime import datetime
 from trash_window import TrashView
 from note_card import NoteCard
+from settings_view import SettingsView
+
 STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
 
 class MainWindow(Adw.ApplicationWindow):
@@ -14,7 +16,6 @@ class MainWindow(Adw.ApplicationWindow):
         self.db = db
         self.stickies = {}
 
-        from gi.repository import Gdk
         css_provider = Gtk.CssProvider()
         css = """
         flowbox { padding: 0px; background: transparent; }
@@ -33,13 +34,11 @@ class MainWindow(Adw.ApplicationWindow):
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         self.stack.set_transition_duration(300)
-
         self.set_content(self.stack)
 
-        # === СТРАНИЦА 1: ГЛАВНАЯ (MAIN) ===
+        # 2. ПОДГОТОВКА ГЛАВНОЙ СТРАНИЦЫ (MAIN)
         self.main_page_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        # Переносим HeaderBar в main_page_box
         header_bar = Adw.HeaderBar()
         header_bar.set_show_end_title_buttons(True)
 
@@ -53,9 +52,13 @@ class MainWindow(Adw.ApplicationWindow):
         btn_trash.connect("clicked", self.on_show_trash)
         header_bar.pack_end(btn_trash)
 
+        btn_settings = Gtk.Button(icon_name="emblem-system-symbolic")
+        btn_settings.add_css_class("flat")
+        btn_settings.connect("clicked", self.on_show_settings)
+        header_bar.pack_end(btn_settings)
+
         self.main_page_box.append(header_bar)
 
-        # Переносим SearchEntry в main_page_box
         self.search_entry = Gtk.SearchEntry(placeholder_text="Search...")
         self.search_entry.set_margin_start(10)
         self.search_entry.set_margin_end(10)
@@ -64,7 +67,6 @@ class MainWindow(Adw.ApplicationWindow):
         self.search_entry.connect("search-changed", self.on_search)
         self.main_page_box.append(self.search_entry)
 
-        # Переносим FlowBox в main_page_box
         self.flowbox = Gtk.FlowBox(
             valign=Gtk.Align.START,
             selection_mode=Gtk.SelectionMode.NONE
@@ -74,16 +76,25 @@ class MainWindow(Adw.ApplicationWindow):
         scrolled.set_has_frame(False)
         self.main_page_box.append(scrolled)
 
-        # Добавляем главную страницу в стек
+        # 3. ДОБАВЛЯЕМ ВСЕ СТРАНИЦЫ В СТЕК
+        # Сначала добавляем главную, потом остальные
         self.stack.add_named(self.main_page_box, "main")
 
-        # === СТРАНИЦА 2: КОРЗИНА (TRASH) ===
         self.trash_view = TrashView(self.db, on_back_callback=self.go_back_to_main)
         self.stack.add_named(self.trash_view, "trash")
+
+        self.settings_view = SettingsView(on_back_callback=self.go_back_to_main)
+        self.stack.add_named(self.settings_view, "settings")
+
+        # 4. ФИНАЛЬНЫЙ ШАГ: Явно указываем показать главную страницу
+        self.stack.set_visible_child_name("main")
 
         self.refresh_list()
 
     # === МЕТОДЫ НАВИГАЦИИ ===
+    def on_show_settings(self, btn):
+        self.stack.set_visible_child_name("settings")
+
     def on_show_trash(self, btn):
         """Переключает на экран корзины"""
         self.trash_view.refresh_list()
