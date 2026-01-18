@@ -9,8 +9,13 @@ _______________
 > **This is the new GTK4/Libadwaita version and it is a BETA release.**  
 > It is under active development and may contain bugs or incomplete features.  
 >  
+> ⚠️ **Backward compatibility notice:**  
+> This version is **NOT compatible with stickers created in previous versions** (PyQt6 v1.x).  
+> Existing stickers **will not be migrated automatically**, so please **save or export any important text in advance** before installing this version.  
+>  
 > If you are looking for a **stable version**, please use the original **PyQt6 version (v1.4.1)** available in the  
 > 👉 [legacy branch](https://github.com/pavel-glukhov/ubuntu-sticky-notes/tree/legacy).
+
 
 
 ![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/blob/gtk/pic/example_2.0.0.png)
