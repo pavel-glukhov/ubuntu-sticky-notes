@@ -53,7 +53,7 @@ ________________________________________________________________________________
 
 ``` bash
 # Clone the repository
-git clone https://github.com/pavel-glukhov/ubuntu-sticky-notes.git
+git clone -b legacy https://github.com/pavel-glukhov/ubuntu-sticky-notes.git
 cd ubuntu-sticky-notes
 # Make the script executable
 chmod +x build_deb_package.sh
