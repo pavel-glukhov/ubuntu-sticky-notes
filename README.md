@@ -2,12 +2,16 @@
 
 Modern sticky notes application built with Python, GTK4, and Libadwaita for Ubuntu.
 
-Version: 2.0.0~beta1
+Version: 2.0.0-beta1
 _______________
 
 > [!IMPORTANT]
-> **This is the new GTK4/Libadwaita version.**
-> If you are looking for the original PyQt6 version (v1.4.1), please switch to the [legacy branch](https://github.com/pavel-glukhov/ubuntu-sticky-notes/tree/legacy).
+> **This is the new GTK4/Libadwaita version and it is a BETA release.**  
+> It is under active development and may contain bugs or incomplete features.  
+>  
+> If you are looking for a **stable version**, please use the original **PyQt6 version (v1.4.1)** available in the  
+> 👉 [legacy branch](https://github.com/pavel-glukhov/ubuntu-sticky-notes/tree/legacy).
+
 
 ![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/blob/gtk/pic/example_2.0.0.png)
 
@@ -30,7 +34,7 @@ To install version 2.0.0-beta, run the following commands in your terminal:
 
 ```bash
 # 1. Download the package
-curl -O -L [https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta1/ubuntu-sticky-notes_2.0.0.beta1_all.deb](https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta1/ubuntu-sticky-notes_2.0.0.beta1_all.deb)
+curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta1/ubuntu-sticky-notes_2.0.0.beta1_all.deb
 
 # 2. Update and install system dependencies (GTK4 & Libadwaita)
 sudo apt update
