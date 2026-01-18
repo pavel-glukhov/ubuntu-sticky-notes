@@ -11,7 +11,8 @@ class MainWindow(Adw.ApplicationWindow):
         super().__init__(application=application,
                          title="Ubuntu Sticky Notes",
                          default_width=200,
-                         default_height=500, **kwargs)
+                         default_height=600, **kwargs)
+        self.set_size_request(100, -1)
         self.app = application
         self.db = db
         self.config = application.config
@@ -81,18 +82,28 @@ class MainWindow(Adw.ApplicationWindow):
         self.trash_view = TrashView(self.db, on_back_callback=self.go_back_to_main)
         self.stack.add_named(self.trash_view, "trash")
 
-        self.settings_view = SettingsView(on_back_callback=self.go_back_to_main)
+        self.settings_view = SettingsView(
+            on_back_callback=self.go_back_to_main,
+            on_settings_change_callback=self.on_settings_changed
+        )
         self.stack.add_named(self.settings_view, "settings")
 
         self.stack.set_visible_child_name("main")
-
         self.refresh_list()
+
+    def on_settings_changed(self):
+        print("DEBUG: Applying settings live...")
+        from config.config_manager import ConfigManager
+        self.config = ConfigManager.load()
+
+        for note_id, sticky_window in self.stickies.items():
+            if hasattr(sticky_window, 'reload_config'):
+                sticky_window.reload_config(self.config)
 
     def on_show_settings(self, btn):
         self.stack.set_visible_child_name("settings")
 
     def on_show_trash(self, btn):
-        """Переключает на экран корзины"""
         self.trash_view.refresh_list()
         self.stack.set_visible_child_name("trash")
 

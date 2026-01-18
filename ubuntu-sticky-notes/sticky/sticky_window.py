@@ -58,8 +58,6 @@ class StickyWindow(Gtk.Window):
 
         self.window_css_provider = Gtk.CssProvider()
 
-        # Исправлено имя переменной с css_data на css для единообразия,
-        # либо используем css_data везде. Здесь использую css_data.
         css_data = f"""
         .resize-handle {{
             background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%);
@@ -112,7 +110,6 @@ class StickyWindow(Gtk.Window):
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }}
         """
-        # !!! ВОТ ЗДЕСЬ БЫЛА ОШИБКА. Теперь передаем правильную переменную css_data
         self.window_css_provider.load_from_data(css_data.encode())
         self.get_style_context().add_provider(
             self.window_css_provider,
@@ -169,55 +166,103 @@ class StickyWindow(Gtk.Window):
         return False
 
     def setup_formatting_bar(self):
-        # Используем уменьшенный размер (18 * scale)
+        if hasattr(self, 'format_bar'):
+            while child := self.format_bar.get_first_child():
+                self.format_bar.remove(child)
+        else:
+            self.format_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+            self.format_bar.add_css_class("compact-format-bar")
+            self.main_box.append(self.format_bar)
         scale = self.scale
         icon_size = int(18 * scale)
 
         self.format_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         self.format_bar.add_css_class("compact-format-bar")
 
-        # Кнопки тегов
-        formats = [("<b>B</b>", "bold"), ("<i>I</i>", "italic"), ("<u>U</u>", "underline"),
-                   ("<s>S</s>", "strikethrough")]
+        # --- ПОЛУЧАЕМ НАСТРОЙКИ КНОПОК ---
+        # Если ключа 'formatting' нет в конфиге, считаем все кнопки включенными (True)
+        fmt_config = self.config.get("formatting", {})
+        if not isinstance(fmt_config, dict): fmt_config = {}
+
+        # 1. Основные кнопки (Bold, Italic, etc.)
+        formats = [
+            ("<b>B</b>", "bold"),
+            ("<i>I</i>", "italic"),
+            ("<u>U</u>", "underline"),
+            ("<s>S</s>", "strikethrough")
+        ]
+
+        has_any_btn = False
+
         for label, tag_name in formats:
-            btn = Gtk.Button(has_frame=False)
-            lbl = Gtk.Label(label=label, use_markup=True)
-            btn.set_child(lbl)
-            btn.add_css_class("format-btn-tiny")
-            btn.set_size_request(icon_size, icon_size)
-            btn.connect("clicked", lambda _, t=tag_name: self.apply_format(t))
-            self.format_bar.append(btn)
+            # Проверяем конфиг для каждой кнопки
+            if fmt_config.get(tag_name, True):
+                btn = Gtk.Button(has_frame=False)
+                lbl = Gtk.Label(label=label, use_markup=True)
+                btn.set_child(lbl)
+                btn.add_css_class("format-btn-tiny")
+                btn.set_size_request(icon_size, icon_size)
+                btn.connect("clicked", lambda _, t=tag_name: self.apply_format(t))
+                self.format_bar.append(btn)
+                has_any_btn = True
 
-        # Кнопка списка
-        btn_list = Gtk.Button(has_frame=False)
-        btn_list.set_child(Gtk.Label(label="≡"))
-        btn_list.add_css_class("format-btn-tiny")
-        btn_list.set_size_request(icon_size, icon_size)
-        btn_list.connect("clicked", lambda _: self.toggle_bullet_list())
-        self.format_bar.append(btn_list)
+        # 2. Кнопка списка
+        if fmt_config.get("list", True):
+            btn_list = Gtk.Button(has_frame=False)
+            btn_list.set_child(Gtk.Label(label="≡"))
+            btn_list.add_css_class("format-btn-tiny")
+            btn_list.set_size_request(icon_size, icon_size)
+            btn_list.connect("clicked", lambda _: self.toggle_bullet_list())
+            self.format_bar.append(btn_list)
+            has_any_btn = True
 
-        sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
-        sep_margin = int(3 * scale)
-        sep.set_margin_start(sep_margin)
-        sep.set_margin_end(sep_margin)
-        self.format_bar.append(sep)
+        # 3. Разделитель (добавляем только если есть кнопки до и после)
+        show_color = fmt_config.get("text_color", True)
+        show_font = fmt_config.get("font_size", True)
 
-        # Цвет текста
-        btn_text_color = Gtk.MenuButton(has_frame=False)
-        btn_text_color.set_child(Gtk.Label(label='<span foreground="#444">A</span>', use_markup=True))
-        btn_text_color.add_css_class("format-btn-tiny")
-        btn_text_color.set_size_request(icon_size, icon_size)
-        self.setup_text_color_popover(btn_text_color)
-        self.format_bar.append(btn_text_color)
+        if has_any_btn and (show_color or show_font):
+            sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+            sep_margin = int(3 * scale)
+            sep.set_margin_start(sep_margin)
+            sep.set_margin_end(sep_margin)
+            self.format_bar.append(sep)
 
-        # РАЗМЕР ШРИФТА
-        self.btn_font_size = Gtk.MenuButton(label=str(self.default_font_size), has_frame=False)
-        self.btn_font_size.add_css_class("format-btn-tiny")
-        self.btn_font_size.set_size_request(int(icon_size * 1.5), icon_size)
-        self.setup_font_size_popover(self.btn_font_size)
-        self.format_bar.append(self.btn_font_size)
+        # 4. Цвет текста
+        if show_color:
+            btn_text_color = Gtk.MenuButton(has_frame=False)
+            btn_text_color.set_child(Gtk.Label(label='<span foreground="#444">A</span>', use_markup=True))
+            btn_text_color.add_css_class("format-btn-tiny")
+            btn_text_color.set_size_request(icon_size, icon_size)
+            self.setup_text_color_popover(btn_text_color)
+            self.format_bar.append(btn_text_color)
+
+        # 5. Размер шрифта
+        if show_font:
+            self.btn_font_size = Gtk.MenuButton(label=str(self.default_font_size), has_frame=False)
+            self.btn_font_size.add_css_class("format-btn-tiny")
+            self.btn_font_size.set_size_request(int(icon_size * 1.5), icon_size)
+            self.setup_font_size_popover(self.btn_font_size)
+            self.format_bar.append(self.btn_font_size)
 
         self.main_box.append(self.format_bar)
+
+    def reload_config(self, new_config):
+        self.config = new_config
+
+        # Обновляем масштаб (если он изменился)
+        try:
+            raw_scale = self.config.get("ui_scale", 1.0)
+            self.scale = float(str(raw_scale)[:4])
+            if not (0.5 <= self.scale <= 3.0): self.scale = 1.0
+        except:
+            self.scale = 1.0
+
+        # Пересоздаем панель кнопок с учетом новых галочек
+        self.setup_formatting_bar()
+
+        # Обновляем CSS (для применения нового масштаба шрифтов, если он изменился)
+        # Применяем текущий цвет заново, чтобы перегенерировать CSS строку с новыми размерами
+        self.apply_color(self.current_color)
 
     def toggle_bullet_list(self):
         BULLET_CHAR = " • "
@@ -339,16 +384,14 @@ class StickyWindow(Gtk.Window):
         main_vbox.append(lbl_color)
 
         grid = Gtk.Grid(column_spacing=6, row_spacing=6)
-        # Уменьшенные кнопки цвета
         btn_size = int(22 * self.scale)
-        radius = int(btn_size / 2)
 
         for i, color in enumerate(STICKY_COLORS):
             b = Gtk.Button()
             b.set_size_request(btn_size, btn_size)
             cp = Gtk.CssProvider()
             cp.load_from_data(
-                f"button {{ background-color: {color}; border-radius: {radius}px; border: 1px solid rgba(0,0,0,0.1); padding: 0; }}".encode())
+                f"button {{ background-color: {color}; border-radius: 50%; min-width: {btn_size}px; min-height: {btn_size}px; border: 1px solid rgba(0,0,0,0.1); padding: 0; }}".encode())
             b.get_style_context().add_provider(cp, Gtk.STYLE_PROVIDER_PRIORITY_USER)
             b.connect("clicked", lambda _, c=color: (self.apply_color(c), popover.popdown()))
             grid.attach(b, i % 4, i // 4, 1, 1)
@@ -648,5 +691,4 @@ class StickyWindow(Gtk.Window):
             )
         except Exception as e:
             print(f"DEBUG: Save minimized to content/size only: {e}")
-
         return True

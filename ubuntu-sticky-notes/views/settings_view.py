@@ -3,10 +3,17 @@ from config.config_manager import ConfigManager
 
 
 class SettingsView(Gtk.Box):
-    def __init__(self, on_back_callback):
+    def __init__(self, on_back_callback, on_settings_change_callback=None):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.on_back_callback = on_back_callback
+        self.on_settings_change_callback = on_settings_change_callback
+
         self.config = ConfigManager.load()
+
+        # --- ЗАЩИТА ОТ ПОВРЕЖДЕННОГО КОНФИГА ---
+        if "formatting" not in self.config or not isinstance(self.config["formatting"], dict):
+            print("DEBUG: Formatting config was missing or corrupted. Resetting to defaults.")
+            self.config["formatting"] = {}
 
         # --- Header ---
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -54,16 +61,13 @@ class SettingsView(Gtk.Box):
             title="Interface Scale",
             subtitle="Upscale UI elements and fonts (e.g. 1.25 = 125%)"
         )
-        self.scale_spin = Gtk.SpinButton.new_with_range(0.5, 2.0, 0.05)
-
+        self.scale_spin = Gtk.SpinButton.new_with_range(0.5, 3.0, 0.05)
         raw_scale = self.config.get("ui_scale", 1.0)
         try:
             clean_scale = float(str(raw_scale)[:4])
         except (ValueError, TypeError):
             clean_scale = 1.0
-
         self.scale_spin.set_value(clean_scale)
-
         self.scale_spin.set_valign(Gtk.Align.CENTER)
         row_scale.add_suffix(self.scale_spin)
         list_box.append(row_scale)
@@ -73,14 +77,50 @@ class SettingsView(Gtk.Box):
         self.db_entry = Gtk.Entry(text=str(self.config.get("db_path", "")))
         self.db_entry.set_hexpand(True)
         self.db_entry.set_valign(Gtk.Align.CENTER)
-
         btn_browse = Gtk.Button(icon_name="folder-open-symbolic")
         btn_browse.set_valign(Gtk.Align.CENTER)
         btn_browse.connect("clicked", self.on_browse_db)
-
         row_db.add_suffix(self.db_entry)
         row_db.add_suffix(btn_browse)
         list_box.append(row_db)
+
+        # === FORMATTING TOOLBAR ===
+        fmt_expander = Adw.ExpanderRow(title="Formatting Buttons", subtitle="Choose which buttons to show on stickers")
+
+        self.switches = {}
+
+        buttons_to_toggle = [
+            ("bold", "Bold (B)"),
+            ("italic", "Italic (I)"),
+            ("underline", "Underline (U)"),
+            ("strikethrough", "Strikethrough (S)"),
+            ("list", "Bullet List"),
+            ("text_color", "Text Color"),
+            ("font_size", "Font Size")
+        ]
+
+        current_fmt = self.config["formatting"]
+
+        for key, name in buttons_to_toggle:
+            row = Adw.ActionRow(title=name)
+
+            # --- ИЗМЕНЕНИЕ: Используем CheckButton (галочку) вместо Switch (тумблера) ---
+            switch = Gtk.CheckButton()
+            switch.set_valign(Gtk.Align.CENTER)
+
+            is_active = current_fmt.get(key, True)
+            switch.set_active(is_active)
+
+            row.add_suffix(switch)
+
+            # Позволяет переключать галочку кликом по всей строке
+            row.set_activatable_widget(switch)
+
+            fmt_expander.add_row(row)
+            self.switches[key] = switch
+
+        list_box.append(fmt_expander)
+        # =======================================
 
         # --- Save Button ---
         footer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -94,7 +134,7 @@ class SettingsView(Gtk.Box):
         btn_save.connect("clicked", self.save_settings)
         footer.append(btn_save)
 
-        lbl_hint = Gtk.Label(label="Changes require application restart")
+        lbl_hint = Gtk.Label(label="Changes apply immediately")
         lbl_hint.add_css_class("caption")
         lbl_hint.set_margin_top(10)
         footer.append(lbl_hint)
@@ -121,6 +161,8 @@ class SettingsView(Gtk.Box):
         dialog.open(self.get_native(), None, callback)
 
     def save_settings(self, _):
+        print("DEBUG: Saving settings process started...")
+
         new_backend = "wayland" if self.backend_dropdown.get_selected() == 0 else "x11"
         new_db_path = self.db_entry.get_text()
 
@@ -134,5 +176,22 @@ class SettingsView(Gtk.Box):
         self.config["db_path"] = new_db_path
         self.config["ui_scale"] = final_scale
 
-        ConfigManager.save(self.config)
-        print(f"Settings saved: {final_scale}, {new_backend}")
+        # Собираем данные
+        fmt_settings = {}
+        for key, switch in self.switches.items():
+            state = switch.get_active()
+            fmt_settings[key] = state
+
+        self.config["formatting"] = fmt_settings
+
+        print(f"DEBUG: Data to save: Scale={final_scale}, Formatting={fmt_settings}")
+
+        try:
+            ConfigManager.save(self.config)
+            print("DEBUG: ConfigManager.save() called successfully.")
+        except Exception as e:
+            print(f"ERROR: Failed to save config: {e}")
+
+        # Обновляем интерфейс без перезапуска
+        if self.on_settings_change_callback:
+            self.on_settings_change_callback()
