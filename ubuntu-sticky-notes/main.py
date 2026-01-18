@@ -2,8 +2,6 @@ import sys
 import os
 from datetime import datetime
 
-# 1. ESSENTIAL: Set environment variables BEFORE importing Gtk/Gdk
-# We add the current directory to sys.path so modules like config_manager are found correctly
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
@@ -13,7 +11,6 @@ try:
 
     config = ConfigManager.load()
 
-    # Check for CLI flags first, then config file
     if "--x11" in sys.argv or config.get("backend") == "x11":
         os.environ["GDK_BACKEND"] = "x11"
         print("SYSTEM: Environment forced to X11")
@@ -23,7 +20,6 @@ try:
 except Exception as e:
     print(f"CRITICAL: Config pre-init error: {e}")
 
-# 2. STANDARD IMPORTS
 import threading
 import subprocess
 import gi
@@ -33,19 +29,18 @@ gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Adw, Gdk, GLib
 from db.db_controller import NotesDB
-from config.config import get_app_paths
+from config.config import get_app_paths, load_app_info
 from views.main_view.main_view import MainWindow
 
 
 class StickyApp(Adw.Application):
+    APP_INFO = load_app_info()
     def __init__(self):
-        super().__init__(application_id="com.ubuntu_sticky_notes")
+        super().__init__(application_id=self.APP_INFO.get('service_name'))
 
-        # Load config to initialize the database
         self.config = ConfigManager.load()
         db_path = self.config.get("db_path")
 
-        # Resolve default path if config is empty
         if not db_path:
             paths = get_app_paths()
             db_path = paths["DB_PATH"]
@@ -130,6 +125,15 @@ class StickyApp(Adw.Application):
         display = Gdk.Display.get_default()
         print(f"DEBUG: Actual running backend: {display.__class__.__name__}")
 
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        icons_dir = os.path.join(base_dir, "resources", "icons")
+
+        if os.path.exists(icons_dir):
+            icon_theme = Gtk.IconTheme.get_for_display(display)
+            icon_theme.add_search_path(icons_dir)
+
+            Gtk.Window.set_default_icon_name("app")
+
         self.load_css()
 
         if not self.win:
@@ -204,27 +208,23 @@ class StickyApp(Adw.Application):
 
         dialog = Adw.AboutWindow(
             transient_for=self.win if self.win.get_visible() else None,
-            application_name=info.get("app_name", "Sticky Notes"),
-            version=info.get("version", "1.0.0"),
-            developer_name=info.get("author", "Unknown"),
+            application_name=info.get("app_name"),
+            version=info.get("version"),
+            developer_name=info.get("author"),
             license_type=Gtk.License.MIT_X11,
-            website=info.get("website", ""),
-            comments=info.get("description", ""),
-            # Using service_name as the icon name
-            application_icon=info.get("service_name", "accessories-text-editor")
+            website=info.get("website"),
+            comments=info.get("description"),
+            application_icon="app"
         )
 
         # Set developers list (replaces debug info for contact)
-        author = info.get("author", "Unknown")
-        email = info.get("email", "")
+        author = info.get("author")
+        email = info.get("email")
         if email:
             dialog.set_developers([f"{author} <{email}>"])
         else:
             dialog.set_developers([author])
-
-        # Add copyright string
         dialog.set_copyright(f"© {datetime.now().year} {author}")
-
         dialog.present()
 
     def quit_app(self):
@@ -233,7 +233,6 @@ class StickyApp(Adw.Application):
             self.tray_process.terminate()
 
         if self.win:
-            # Close all active sticky windows
             for note_id in list(self.win.stickies.keys()):
                 win = self.win.stickies.get(note_id)
                 if win: win.close()
@@ -243,5 +242,8 @@ class StickyApp(Adw.Application):
 
 
 if __name__ == "__main__":
+    APP_INFO = load_app_info()
+    GLib.set_prgname(APP_INFO.get('service_name'))
+    GLib.set_application_name(APP_INFO.get('app_name'))
     app = StickyApp()
     sys.exit(app.run(sys.argv))

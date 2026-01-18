@@ -27,7 +27,7 @@ def load_app_info(path: str = APP_INFO_FILE) -> dict:
         return {
             "name": "Ubuntu Sticky Notes",
             "service_name": "ubuntu-sticky-notes",
-            "version": "1.0.0"
+            "version": "0.0.0"
         }
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -49,7 +49,7 @@ def get_app_paths() -> dict:
             os.path.expanduser("~"),
             ".local",
             "share",
-            app_info.get("service_name", "ubuntu-sticky-notes")
+            app_info.get("service_name")
         )
         db_path = os.path.join(data_dir, "stickies.db")
 

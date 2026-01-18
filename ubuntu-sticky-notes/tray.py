@@ -19,7 +19,6 @@ from gi.repository import Gtk as Gtk3
 
 APP_ID = "stickynotes-tray"
 
-
 def get_custom_icon():
     base_dir = os.path.dirname(os.path.abspath(__file__))
 

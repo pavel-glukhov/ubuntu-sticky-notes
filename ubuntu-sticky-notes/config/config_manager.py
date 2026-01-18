@@ -2,7 +2,7 @@ import os
 import json
 
 CONF_DIR = os.path.expanduser("~/.config/ubuntu-sticky-notes")
-CONF_PATH = os.path.join(CONF_DIR, "config.json")  # Лучше переименовать в .json
+CONF_PATH = os.path.join(CONF_DIR, "config.json")
 
 
 class ConfigManager:
@@ -25,13 +25,11 @@ class ConfigManager:
 
     @classmethod
     def load(cls):
-        # Создаем папку, если нет
         if not os.path.exists(CONF_DIR):
             os.makedirs(CONF_DIR, exist_ok=True)
 
         defaults = cls.get_defaults()
 
-        # Если файла нет, создаем дефолтный
         if not os.path.exists(CONF_PATH):
             cls.save(defaults)
             return defaults
@@ -39,13 +37,9 @@ class ConfigManager:
         try:
             with open(CONF_PATH, "r", encoding="utf-8") as f:
                 loaded_config = json.load(f)
-
-            # Объединяем загруженное с дефолтным (чтобы новые ключи появились в старом конфиге)
-            # Это называется "Soft merge"
             config = defaults.copy()
             config.update(loaded_config)
 
-            # Дополнительная защита: убедимся, что formatting это словарь
             if not isinstance(config.get("formatting"), dict):
                 config["formatting"] = defaults["formatting"]
 
@@ -59,7 +53,6 @@ class ConfigManager:
     def save(config_dict):
         try:
             with open(CONF_PATH, "w", encoding="utf-8") as f:
-                # indent=4 делает файл читаемым человеком
                 json.dump(config_dict, f, ensure_ascii=False, indent=4)
             print(f"DEBUG: Config saved to {CONF_PATH}")
         except Exception as e:
