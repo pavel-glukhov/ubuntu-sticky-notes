@@ -9,9 +9,9 @@ _______________
 > **This is the new GTK4/Libadwaita version.**
 > If you are looking for the original PyQt6 version (v1.4.1), please switch to the [legacy branch](https://github.com/pavel-glukhov/ubuntu-sticky-notes/tree/legacy).
 
-![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/blob/main/pic/example_2.0.0.png)
-![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/blob/main/pic/example_2.0.0_settings.png)
-![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/blob/main/pic/example_2.0.0_trash.png)
+![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/blob/gtk/pic/example_2.0.0.png)
+![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/blob/gtk/pic/example_2.0.0_settings.png)
+![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/blob/gtk/pic/example_2.0.0_trash.png)
 ## ✨ Features
 - 📝 **Modern UI** – Built with GTK4 and Libadwaita for a native GNOME look and feel, featuring smooth animations and an adaptive design that matches your system theme.
 - 🎨 **Rich Formatting** – Express yourself with bold, italic, underline, and strikethrough text. Customize individual notes with various font sizes and a wide palette of text colors.
