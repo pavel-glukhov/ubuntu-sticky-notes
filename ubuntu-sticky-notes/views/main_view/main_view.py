@@ -7,18 +7,22 @@ from views.trash_view import TrashView
 STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
 
 class MainWindow(Adw.ApplicationWindow):
-    def __init__(self, db, **kwargs):
-        super().__init__(title="Ubuntu Sticky Notes", default_width=400, default_height=600, **kwargs)
+    def __init__(self, db, application, **kwargs):
+        super().__init__(application=application,
+                         title="Ubuntu Sticky Notes",
+                         default_width=200,
+                         default_height=500, **kwargs)
+        self.app = application
         self.db = db
+        self.config = application.config
         self.stickies = {}
 
         css_provider = Gtk.CssProvider()
         css = """
-        flowbox { padding: 0px; background: transparent; }
-        flowboxchild { padding: 0px; margin: 0px; border: none; min-width: 0px; outline: none; }
-        /* Убираем фон самого окна, чтобы было чисто */
-        window.background { background-color: #ffffff; } 
-        """
+                flowbox { padding: 0px; background: transparent; }
+                flowboxchild { padding: 0px; margin: 0px; border: none; min-width: 0px; outline: none; }
+                window.background { background-color: #ffffff; } 
+                """
         css_provider.load_from_data(css.encode())
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider,
                                                   Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
@@ -93,7 +97,6 @@ class MainWindow(Adw.ApplicationWindow):
         self.stack.set_visible_child_name("trash")
 
     def go_back_to_main(self):
-        """Возвращает на главный экран"""
         self.refresh_list()
         self.stack.set_visible_child_name("main")
 
@@ -158,7 +161,6 @@ class MainWindow(Adw.ApplicationWindow):
             child = child.get_next_sibling()
 
     def update_card_text(self, note_id, serialized_content):
-        """Мгновенно обновляет текст карточки"""
         child = self.flowbox.get_first_child()
         while child:
             card = child.get_child()
@@ -169,7 +171,6 @@ class MainWindow(Adw.ApplicationWindow):
             child = child.get_next_sibling()
 
     def update_card_color_live(self, note_id, color):
-        """Мгновенно красит карточку"""
         child = self.flowbox.get_first_child()
         while child:
             card = child.get_child()

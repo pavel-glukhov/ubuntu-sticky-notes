@@ -34,13 +34,12 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw, Gdk, GLib
 from db.db_controller import NotesDB
 from config.config import get_app_paths
-# Import MainWindow after environment is ready
 from views.main_view.main_view import MainWindow
 
 
 class StickyApp(Adw.Application):
     def __init__(self):
-        super().__init__(application_id="com.ubuntu.stickynotes")
+        super().__init__(application_id="com.ubuntu_sticky_notes")
 
         # Load config to initialize the database
         self.config = ConfigManager.load()
@@ -75,8 +74,59 @@ class StickyApp(Adw.Application):
             except Exception as e:
                 print(f"ERROR: CSS loading failed: {e}")
 
+    def apply_ui_scale(self):
+        try:
+            raw_scale = self.config.get("ui_scale", 1.0)
+            scale = float(str(raw_scale)[:4])
+
+            if not (0.5 <= scale <= 2.0): scale = 1.0
+        except (ValueError, TypeError):
+            scale = 1.0
+
+        new_dpi = int(96 * scale * 1024)
+        settings = Gtk.Settings.get_default()
+        if settings:
+            settings.set_property("gtk-xft-dpi", new_dpi)
+
+        custom_css = f"""
+        * {{ 
+            -gtk-icon-size: {int(16 * scale)}px; 
+        }}
+        .sticky-text-edit {{
+            font-size: {int(12 * scale)}pt;
+        }}
+        """
+        provider = Gtk.CssProvider()
+        provider.load_from_data(custom_css.encode())
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        print(f"SYSTEM: UI Scale applied: {scale}")
+
+    def apply_custom_scale_css(self, scale):
+        css = f"""
+        * {{ 
+            -gtk-icon-size: {int(16 * scale)}px;
+        }}
+        .sticky-window {{
+            font-size: {10 * scale}pt;
+        }}
+        """
+        provider = Gtk.CssProvider()
+        provider.load_from_data(css.encode())
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
     def do_activate(self):
-        """Initializes the main application window."""
+        """Инициализация главного окна приложения."""
+        self.config = ConfigManager.load()
+        self.apply_ui_scale()
+
         display = Gdk.Display.get_default()
         print(f"DEBUG: Actual running backend: {display.__class__.__name__}")
 

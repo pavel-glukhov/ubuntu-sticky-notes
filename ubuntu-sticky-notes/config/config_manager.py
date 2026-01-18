@@ -3,6 +3,11 @@ import os
 CONF_DIR = os.path.expanduser("~/.config/ubuntu-sticky-notes")
 CONF_PATH = os.path.join(CONF_DIR, "usn.conf")
 
+DEFAULT_CONFIG = {
+    "backend": "wayland",
+    "db_path": "",
+    "ui_scale": 1.0,  # 1.0 = 100%, 1.25 = 125%
+}
 
 class ConfigManager:
     @staticmethod
@@ -14,8 +19,6 @@ class ConfigManager:
 
     @classmethod
     def load(cls):
-        """Загружает конфиг или создает его с дефолтными значениями"""
-
         if not os.path.exists(CONF_DIR):
             os.makedirs(CONF_DIR, exist_ok=True)
 
@@ -37,16 +40,14 @@ class ConfigManager:
 
         return config
 
-    @classmethod
-    def save(cls, config):
-        """Сохраняет переданный словарь в файл usn.conf"""
-        try:
-            if not os.path.exists(CONF_DIR):
-                os.makedirs(CONF_DIR, exist_ok=True)
+    @staticmethod
+    def save(config_dict):
+        lines = []
+        for key, value in config_dict.items():
+            lines.append(f"{key}={value}")
 
+        try:
             with open(CONF_PATH, "w") as f:
-                for k, v in config.items():
-                    f.write(f"{k}={v}\n")
-            print(f"Config saved to {CONF_PATH}")
+                f.write("\n".join(lines))
         except Exception as e:
-            print(f"Error saving config: {e}")
+            print(f"ERROR: Could not save config: {e}")

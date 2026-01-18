@@ -18,62 +18,101 @@ ALLOWED_TAGS = {"bold", "italic", "underline", "strikethrough"}
 
 class StickyWindow(Gtk.Window):
     def __init__(self, db, note_id=None, main_window=None):
-        super().__init__(decorated=False, default_width=300, default_height=380)
+        super().__init__()
+
+        self.set_application(main_window.app)
+        self.set_decorated(False)
+        self.set_default_size(280, 350)
         self.add_css_class("sticky-window")
+        self.set_title(f"Sticky Note {note_id}")
+        self.set_name(f"sticky-note-{note_id}")
 
         self.db = db
         self.note_id = note_id
         self.main_window = main_window
+        self.config = getattr(main_window, 'config', {})
         self._loading = True
         self.current_color = "#FFF59D"
         self.default_font_size = 12
         self.is_pinned = False
-
-        # Переменные для хранения размеров при загрузке
         self.saved_width = 300
         self.saved_height = 380
 
+        # --- РАСЧЕТ МАСШТАБА ---
+        try:
+            raw_scale = self.config.get("ui_scale", 1.0)
+            self.scale = float(str(raw_scale)[:4])
+            if not (0.5 <= self.scale <= 3.0): self.scale = 1.0
+        except:
+            self.scale = 1.0
+
+        # --- КОМПАКТНЫЕ РАЗМЕРЫ (-30%) ---
+        scale = self.scale
+        btn_size = int(18 * scale)
+        header_h = int(22 * scale)
+        font_tiny = int(9 * scale)
+        handle_s = int(16 * scale)
+        toast_pad_v = int(6 * scale)
+        toast_pad_h = int(12 * scale)
+        menu_pad = int(4 * scale)
+
         self.window_css_provider = Gtk.CssProvider()
-        css_data = """
-                .format-btn-tiny {
-                    padding: 0px; margin: 0px;
-                    min-height: 20px; min-width: 20px;
-                    border-radius: 2px;
-                    font-size: 10px;
-                    background: transparent;
-                    color: rgba(0,0,0,0.7);
-                    border: none;
-                }
-                .format-btn-tiny:hover { background: rgba(0,0,0,0.05); color: black; }
 
-                .compact-format-bar { padding: 1px; background: rgba(255,255,255,0.4); }
+        # Исправлено имя переменной с css_data на css для единообразия,
+        # либо используем css_data везде. Здесь использую css_data.
+        css_data = f"""
+        .resize-handle {{
+            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%);
+            border-bottom-right-radius: 12px;
+            min-width: {handle_s}px;
+            min-height: {handle_s}px;
+        }}
+        .resize-handle:hover {{
+            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.2) 50%);
+        }}
+        .format-btn-tiny {{
+            padding: 0px; margin: 0px;
+            min-height: {btn_size}px; 
+            min-width: {btn_size}px;
+            border-radius: 2px;
+            font-size: {font_tiny}px;
+            background: transparent;
+            color: rgba(0,0,0,0.7);
+            border: none;
+        }}
+        .format-btn-tiny:hover {{ background: rgba(0,0,0,0.05); color: black; }}
+        .compact-format-bar {{ padding: 1px; background: rgba(255,255,255,0.4); }}
 
-                .header-btn-subtle {
-                    opacity: 0; transition: opacity 0.2s ease;
-                    padding: 0 4px; margin: 0 1px;
-                    min-height: 20px; min-width: 20px;
-                    background: transparent; border: none; color: rgba(0,0,0,0.5);
-                }
-                .sticky-window:hover .header-btn-subtle { opacity: 1; }
-                .header-btn-subtle:hover { background: rgba(0,0,0,0.1); color: black; }
+        .compact-header {{
+            min-height: {header_h}px;
+        }}
 
-                .menu-box { padding: 10px; }
-                .menu-label { font-size: 10px; font-weight: bold; color: grey; margin-bottom: 5px; }
-                .menu-row-btn { background: transparent; border: none; padding: 5px; border-radius: 4px; }
-                .menu-row-btn:hover { background: rgba(0,0,0,0.05); }
+        .header-btn-subtle {{
+            opacity: 0; transition: opacity 0.2s ease;
+            padding: 0 {int(3 * scale)}px; margin: 0 1px;
+            min-height: {btn_size}px; min-width: {btn_size}px;
+            background: transparent; border: none; color: rgba(0,0,0,0.5);
+        }}
+        .sticky-window:hover .header-btn-subtle {{ opacity: 1; }}
+        .header-btn-subtle:hover {{ background: rgba(0,0,0,0.1); color: black; }}
 
-                /* СТИЛЬ ДЛЯ СООБЩЕНИЯ (TOAST) */
-                .toast-msg {
-                    background-color: #262626; /* Темно-серый фон */
-                    color: #ffffff;            /* Белый текст */
-                    border-radius: 20px;       /* Округлые края (таблетка) */
-                    padding: 8px 16px;         /* Отступы внутри */
-                    margin: 20px;              /* Отступы от краев */
-                    font-size: 13px;
-                    font-weight: bold;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3); /* Тень для читаемости */
-                }
-                """
+        .menu-box {{ padding: {int(8 * scale)}px; }}
+        .menu-label {{ font-size: {font_tiny}px; font-weight: bold; color: grey; margin-bottom: 4px; }}
+        .menu-row-btn {{ background: transparent; border: none; padding: {menu_pad}px; border-radius: 4px; }}
+        .menu-row-btn:hover {{ background: rgba(0,0,0,0.05); }}
+
+        .toast-msg {{
+            background-color: #262626;
+            color: #ffffff;
+            border-radius: 20px;
+            padding: {toast_pad_v}px {toast_pad_h}px;
+            margin: {int(20 * scale)}px;
+            font-size: {int(12 * scale)}px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }}
+        """
+        # !!! ВОТ ЗДЕСЬ БЫЛА ОШИБКА. Теперь передаем правильную переменную css_data
         self.window_css_provider.load_from_data(css_data.encode())
         self.get_style_context().add_provider(
             self.window_css_provider,
@@ -96,22 +135,139 @@ class StickyWindow(Gtk.Window):
         self.load_from_db()
         self._loading = False
 
+        # Контроллер для работы со списками
+        key_controller = Gtk.EventControllerKey()
+        key_controller.connect("key-pressed", self._on_key_pressed)
+        self.text_view.add_controller(key_controller)
+
         GLib.timeout_add(2000, self.save)
         self.connect("close-request", self._on_close_requested)
         self.connect("notify::default-width", lambda *_: self.save())
         self.connect("notify::default-height", lambda *_: self.save())
-        # Подключаем событие отображения окна для восстановления размеров
         self.connect("map", self._on_map)
         self.buffer.connect("notify::cursor-position", self.on_cursor_moved)
 
+    def is_x11(self):
+        display = Gdk.Display.get_default()
+        return "X11" in display.__class__.__name__
+
+    def _on_key_pressed(self, controller, keyval, keycode, state):
+        BULLET_CHAR = " • "
+        if keyval == Gdk.KEY_Return:
+            cursor_iter = self.buffer.get_iter_at_mark(self.buffer.get_insert())
+            line_start = cursor_iter.copy()
+            line_start.set_line_offset(0)
+            line_text = self.buffer.get_text(line_start, cursor_iter, False)
+
+            if line_text.startswith(BULLET_CHAR):
+                if line_text.strip() == BULLET_CHAR.strip():
+                    self.buffer.delete(line_start, cursor_iter)
+                    self.buffer.insert(cursor_iter, "\n")
+                else:
+                    self.buffer.insert(cursor_iter, f"\n{BULLET_CHAR}")
+                return True
+        return False
+
+    def setup_formatting_bar(self):
+        # Используем уменьшенный размер (18 * scale)
+        scale = self.scale
+        icon_size = int(18 * scale)
+
+        self.format_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        self.format_bar.add_css_class("compact-format-bar")
+
+        # Кнопки тегов
+        formats = [("<b>B</b>", "bold"), ("<i>I</i>", "italic"), ("<u>U</u>", "underline"),
+                   ("<s>S</s>", "strikethrough")]
+        for label, tag_name in formats:
+            btn = Gtk.Button(has_frame=False)
+            lbl = Gtk.Label(label=label, use_markup=True)
+            btn.set_child(lbl)
+            btn.add_css_class("format-btn-tiny")
+            btn.set_size_request(icon_size, icon_size)
+            btn.connect("clicked", lambda _, t=tag_name: self.apply_format(t))
+            self.format_bar.append(btn)
+
+        # Кнопка списка
+        btn_list = Gtk.Button(has_frame=False)
+        btn_list.set_child(Gtk.Label(label="≡"))
+        btn_list.add_css_class("format-btn-tiny")
+        btn_list.set_size_request(icon_size, icon_size)
+        btn_list.connect("clicked", lambda _: self.toggle_bullet_list())
+        self.format_bar.append(btn_list)
+
+        sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
+        sep_margin = int(3 * scale)
+        sep.set_margin_start(sep_margin)
+        sep.set_margin_end(sep_margin)
+        self.format_bar.append(sep)
+
+        # Цвет текста
+        btn_text_color = Gtk.MenuButton(has_frame=False)
+        btn_text_color.set_child(Gtk.Label(label='<span foreground="#444">A</span>', use_markup=True))
+        btn_text_color.add_css_class("format-btn-tiny")
+        btn_text_color.set_size_request(icon_size, icon_size)
+        self.setup_text_color_popover(btn_text_color)
+        self.format_bar.append(btn_text_color)
+
+        # РАЗМЕР ШРИФТА
+        self.btn_font_size = Gtk.MenuButton(label=str(self.default_font_size), has_frame=False)
+        self.btn_font_size.add_css_class("format-btn-tiny")
+        self.btn_font_size.set_size_request(int(icon_size * 1.5), icon_size)
+        self.setup_font_size_popover(self.btn_font_size)
+        self.format_bar.append(self.btn_font_size)
+
+        self.main_box.append(self.format_bar)
+
+    def toggle_bullet_list(self):
+        BULLET_CHAR = " • "
+        res = self.buffer.get_selection_bounds()
+        if res:
+            start, end = res
+        else:
+            start = self.buffer.get_iter_at_mark(self.buffer.get_insert())
+            end = start.copy()
+
+        start.set_line_offset(0)
+        if not end.ends_line():
+            end.forward_to_line_end()
+
+        text = self.buffer.get_text(start, end, False)
+        lines = text.split('\n')
+        new_lines = []
+
+        for line in lines:
+            if line.startswith(BULLET_CHAR):
+                new_lines.append(line[len(BULLET_CHAR):])
+            else:
+                new_lines.append(f"{BULLET_CHAR}{line}")
+
+        self.buffer.begin_user_action()
+        self.buffer.delete(start, end)
+        self.buffer.insert(start, '\n'.join(new_lines))
+        self.buffer.end_user_action()
+        self.text_view.grab_focus()
+
+    def on_cursor_moved(self, buffer, pspec):
+        if not hasattr(self, 'btn_font_size'):
+            return
+        cursor_iter = buffer.get_iter_at_mark(buffer.get_insert())
+        tags = cursor_iter.get_tags()
+        current_size = self.default_font_size
+        for tag in tags:
+            name = tag.get_property("name")
+            if name and name.startswith("font_size_"):
+                try:
+                    current_size = int(name.replace("font_size_", ""))
+                except ValueError:
+                    pass
+        self.btn_font_size.set_label(str(current_size))
+
     def show_toast(self, message):
-        """Показывает красивое сообщение по центру окна"""
         lbl = Gtk.Label(label=message)
         lbl.add_css_class("toast-msg")
-
         lbl.set_halign(Gtk.Align.CENTER)
         lbl.set_valign(Gtk.Align.CENTER)
-
         self.overlay.add_overlay(lbl)
 
         def _remove():
@@ -124,30 +280,26 @@ class StickyWindow(Gtk.Window):
         self.is_pinned = state
 
     def _on_map(self, widget):
-        """Вызывается при отрисовке окна"""
         self.set_keep_above(self.is_pinned)
 
-        # 1. Восстанавливаем размеры (работает везде)
+        # 1. Восстанавливаем размер (это работает везде)
         if self.saved_width > 0 and self.saved_height > 0:
             self.set_default_size(self.saved_width, self.saved_height)
 
-        # 2. Восстанавливаем позицию (Работает ТОЛЬКО на X11)
+        # 2. Восстанавливаем позицию (только X11)
         display = Gdk.Display.get_default()
         if "X11" in display.__class__.__name__:
             try:
                 row = self.db.get(self.note_id)
-                if row and (row['x'] != 0 or row['y'] != 0):
-                    # В GTK4 нет move(), но можно попробовать запросить позицию через
-                    # подсказки для оконного менеджера при создании.
-                    # К сожалению, GTK4 очень агрессивно блокирует это.
-                    # Если позиция критична, используйте set_focus_on_map
-                    pass
+                # X11 restore logic placeholder
+                pass
             except Exception as e:
                 print(f"Position restore error: {e}")
 
     def setup_header(self):
         self.header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.header_box.set_size_request(-1, 24)
+        # Компактный заголовок (22px base)
+        self.header_box.set_size_request(-1, int(22 * self.scale))
         self.header_box.add_css_class("compact-header")
 
         btn_add = Gtk.Button(label="+", has_frame=False)
@@ -159,6 +311,9 @@ class StickyWindow(Gtk.Window):
         spacer.set_can_target(True)
         header_drag = Gtk.GestureDrag()
         header_drag.connect("drag-begin", self._on_header_drag_begin)
+        header_drag.connect("drag-update", self._on_header_drag_update)
+        header_drag.connect("drag-end", self._on_header_drag_end)
+
         spacer.add_controller(header_drag)
         self.header_box.append(spacer)
 
@@ -172,12 +327,11 @@ class StickyWindow(Gtk.Window):
         btn_close.add_css_class("header-btn-subtle")
         btn_close.connect("clicked", self._on_close_clicked)
         self.header_box.append(btn_close)
-
         self.main_box.append(self.header_box)
 
     def setup_main_menu(self, btn):
         popover = Gtk.Popover()
-        main_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        main_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=int(4 * self.scale))
         main_vbox.add_css_class("menu-box")
 
         lbl_color = Gtk.Label(label="Color", xalign=0)
@@ -185,17 +339,20 @@ class StickyWindow(Gtk.Window):
         main_vbox.append(lbl_color)
 
         grid = Gtk.Grid(column_spacing=6, row_spacing=6)
+        # Уменьшенные кнопки цвета
+        btn_size = int(22 * self.scale)
+        radius = int(btn_size / 2)
+
         for i, color in enumerate(STICKY_COLORS):
             b = Gtk.Button()
-            b.set_size_request(26, 26)
+            b.set_size_request(btn_size, btn_size)
             cp = Gtk.CssProvider()
             cp.load_from_data(
-                f"button {{ background-color: {color}; border-radius: 13px; border: 1px solid rgba(0,0,0,0.1); padding: 0; }}".encode())
+                f"button {{ background-color: {color}; border-radius: {radius}px; border: 1px solid rgba(0,0,0,0.1); padding: 0; }}".encode())
             b.get_style_context().add_provider(cp, Gtk.STYLE_PROVIDER_PRIORITY_USER)
             b.connect("clicked", lambda _, c=color: (self.apply_color(c), popover.popdown()))
             grid.attach(b, i % 4, i // 4, 1, 1)
         main_vbox.append(grid)
-
         main_vbox.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
 
         self.box_pin_content = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -208,7 +365,6 @@ class StickyWindow(Gtk.Window):
         btn_pin.set_child(self.box_pin_content)
         btn_pin.add_css_class("menu-row-btn")
         self.box_pin_content.set_halign(Gtk.Align.START)
-
         btn_pin.connect("clicked", lambda _,: (self.toggle_pin(), popover.popdown()))
         main_vbox.append(btn_pin)
 
@@ -216,7 +372,6 @@ class StickyWindow(Gtk.Window):
         box_print.append(Gtk.Image.new_from_icon_name("printer-symbolic"))
         box_print.append(Gtk.Label(label="Print note"))
         box_print.set_halign(Gtk.Align.START)
-
         btn_print = Gtk.Button(has_frame=False)
         btn_print.set_child(box_print)
         btn_print.add_css_class("menu-row-btn")
@@ -225,7 +380,6 @@ class StickyWindow(Gtk.Window):
 
         popover.set_child(main_vbox)
         btn.set_popover(popover)
-
         self.update_pin_ui()
 
     def update_pin_ui(self):
@@ -235,17 +389,6 @@ class StickyWindow(Gtk.Window):
         else:
             self.img_pin.set_from_icon_name("view-pin-symbolic")
             self.lbl_pin.set_text("Pin note")
-
-    def toggle_pin(self):
-        self.is_pinned = not self.is_pinned
-        self.update_pin_ui()
-        if not self._loading:
-            try:
-                self.db.set_always_on_top(self.note_id, 1 if self.is_pinned else 0)
-            except Exception:
-                pass
-        if self.is_pinned:
-            self.show_toast("Wayland doesn't support pinning")
 
     def setup_text_area(self):
         self.text_view = Gtk.TextView(wrap_mode=Gtk.WrapMode.WORD_CHAR)
@@ -273,50 +416,7 @@ class StickyWindow(Gtk.Window):
             if text: segments.append({"text": text, "tags": active_tags})
             start_iter = next_iter
         if not segments: segments = [{"text": "", "tags": []}]
-        json_str = json.dumps(segments)
-        return json_str.encode('utf-8').hex()
-
-    def setup_formatting_bar(self):
-        self.format_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-        self.format_bar.add_css_class("compact-format-bar")
-        formats = [("<b>B</b>", "bold"), ("<i>I</i>", "italic"), ("<u>U</u>", "underline"),
-                   ("<s>S</s>", "strikethrough")]
-        for label, tag_name in formats:
-            btn = Gtk.Button(has_frame=False)
-            lbl = Gtk.Label(label=label, use_markup=True)
-            btn.set_child(lbl)
-            btn.add_css_class("format-btn-tiny")
-            btn.connect("clicked", lambda _, t=tag_name: self.apply_format(t))
-            self.format_bar.append(btn)
-        sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
-        sep.set_margin_start(4);
-        sep.set_margin_end(4)
-        self.format_bar.append(sep)
-
-        btn_text_color = Gtk.MenuButton(has_frame=False)
-        btn_text_color.set_child(Gtk.Label(label='<span foreground="#444">A</span>', use_markup=True))
-        btn_text_color.add_css_class("format-btn-tiny")
-        self.setup_text_color_popover(btn_text_color)
-        self.format_bar.append(btn_text_color)
-
-        self.btn_font_size = Gtk.MenuButton(label=str(self.default_font_size), has_frame=False)
-        self.btn_font_size.add_css_class("format-btn-tiny")
-        self.setup_font_size_popover(self.btn_font_size)
-        self.format_bar.append(self.btn_font_size)
-        self.main_box.append(self.format_bar)
-
-    def on_cursor_moved(self, buffer, pspec):
-        cursor_iter = buffer.get_iter_at_mark(buffer.get_insert())
-        tags = cursor_iter.get_tags()
-        current_size = self.default_font_size
-        for tag in tags:
-            name = tag.get_property("name")
-            if name and name.startswith("font_size_"):
-                try:
-                    current_size = int(name.replace("font_size_", ""))
-                except ValueError:
-                    pass
-        self.btn_font_size.set_label(str(current_size))
+        return json.dumps(segments).encode('utf-8').hex()
 
     def setup_tags(self):
         self.tag_table = self.buffer.get_tag_table()
@@ -327,62 +427,6 @@ class StickyWindow(Gtk.Window):
         for color in TEXT_COLORS: self.buffer.create_tag(f"text_color_{color}", foreground=color)
         for size in FONT_SIZES: self.buffer.create_tag(f"font_size_{size}", size=size * Pango.SCALE)
 
-    def save(self):
-        if self._loading: return True
-
-        # 1. Сериализация контента
-        segments = []
-        iter_curr = self.buffer.get_start_iter()
-        iter_end = self.buffer.get_end_iter()
-        while not iter_curr.equal(iter_end):
-            iter_next = iter_curr.copy()
-            if not iter_next.forward_to_tag_toggle(None): iter_next = iter_end
-            text = self.buffer.get_text(iter_curr, iter_next, False)
-            if text:
-                tags = iter_curr.get_tags()
-                tag_names = [t.props.name for t in tags if t.props.name and (
-                        t.props.name in ALLOWED_TAGS or t.props.name.startswith(("text_color_", "font_size_")))]
-                segments.append({"text": text, "tags": tag_names})
-            iter_curr = iter_next
-
-        try:
-            json_str = json.dumps(segments)
-            hex_data = json_str.encode('utf-8').hex()
-
-            # 2. Получение размеров (работает везде)
-            current_width = self.get_width()
-            current_height = self.get_height()
-
-            # 3. Получение координат (Логика для X11)
-            current_x, current_y = 0, 0
-
-            # Проверяем, какой бэкенд используется
-            display = Gdk.Display.get_default()
-            backend_name = display.__class__.__name__  # 'GdkWaylandDisplay' или 'GdkX11Display'
-
-            if "X11" in backend_name:
-                # В GTK4 нет прямого способа получить X/Y окна из-за абстракции поверхностей.
-                # Самый простой способ для X11 — это хранить их, если мы их программно меняли,
-                # либо оставить 0, если используется стандартный оконный менеджер.
-                # Если вы используете --x11, размеры сохранятся, а позицию менеджер X11 запомнит сам.
-                pass
-
-            # 4. Сохранение в базу
-            self.db.update(
-                self.note_id,
-                hex_data,
-                current_x,
-                current_y,
-                current_width,
-                current_height,
-                self.current_color,
-                1 if self.is_pinned else 0
-            )
-        except Exception as e:
-            print(f"Save error: {e}")
-
-        return True
-
     def load_from_db(self):
         if self.note_id:
             row = self.db.get(self.note_id)
@@ -391,8 +435,7 @@ class StickyWindow(Gtk.Window):
                 content = row["content"] or ""
                 self.buffer.set_text("")
                 try:
-                    json_bytes = bytes.fromhex(content)
-                    segments = json.loads(json_bytes.decode('utf-8'))
+                    segments = json.loads(bytes.fromhex(content).decode('utf-8'))
                     iter_pos = self.buffer.get_start_iter()
                     for seg in segments:
                         text = seg.get("text", "")
@@ -406,21 +449,11 @@ class StickyWindow(Gtk.Window):
 
                 self.apply_color(row["color"] or "#FFF59D")
 
-                # --- ИСПРАВЛЕННАЯ ЗАГРУЗКА РАЗМЕРОВ ---
-                # Используем ключи 'w' и 'h' и безопасный доступ
-                try:
-                    w = row['w']
-                    h = row['h']
-                    self.saved_width = w if w and w > 0 else 300
-                    self.saved_height = h if h and h > 0 else 380
-                except (IndexError, KeyError):
-                    self.saved_width = 300
-                    self.saved_height = 380
+                self.saved_width = row['w'] if row['w'] else 300
+                self.saved_height = row['h'] if row['h'] else 380
 
-                # Загрузка флага pinned
                 try:
-                    pinned = row["always_on_top"]
-                    self.is_pinned = bool(pinned)
+                    self.is_pinned = bool(row["always_on_top"])
                 except (IndexError, KeyError):
                     self.is_pinned = False
 
@@ -430,16 +463,19 @@ class StickyWindow(Gtk.Window):
     def setup_text_color_popover(self, btn):
         popover = Gtk.Popover()
         grid = Gtk.Grid(column_spacing=2, row_spacing=2)
-        grid.set_margin_top(4);
-        grid.set_margin_bottom(4);
-        grid.set_margin_start(4);
+        grid.set_margin_top(4)
+        grid.set_margin_bottom(4)
+        grid.set_margin_start(4)
         grid.set_margin_end(4)
+
+        btn_size = int(18 * self.scale)  # Компактные кнопки цвета
+
         for i, color in enumerate(TEXT_COLORS):
-            b = Gtk.Button()
-            b.set_size_request(20, 20)
+            b = Gtk.Button();
+            b.set_size_request(btn_size, btn_size)
             cp = Gtk.CssProvider()
             cp.load_from_data(
-                f"button {{ background-color: {color}; border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); min-height: 20px; min-width: 20px; padding: 0; }}".encode())
+                f"button {{ background-color: {color}; border-radius: 3px; border: 1px solid rgba(0,0,0,0.2); min-height: {btn_size}px; min-width: {btn_size}px; padding: 0; }}".encode())
             b.get_style_context().add_provider(cp, Gtk.STYLE_PROVIDER_PRIORITY_USER)
             b.connect("clicked", lambda _, c=color: (self.apply_text_color(c), popover.popdown()))
             grid.attach(b, i % 4, i // 4, 1, 1)
@@ -460,12 +496,12 @@ class StickyWindow(Gtk.Window):
             start, end = res
             for s in FONT_SIZES: self.buffer.remove_tag_by_name(f"font_size_{s}", start, end)
             self.buffer.apply_tag_by_name(f"font_size_{size}", start, end)
-        self.btn_font_size.set_label(str(size))
+        if hasattr(self, 'btn_font_size'): self.btn_font_size.set_label(str(size))
         self.text_view.grab_focus()
 
     def setup_font_size_popover(self, btn):
         popover = Gtk.Popover()
-        scrolled = Gtk.ScrolledWindow(max_content_height=200, propagate_natural_height=True)
+        scrolled = Gtk.ScrolledWindow(max_content_height=int(200 * self.scale), propagate_natural_height=True)
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         for size in FONT_SIZES:
             b = Gtk.Button(label=f"{size}", has_frame=False)
@@ -489,36 +525,80 @@ class StickyWindow(Gtk.Window):
 
     def apply_color(self, hex_color):
         self.current_color = hex_color
-        css = f"""
-            window.sticky-window {{ 
-                background-color: {hex_color}; 
-                border-radius: 12px; 
-                border: 1px solid rgba(0,0,0,0.1); 
-            }}
-            .sticky-text-edit, .sticky-text-edit text, textview, text {{ 
-                background-color: transparent; background-image: none; color: #1a1a1a; 
-            }}
-            scrolledwindow {{ background-color: transparent; border: none; }}
-            .sticky-main-area {{ background-color: transparent; margin: 0; }}
-        """
+        css = f"window.sticky-window {{ background-color: {hex_color}; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); }} .sticky-text-edit, .sticky-text-edit text, textview, text {{ background-color: transparent; color: #1a1a1a; }} scrolledwindow {{ background-color: transparent; border: none; }} .sticky-main-area {{ background-color: transparent; margin: 0; }}"
         self.window_css_provider.load_from_data(css.encode('utf-8'))
-        if self.main_window:
-            self.main_window.update_card_color_live(self.note_id, hex_color)
+        if self.main_window: self.main_window.update_card_color_live(self.note_id, hex_color)
 
     def setup_resize_handle(self):
         self.resize_handle = Gtk.Box()
-        self.resize_handle.set_size_request(15, 15)
-        self.resize_handle.set_halign(Gtk.Align.END);
+        size = int(16 * self.scale)  # Компактная ручка
+        self.resize_handle.set_size_request(size, size)
+        self.resize_handle.set_halign(Gtk.Align.END)
         self.resize_handle.set_valign(Gtk.Align.END)
+        self.resize_handle.add_css_class("resize-handle")
+
         self.resize_handle.set_cursor(Gdk.Cursor.new_from_name("se-resize", None))
-        resize_drag = Gtk.GestureDrag()
-        resize_drag.connect("drag-begin", self._on_resize_drag_begin)
-        self.resize_handle.add_controller(resize_drag)
+
+        click_gest = Gtk.GestureClick()
+        click_gest.connect("pressed", self._on_resize_pressed)
+        self.resize_handle.add_controller(click_gest)
+
         self.overlay.add_overlay(self.resize_handle)
+
+    def _on_resize_pressed(self, gesture, n_press, x, y):
+        surface = self.get_native().get_surface()
+        if surface:
+            size = int(16 * self.scale)
+            window_x = self.get_width() - (size - x)
+            window_y = self.get_height() - (size - y)
+
+            device = gesture.get_device()
+            surface.begin_resize(
+                Gdk.SurfaceEdge.SOUTH_EAST,
+                device,
+                Gdk.BUTTON_PRIMARY,
+                window_x,
+                window_y,
+                Gdk.CURRENT_TIME
+            )
 
     def _on_header_drag_begin(self, gesture, x, y):
         surface = self.get_native().get_surface()
-        if surface: surface.begin_move(gesture.get_device(), Gdk.BUTTON_PRIMARY, x, y, Gdk.CURRENT_TIME)
+        if not surface:
+            return
+
+        surface.begin_move(
+            gesture.get_device(),
+            Gdk.BUTTON_PRIMARY,
+            x,
+            y,
+            Gdk.CURRENT_TIME
+        )
+
+        if self.is_x11():
+            self._drag_offset_x = x
+            self._drag_offset_y = y
+
+    def _on_header_drag_update(self, gesture, dx, dy):
+        if not self.is_x11():
+            return
+
+        display = Gdk.Display.get_default()
+        seat = display.get_default_seat()
+        pointer = seat.get_pointer()
+
+        # X11 only
+        screen, px, py = pointer.get_position()
+
+        self.last_x = int(px - self._drag_offset_x)
+        self.last_y = int(py - self._drag_offset_y)
+
+    def _on_header_drag_end(self, gesture, dx, dy):
+        if not self.is_x11():
+            return
+
+        self.saved_x = getattr(self, "last_x", 0)
+        self.saved_y = getattr(self, "last_y", 0)
 
     def _on_resize_drag_begin(self, gesture, x, y):
         surface = self.get_native().get_surface()
@@ -532,13 +612,12 @@ class StickyWindow(Gtk.Window):
         self.close()
 
     def _on_close_requested(self, window):
-        if self.main_window and self.note_id in self.main_window.stickies:
-            del self.main_window.stickies[self.note_id]
+        if self.main_window and self.note_id in self.main_window.stickies: del self.main_window.stickies[self.note_id]
         return False
 
     def on_print_clicked(self, _):
         print_op = Gtk.PrintOperation()
-        print_op.connect("draw-page", self._draw_page)
+        print_op.connect("draw-page", self._draw_page);
         print_op.set_n_pages(1)
         print_op.run(Gtk.PrintOperationAction.PRINT_DIALOG, self)
 
@@ -546,7 +625,28 @@ class StickyWindow(Gtk.Window):
         cr = context.get_cairo_context()
         layout = context.create_pango_layout()
         start, end = self.buffer.get_bounds()
-        text = self.buffer.get_text(start, end, False)
-        layout.set_text(text, -1)
+        layout.set_text(self.buffer.get_text(start, end, False), -1)
         layout.set_width(int(context.get_width() * Pango.SCALE))
         PangoCairo.show_layout(cr, layout)
+
+    def save(self):
+        if self._loading or not self.get_visible():
+            return True
+
+        try:
+            hex_data = self._serialize_buffer()
+            w = self.get_width()
+            h = self.get_height()
+
+            self.db.update(
+                self.note_id,
+                hex_data,
+                0, 0,
+                w, h,
+                self.current_color,
+                1 if self.is_pinned else 0
+            )
+        except Exception as e:
+            print(f"DEBUG: Save minimized to content/size only: {e}")
+
+        return True

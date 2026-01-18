@@ -3,34 +3,39 @@ import os
 import signal
 import gi
 
-
 try:
     gi.require_version('Gtk', '3.0')
     gi.require_version('AyatanaAppIndicator3', '0.1')
+    from gi.repository import AyatanaAppIndicator3 as AppIndicator
 except ValueError:
-    sys.exit(1)
+    try:
+        gi.require_version('AppIndicator3', '0.1')
+        from gi.repository import AppIndicator3 as AppIndicator
+    except ValueError:
+        print("Tray indicator library not found.")
+        sys.exit(1)
 
-from gi.repository import Gtk as Gtk3, AyatanaAppIndicator3 as AppIndicator
+from gi.repository import Gtk as Gtk3
+
+APP_ID = "stickynotes-tray"
 
 
-def get_icon_paths():
-    """
-    Вычисляет путь к иконке.
-    """
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    icons_dir = os.path.join(current_dir, "..", "resources", "icons")
-    icons_dir = os.path.abspath(icons_dir)
+def get_custom_icon():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    if not os.path.exists(icons_dir):
-        icons_dir = os.path.join(current_dir, "resources", "icons")
+    possible_paths = [
+        os.path.join(base_dir, "resources", "icons"),
+        os.path.join(base_dir, "..", "resources", "icons")
+    ]
 
-    icon_filename = "app.png"
-    full_path = os.path.join(icons_dir, icon_filename)
+    for icon_dir in possible_paths:
+        icon_dir = os.path.abspath(icon_dir)
+        full_path = os.path.join(icon_dir, "app.png")
 
-    if os.path.exists(full_path):
-        return icons_dir, "app"
-    else:
-        return None, None
+        if os.path.exists(full_path):
+            return icon_dir, "app"
+
+    return None, None
 
 
 def main():
@@ -74,19 +79,20 @@ def main():
     menu.show_all()
 
     # --- Icon Setup ---
-    icon_dir, icon_name = get_icon_paths()
+    icon_dir, icon_name = get_custom_icon()
 
     if icon_dir and icon_name:
         indicator = AppIndicator.Indicator.new(
-            "stickynotes-tray",
+            APP_ID,
             icon_name,
             AppIndicator.IndicatorCategory.APPLICATION_STATUS
         )
         indicator.set_icon_theme_path(icon_dir)
     else:
+        print("Warning: app.png not found, using system icon.")
         indicator = AppIndicator.Indicator.new(
-            "stickynotes-tray",
-            "text-editor",  # Fallback icon
+            APP_ID,
+            "accessories-text-editor",
             AppIndicator.IndicatorCategory.APPLICATION_STATUS
         )
 

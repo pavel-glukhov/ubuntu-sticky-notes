@@ -7,7 +7,7 @@ class NoteCard(Gtk.Box):
     def __init__(self, note, db, menu_callback=None):
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.note_id = note["id"]
-        self.menu_callback = menu_callback  # Функция для вызова меню (опционально)
+        self.menu_callback = menu_callback
 
         self.set_margin_top(0)
         self.set_margin_bottom(0)

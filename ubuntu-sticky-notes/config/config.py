@@ -60,7 +60,7 @@ def get_app_paths() -> dict:
         "APP_INFO": app_info,
         "DATA_DIR": os.path.dirname(db_path),
         "DB_PATH": db_path,
-        "CONFIG_PATH": os.path.expanduser("~/.config/ubuntu-sticky-notes/usn.conf"),
+        "CONFIG_PATH": os.path.expanduser("~/.config/ubuntu-sticky-notes/config.conf"),
         "ICONS_DIR": ICONS_DIR,
         "APP_ICON_PATH": os.path.join(ICONS_DIR, "app.png"),
         "STYLE_CSS": STYLE_CSS,

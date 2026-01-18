@@ -1,4 +1,4 @@
-from gi.repository import Gtk, Adw, Gio
+from gi.repository import Gtk, Adw, Gio, Gdk
 from config.config_manager import ConfigManager
 
 
@@ -10,9 +10,9 @@ class SettingsView(Gtk.Box):
 
         # --- Header ---
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        header.set_margin_top(10)
+        header.set_margin_top(10);
         header.set_margin_bottom(10)
-        header.set_margin_start(10)
+        header.set_margin_start(10);
         header.set_margin_end(10)
 
         btn_back = Gtk.Button(label="<<- Back")
@@ -31,14 +31,14 @@ class SettingsView(Gtk.Box):
 
         list_box = Gtk.ListBox()
         list_box.set_selection_mode(Gtk.SelectionMode.NONE)
-        list_box.set_margin_top(15)
+        list_box.set_margin_top(15);
         list_box.set_margin_bottom(15)
-        list_box.set_margin_start(15)
+        list_box.set_margin_start(15);
         list_box.set_margin_end(15)
         list_box.add_css_class("boxed-list")
         content_scroll.set_child(list_box)
 
-        # Row 1: Backend (Wayland / X11)
+        # Row 1: Backend
         row_backend = Adw.ActionRow(
             title="Display Backend",
             subtitle="Wayland (Default) or X11 (For sticker positioning)"
@@ -49,9 +49,28 @@ class SettingsView(Gtk.Box):
         row_backend.add_suffix(self.backend_dropdown)
         list_box.append(row_backend)
 
-        # Row 2: DB Path
+        # Row 2: UI Scale
+        row_scale = Adw.ActionRow(
+            title="Interface Scale",
+            subtitle="Upscale UI elements and fonts (e.g. 1.25 = 125%)"
+        )
+        self.scale_spin = Gtk.SpinButton.new_with_range(0.5, 2.0, 0.05)
+
+        raw_scale = self.config.get("ui_scale", 1.0)
+        try:
+            clean_scale = float(str(raw_scale)[:4])
+        except (ValueError, TypeError):
+            clean_scale = 1.0
+
+        self.scale_spin.set_value(clean_scale)
+
+        self.scale_spin.set_valign(Gtk.Align.CENTER)
+        row_scale.add_suffix(self.scale_spin)
+        list_box.append(row_scale)
+
+        # Row 3: DB Path
         row_db = Adw.ActionRow(title="Database Path")
-        self.db_entry = Gtk.Entry(text=self.config.get("db_path", ""))
+        self.db_entry = Gtk.Entry(text=str(self.config.get("db_path", "")))
         self.db_entry.set_hexpand(True)
         self.db_entry.set_valign(Gtk.Align.CENTER)
 
@@ -65,9 +84,9 @@ class SettingsView(Gtk.Box):
 
         # --- Save Button ---
         footer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        footer.set_margin_top(20)
+        footer.set_margin_top(20);
         footer.set_margin_bottom(20)
-        footer.set_margin_start(20)
+        footer.set_margin_start(20);
         footer.set_margin_end(20)
 
         btn_save = Gtk.Button(label="Save Settings")
@@ -84,7 +103,6 @@ class SettingsView(Gtk.Box):
 
     def on_browse_db(self, btn):
         dialog = Gtk.FileDialog(title="Select Database File")
-
         filters = Gio.ListStore.new(Gtk.FileFilter)
         db_filter = Gtk.FileFilter()
         db_filter.set_name("Database files")
@@ -104,9 +122,17 @@ class SettingsView(Gtk.Box):
 
     def save_settings(self, _):
         new_backend = "wayland" if self.backend_dropdown.get_selected() == 0 else "x11"
+        new_db_path = self.db_entry.get_text()
+
+        try:
+            new_scale = float(self.scale_spin.get_value())
+            final_scale = round(new_scale, 2)
+        except:
+            final_scale = 1.0
+
         self.config["backend"] = new_backend
-        self.config["db_path"] = self.db_entry.get_text()
+        self.config["db_path"] = new_db_path
+        self.config["ui_scale"] = final_scale
 
         ConfigManager.save(self.config)
-
-        print("Settings saved to usn.conf")
+        print(f"Settings saved: {final_scale}, {new_backend}")
