@@ -1,21 +1,29 @@
 import sys
 import os
+from datetime import datetime
 
-# СТРОГО ПЕРВЫМ ДЕЛОМ: Настройка бэкенда
-# Импортируем ConfigManager локально, чтобы не задеть библиотеки GTK раньше времени
+# 1. ESSENTIAL: Set environment variables BEFORE importing Gtk/Gdk
+# We add the current directory to sys.path so modules like config_manager are found correctly
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 try:
     from config_manager import ConfigManager
 
     config = ConfigManager.load()
-    if config.get("backend") == "x11":
+
+    # Check for CLI flags first, then config file
+    if "--x11" in sys.argv or config.get("backend") == "x11":
         os.environ["GDK_BACKEND"] = "x11"
-        print("SYSTEM: Environment set to X11")
+        print("SYSTEM: Environment forced to X11")
     else:
         os.environ["GDK_BACKEND"] = "wayland"
         print("SYSTEM: Environment set to Wayland")
 except Exception as e:
-    print(f"Config pre-init error: {e}")
+    print(f"CRITICAL: Config pre-init error: {e}")
 
+# 2. STANDARD IMPORTS
 import threading
 import subprocess
 import gi
@@ -25,17 +33,23 @@ gi.require_version('Adw', '1')
 
 from gi.repository import Gtk, Adw, Gdk, GLib
 from notes_db import NotesDB
-from main_window import MainWindow
 from config import get_app_paths
+# Import MainWindow after environment is ready
+from views.main_view import MainWindow
 
 
 class StickyApp(Adw.Application):
     def __init__(self):
         super().__init__(application_id="com.ubuntu.stickynotes")
 
-        # Загружаем настройки повторно для использования внутри приложения
+        # Load config to initialize the database
         self.config = ConfigManager.load()
         db_path = self.config.get("db_path")
+
+        # Resolve default path if config is empty
+        if not db_path:
+            paths = get_app_paths()
+            db_path = paths["DB_PATH"]
 
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         self.db = NotesDB(path=db_path)
@@ -44,33 +58,27 @@ class StickyApp(Adw.Application):
         self.tray_process = None
 
     def load_css(self):
+        """Loads custom CSS styles."""
         paths = get_app_paths()
-        possible_paths = [
-            os.path.join(paths["DATA_DIR"], "..", "resources", "style.css"),
-            os.path.join(os.path.dirname(__file__), "resources", "style.css"),
-            os.path.join(os.path.dirname(__file__), "..", "resources", "style.css")
-        ]
+        css_path = paths.get("STYLE_CSS")
 
-        css_path = None
-        for p in possible_paths:
-            if os.path.exists(p):
-                css_path = os.path.abspath(p)
-                break
-
-        if css_path:
+        if css_path and os.path.exists(css_path):
             css_provider = Gtk.CssProvider()
             try:
                 css_provider.load_from_path(css_path)
                 Gtk.StyleContext.add_provider_for_display(
-                    Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+                    Gdk.Display.get_default(),
+                    css_provider,
+                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
                 )
-                print(f"CSS loaded from: {css_path}")
+                print(f"DEBUG: CSS loaded from {css_path}")
             except Exception as e:
-                print(f"CSS Error: {e}")
+                print(f"ERROR: CSS loading failed: {e}")
 
     def do_activate(self):
+        """Initializes the main application window."""
         display = Gdk.Display.get_default()
-        print(f"ACTUAL RUNNING BACKEND: {display.__class__.__name__}")
+        print(f"DEBUG: Actual running backend: {display.__class__.__name__}")
 
         self.load_css()
 
@@ -82,12 +90,17 @@ class StickyApp(Adw.Application):
         self.win.present()
 
     def on_window_close_request(self, window):
+        """Hides the window instead of closing it (minimize to tray)."""
         window.set_visible(False)
         return True
 
     def start_tray_subprocess(self):
+        """Starts the GTK3 tray icon as a separate process to avoid library conflicts."""
         script_path = os.path.join(os.path.dirname(__file__), "tray.py")
         env = os.environ.copy()
+        # Ensure tray knows which display to use
+        if "GDK_BACKEND" in os.environ:
+            del env["GDK_BACKEND"]  # Let tray decide its own backend (usually X11)
 
         self.tray_process = subprocess.Popen(
             [sys.executable, script_path],
@@ -102,6 +115,7 @@ class StickyApp(Adw.Application):
         self.monitor_thread.start()
 
     def monitor_tray_output(self):
+        """Monitors commands sent from the tray process via stdout."""
         if not self.tray_process or not self.tray_process.stdout:
             return
 
@@ -119,7 +133,7 @@ class StickyApp(Adw.Application):
                 elif cmd == "about":
                     GLib.idle_add(self.show_about_dialog)
         except Exception as e:
-            print(f"Tray monitor stopped: {e}")
+            print(f"DEBUG: Tray monitor thread terminated: {e}")
 
     def show_main_window(self):
         if self.win:
@@ -127,27 +141,49 @@ class StickyApp(Adw.Application):
             self.win.present()
 
     def open_all_stickers(self):
+        """Opens all existing stickers from the database."""
         notes = self.db.all_notes(full=False)
         for note in notes:
             self.win.open_note(note['id'])
 
     def show_about_dialog(self):
         if not self.win: return
+
+        paths = get_app_paths()
+        info = paths.get("APP_INFO", {})
+
         dialog = Adw.AboutWindow(
             transient_for=self.win if self.win.get_visible() else None,
-            application_name="Sticky Notes",
-            developer_name="Me",
-            version="1.0",
-            copyright="© 2024",
-            license_type=Gtk.License.GPL_3_0
+            application_name=info.get("app_name", "Sticky Notes"),
+            version=info.get("version", "1.0.0"),
+            developer_name=info.get("author", "Unknown"),
+            license_type=Gtk.License.MIT_X11,
+            website=info.get("website", ""),
+            comments=info.get("description", ""),
+            # Using service_name as the icon name
+            application_icon=info.get("service_name", "accessories-text-editor")
         )
+
+        # Set developers list (replaces debug info for contact)
+        author = info.get("author", "Unknown")
+        email = info.get("email", "")
+        if email:
+            dialog.set_developers([f"{author} <{email}>"])
+        else:
+            dialog.set_developers([author])
+
+        # Add copyright string
+        dialog.set_copyright(f"© {datetime.now().year} {author}")
+
         dialog.present()
 
     def quit_app(self):
+        """Safely shuts down the tray process and the application."""
         if self.tray_process:
             self.tray_process.terminate()
 
         if self.win:
+            # Close all active sticky windows
             for note_id in list(self.win.stickies.keys()):
                 win = self.win.stickies.get(note_id)
                 if win: win.close()

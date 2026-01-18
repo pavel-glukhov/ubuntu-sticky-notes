@@ -1,12 +1,8 @@
-import re
-import json
-import html as html_lib
 from gi.repository import Gtk, Adw, Gio, GObject, GLib, Pango, Gdk
-from sticky_window import StickyWindow
-from datetime import datetime
-from trash_window import TrashView
 from note_card import NoteCard
-from settings_view import SettingsView
+from sticky_window import StickyWindow
+from views.settings_view import SettingsView
+from views.trash_view import TrashView
 
 STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
 
@@ -29,14 +25,13 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.setup_actions()
 
-        # === ИНТЕГРАЦИЯ STACK ===
-        # Создаем стек для переключения страниц
+        # === STACK ===
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         self.stack.set_transition_duration(300)
         self.set_content(self.stack)
 
-        # 2. ПОДГОТОВКА ГЛАВНОЙ СТРАНИЦЫ (MAIN)
+        # 2. (MAIN)
         self.main_page_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
         header_bar = Adw.HeaderBar()
@@ -76,8 +71,7 @@ class MainWindow(Adw.ApplicationWindow):
         scrolled.set_has_frame(False)
         self.main_page_box.append(scrolled)
 
-        # 3. ДОБАВЛЯЕМ ВСЕ СТРАНИЦЫ В СТЕК
-        # Сначала добавляем главную, потом остальные
+        # Pages
         self.stack.add_named(self.main_page_box, "main")
 
         self.trash_view = TrashView(self.db, on_back_callback=self.go_back_to_main)
@@ -86,12 +80,10 @@ class MainWindow(Adw.ApplicationWindow):
         self.settings_view = SettingsView(on_back_callback=self.go_back_to_main)
         self.stack.add_named(self.settings_view, "settings")
 
-        # 4. ФИНАЛЬНЫЙ ШАГ: Явно указываем показать главную страницу
         self.stack.set_visible_child_name("main")
 
         self.refresh_list()
 
-    # === МЕТОДЫ НАВИГАЦИИ ===
     def on_show_settings(self, btn):
         self.stack.set_visible_child_name("settings")
 
@@ -105,7 +97,6 @@ class MainWindow(Adw.ApplicationWindow):
         self.refresh_list()
         self.stack.set_visible_child_name("main")
 
-    # === СТАНДАРТНЫЕ МЕТОДЫ ===
     def refresh_list(self):
         while child := self.flowbox.get_first_child():
             self.flowbox.remove(child)

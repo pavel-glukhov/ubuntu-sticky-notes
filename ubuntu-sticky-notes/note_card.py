@@ -52,9 +52,7 @@ class NoteCard(Gtk.Box):
     def _generate_markup(self, raw_content):
         if not raw_content: return ""
 
-        # 1. Пытаемся обработать как новый формат (HEX -> JSON)
         try:
-            # Проверка: если это не HEX-строка, вызовет ValueError
             json_bytes = bytes.fromhex(raw_content)
             segments = json.loads(json_bytes.decode('utf-8'))
 
@@ -64,7 +62,6 @@ class NoteCard(Gtk.Box):
             for seg in segments:
                 text = seg.get("text", "")
 
-                # Считаем строки для лимита
                 lines_in_seg = text.split('\n')
                 if line_count >= 5: break
 
@@ -75,7 +72,6 @@ class NoteCard(Gtk.Box):
                 else:
                     line_count += len(lines_in_seg) - 1
 
-                # Экранируем текст, чтобы пользовательские < > не ломали разметку
                 safe_text = html_lib.escape(text)
 
                 tags = seg.get("tags", [])
@@ -99,24 +95,12 @@ class NoteCard(Gtk.Box):
             return full_markup.rstrip()
 
         except Exception:
-            # 2. Если упали здесь - значит это СТАРЫЙ формат или простой текст
-            # Сначала заменяем <br> на переносы строк (для старых заметок)
             text_content = str(raw_content).replace("<br>", "\n")
 
-            # Обрезаем до 5 строк
             lines = text_content.split('\n')
             if len(lines) > 5:
                 text_content = "\n".join(lines[:5])
 
-            # ВАЖНО: Экранируем текст, чтобы теги не исполнялись, но были читаемыми,
-            # но если в тексте были HTML теги (например <b>), мы хотим их видеть как текст?
-            # Если вы хотите, чтобы старые HTML теги (если они есть) работали, уберите html_lib.escape.
-            # Но безопаснее оставить escape, чтобы не ломать Pango.
-
-            # Если проблема именно в том, что вы видите <b>текст</b>, значит
-            # html_lib.escape превращает '<' в '&lt;'.
-
-            # Попробуем вернуть просто экранированный текст:
             return html_lib.escape(text_content).rstrip()
 
     def update_color(self, hex_color):
@@ -133,20 +117,16 @@ class NoteCard(Gtk.Box):
         self.card_canvas.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def setup_gestures(self):
-        # Левый клик - открыть заметку (стандартно)
         click = Gtk.GestureClick()
         click.connect("released", lambda *args: self.get_native().open_note(self.note_id))
         self.add_controller(click)
 
-        # Правый клик - контекстное меню
         menu = Gtk.GestureClick(button=3)
         menu.connect("pressed", self._on_right_click)
         self.add_controller(menu)
 
     def _on_right_click(self, gesture, n, x, y):
-        # Если передан специальный колбэк (для корзины), используем его
         if self.menu_callback:
             self.menu_callback(self.note_id, self.card_canvas)
         else:
-            # Иначе вызываем стандартное меню главного окна
             self.get_native().create_combined_context_menu(self.note_id, self.card_canvas)
