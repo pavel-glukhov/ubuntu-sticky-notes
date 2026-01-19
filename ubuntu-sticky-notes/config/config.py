@@ -23,15 +23,8 @@ STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
 
 def load_app_info(path: str = APP_INFO_FILE) -> dict:
     """Loads application metadata from a JSON file."""
-    if not os.path.exists(path):
-        return {
-            "name": "Ubuntu Sticky Notes",
-            "service_name": "ubuntu-sticky-notes",
-            "version": "0.0.0"
-        }
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
-
 
 def get_app_paths() -> dict:
     """

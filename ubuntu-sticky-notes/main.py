@@ -243,7 +243,7 @@ class StickyApp(Adw.Application):
 
 if __name__ == "__main__":
     APP_INFO = load_app_info()
-    GLib.set_prgname(APP_INFO.get('service_name'))
+    GLib.set_prgname(APP_INFO.get('service_name', 'com.ubuntu.sticky.notes'))
     GLib.set_application_name(APP_INFO.get('app_name'))
     app = StickyApp()
     sys.exit(app.run(sys.argv))
