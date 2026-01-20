@@ -1,14 +1,36 @@
+"""Trash view module for Ubuntu Sticky Notes.
+
+Provides a trash bin interface for managing deleted notes, allowing users
+to restore or permanently delete them.
+"""
+
 from gi.repository import Gtk, Adw, Gdk, GObject
-from views.main_view.note_card import NoteCard  # Импортируем нашу общую карточку
+from views.main_view.note_card import NoteCard
 
 
 class TrashView(Gtk.Box):
+    """Trash bin view for deleted notes.
+    
+    Displays deleted notes in a list format with options to restore or
+    permanently delete them. Shows a placeholder when empty.
+    
+    Attributes:
+        db: Database controller instance.
+        on_back_callback: Function to call when back button is clicked.
+        flowbox: Container for note cards.
+    """
+    
     def __init__(self, db, on_back_callback):
+        """Initialize the trash view.
+        
+        Args:
+            db: Database controller instance.
+            on_back_callback: Function to call when returning to main view.
+        """
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.db = db
         self.on_back_callback = on_back_callback
 
-        # --- Верхняя панель ---
         header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         header_box.set_margin_top(10)
         header_box.set_margin_bottom(10)
@@ -31,18 +53,15 @@ class TrashView(Gtk.Box):
         self.append(header_box)
         self.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
 
-        # --- Область со стикерами (FlowBox) ---
         self.flowbox = Gtk.FlowBox(
             valign=Gtk.Align.START,
             selection_mode=Gtk.SelectionMode.NONE
         )
 
         scrolled = Gtk.ScrolledWindow(child=self.flowbox, vexpand=True)
-        # Убираем рамку скролла для чистого вида
         scrolled.set_has_frame(False)
         self.append(scrolled)
 
-        # --- Кнопка очистки ---
         action_bar = Gtk.ActionBar()
         btn_clear = Gtk.Button(label="Empty Trash")
         btn_clear.add_css_class("destructive-action")
@@ -54,21 +73,25 @@ class TrashView(Gtk.Box):
         self.refresh_list()
 
     def _on_back_clicked(self, btn):
+        """Handle back button click."""
         if self.on_back_callback:
             self.on_back_callback()
 
     def refresh_list(self):
+        """Refresh the list of deleted notes.
+        
+        Clears and rebuilds the flowbox with all deleted notes from the
+        database. Shows a placeholder if the trash is empty.
+        """
         while child := self.flowbox.get_first_child():
             self.flowbox.remove(child)
 
-        # Настраиваем FlowBox как список (одна колонка)
         self.flowbox.set_homogeneous(False)
         self.flowbox.set_max_children_per_line(1)
         self.flowbox.set_min_children_per_line(1)
         self.flowbox.set_halign(Gtk.Align.FILL)
         self.flowbox.set_valign(Gtk.Align.START)
 
-        # Отступы
         self.flowbox.set_column_spacing(0)
         self.flowbox.set_row_spacing(10)
         self.flowbox.set_margin_top(10)
@@ -79,7 +102,6 @@ class TrashView(Gtk.Box):
         trash_items = self.db.all_trash()
 
         if not trash_items:
-            # Заглушка, если пусто
             placeholder_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
             placeholder_box.set_valign(Gtk.Align.CENTER)
             placeholder_box.set_halign(Gtk.Align.CENTER)
@@ -96,16 +118,13 @@ class TrashView(Gtk.Box):
             placeholder_box.append(icon)
             placeholder_box.append(lbl)
 
-            # Добавляем во FlowBox как единственный элемент
             self.flowbox.append(placeholder_box)
-            # Настраиваем обертку
             child = placeholder_box.get_parent()
             child.set_hexpand(True)
             child.set_halign(Gtk.Align.FILL)
             return
 
         for note in trash_items:
-            # Создаем карточку, передаем self.show_context_menu как колбэк
             card = NoteCard(note, self.db, menu_callback=self.show_context_menu)
             self.flowbox.append(card)
 
@@ -120,7 +139,12 @@ class TrashView(Gtk.Box):
                 flow_child.set_halign(Gtk.Align.FILL)
 
     def show_context_menu(self, note_id, target_widget):
-        """Контекстное меню специально для корзины"""
+        """Show context menu for a note in trash.
+        
+        Args:
+            note_id: ID of the note.
+            target_widget: Widget to attach the popover to.
+        """
         popover = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         vbox.set_margin_top(5);
@@ -128,7 +152,6 @@ class TrashView(Gtk.Box):
         vbox.set_margin_start(5);
         vbox.set_margin_end(5)
 
-        # Кнопка восстановить
         btn_restore = Gtk.Button(label="Restore Note", has_frame=False)
         btn_restore.set_icon_name("edit-undo-symbolic")
         btn_restore.connect("clicked", lambda _: (self.restore_note(note_id), popover.popdown()))
@@ -136,7 +159,6 @@ class TrashView(Gtk.Box):
 
         vbox.append(Gtk.Separator())
 
-        # Кнопка удалить навсегда
         btn_del = Gtk.Button(label="Delete Permanently", has_frame=False)
         btn_del.add_css_class("destructive-action")
         btn_del.connect("clicked", lambda _: (self.delete_permanently(note_id), popover.popdown()))
@@ -147,14 +169,29 @@ class TrashView(Gtk.Box):
         popover.popup()
 
     def restore_note(self, note_id):
+        """Restore a note from trash.
+        
+        Args:
+            note_id: ID of the note to restore.
+        """
         self.db.restore_from_trash(note_id)
         self.refresh_list()
 
     def delete_permanently(self, note_id):
+        """Permanently delete a note.
+        
+        Args:
+            note_id: ID of the note to delete permanently.
+        """
         self.db.delete_permanently(note_id)
         self.refresh_list()
 
     def on_empty_trash(self, btn):
+        """Empty the entire trash bin.
+        
+        Args:
+            btn: The button that triggered this callback.
+        """
         for note in self.db.all_trash():
             self.db.delete_permanently(note['id'])
         self.refresh_list()
