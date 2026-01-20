@@ -1,17 +1,29 @@
+"""Text formatting module for sticky note windows.
+
+This module provides text formatting functionality including bold, italic,
+underline, strikethrough, text colors, font sizes, and bullet list management
+for sticky note text buffers.
+"""
+
 import json
 from gi.repository import Gtk, Pango
 
 
 class StickyFormatting:
     """
-    Mixin class for StickyWindow handling text buffer formatting,
-    including styles, colors, font sizes, and list toggles.
+    Mixin class for StickyWindow handling text buffer formatting.
+    
+    Provides text formatting capabilities including bold, italic, underline,
+    strikethrough, text colors, font sizes, and bullet list management.
+    Designed to be used as a mixin with StickyWindow.
     """
 
     def setup_tags(self):
         """
-        Initializes the GtkTextTagTable with standard styles and dynamic
-        color/size tags based on the application configuration.
+        Initialize text formatting tags in the buffer's tag table.
+        
+        Creates standard style tags (bold, italic, underline, strikethrough)
+        and dynamic color/size tags based on application configuration.
         """
         self.tag_table = self.buffer.get_tag_table()
 
@@ -33,7 +45,13 @@ class StickyFormatting:
 
     def apply_format(self, tag_name):
         """
-        Toggles a basic format tag (bold, italic, etc.) on the selected text range.
+        Toggle a basic format tag on the selected text range.
+        
+        If the tag is already applied, it will be removed. Otherwise, it will
+        be applied to the selection.
+        
+        Args:
+            tag_name (str): Name of the format tag (e.g., 'bold', 'italic').
         """
         res = self.buffer.get_selection_bounds()
         if res:
@@ -49,8 +67,13 @@ class StickyFormatting:
 
     def apply_text_color(self, hex_color):
         """
-        Applies a foreground color tag to the selection.
-        Removes any existing color tags in the range before applying the new one.
+        Apply a foreground color tag to the selected text.
+        
+        Removes any existing color tags in the range before applying the
+        new color to prevent color conflicts.
+        
+        Args:
+            hex_color (str): Hexadecimal color code (e.g., '#FF0000').
         """
         res = self.buffer.get_selection_bounds()
         if res:
@@ -67,8 +90,13 @@ class StickyFormatting:
 
     def apply_font_size(self, size):
         """
-        Applies a font size tag to the selection and updates the UI button label.
-        Removes existing font size tags in the range before applying the new one.
+        Apply a font size tag to the selected text.
+        
+        Removes existing font size tags before applying the new size and
+        updates the UI button label to reflect the current size.
+        
+        Args:
+            size (int): Font size in points.
         """
         res = self.buffer.get_selection_bounds()
         if res:
@@ -88,8 +116,11 @@ class StickyFormatting:
 
     def toggle_bullet_list(self):
         """
-        Toggles bullet points for the selected lines.
-        Prepends a bullet character if missing, or removes it if present.
+        Toggle bullet points for the selected lines.
+        
+        Prepends a bullet character (•) to lines that don't have one, or
+        removes it from lines that already have it. Works on the current
+        selection or the current line if no text is selected.
         """
         BULLET_CHAR = " • "
         res = self.buffer.get_selection_bounds()
