@@ -26,10 +26,7 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         self.note_id = note_id
         self.main_window = main_window
         self.config = getattr(main_window, 'config', {})
-
-        # Prevent auto-saving during initial data fetch
         self._loading = True
-
         self.scale = 1.0
         self.current_color = "#FFF59D"
         self.default_font_size = 12
@@ -43,7 +40,7 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         )
 
         # 3. Window Configuration
-        self.set_decorated(False)  # Frameless window
+        self.set_decorated(False)
         self.add_css_class("sticky-window")
 
         # 4. UI Hierarchy Construction
@@ -53,7 +50,6 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         self.main_box.add_css_class("sticky-main-area")
         self.overlay.set_child(self.main_box)
 
-        # Initialize components via mixins
         self.setup_header()
         self.setup_text_area()
         self.setup_tags()
@@ -66,12 +62,9 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         self._connect_main_signals()
 
         # 6. Persistence Controllers
-        # Save immediately when the window loses focus
         focus_ctrl = Gtk.EventControllerFocus()
         focus_ctrl.connect("leave", lambda *_: self.save())
         self.add_controller(focus_ctrl)
-
-        # Periodic background auto-save (every 2 seconds)
         GLib.timeout_add_seconds(2, self.save)
 
     def _connect_main_signals(self):
@@ -87,49 +80,22 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         return "X11" in display.__class__.__name__
 
     def _update_ui_design(self, hex_color=None):
-        """
-        Dynamically generates and applies CSS to update the note's
-        background color and UI scaling.
-        """
         if hex_color:
             self.current_color = hex_color.strip()
-
         scale = self.scale
         css = f"""
-        window.sticky-window {{ 
-            background-color: {self.current_color}; 
-            border-radius: 12px; 
-            border: 1px solid rgba(0,0,0,0.1); 
-        }}
-        .header-btn-subtle, .format-btn-tiny {{ 
-            background-color: transparent; 
-            border-radius: 4px; 
-            color: rgba(0,0,0,0.7); 
-        }}
-        .header-btn-subtle:hover, .format-btn-tiny:hover {{ 
-            background-color: rgba(0,0,0,0.1); 
-        }}
-        .compact-header {{ 
-            min-height: {int(22 * scale)}px; 
-        }}
-        .sticky-text-edit, .sticky-text-edit text, textview, text {{ 
-            background-color: transparent; 
-            color: #000000; 
-        }}
-        .resize-handle {{ 
-            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%); 
-            min-width: {int(16 * scale)}px; 
-            min-height: {int(16 * scale)}px; 
-        }}
+        window.sticky-window {{ background-color: {self.current_color}; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); }}
+        .header-btn-subtle, .format-btn-tiny {{ background-color: transparent; border-radius: 4px; color: rgba(0,0,0,0.7); }}
+        .header-btn-subtle:hover, .format-btn-tiny:hover {{ background-color: rgba(0,0,0,0.1); }}
+        .compact-header {{ min-height: {int(22 * scale)}px; }}
+        .sticky-text-edit, .sticky-text-edit text, textview, text {{ background-color: transparent; color: #000000; }}
+        .resize-handle {{ background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%); min-width: {int(16 * scale)}px; min-height: {int(16 * scale)}px; }}
         """
-        # Cleanup string for the GTK CSS parser
         clean_css = "\n".join([line.strip() for line in css.split('\n') if line.strip()])
         self.window_css_provider.load_from_data(clean_css.encode('utf-8'))
 
     def setup_formatting_bar(self):
-        """
-        Configures the bottom toolbar with formatting buttons based on user preferences.
-        """
+        """Configures the bottom toolbar with formatting buttons based on user preferences."""
         if hasattr(self, 'format_bar'):
             while child := self.format_bar.get_first_child():
                 self.format_bar.remove(child)
@@ -140,44 +106,36 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
 
         scale = self.scale
         icon_size = int(18 * scale)
-
         fmt_config = self.config.get("formatting", {})
         if not isinstance(fmt_config, dict): fmt_config = {}
 
-        # Core formatting buttons
-        formats = [
-            ("<b>B</b>", "bold"), ("<i>I</i>", "italic"),
-            ("<u>U</u>", "underline"), ("<s>S</s>", "strikethrough")
+        buttons_config = [
+            ("bold", "<b>B</b>", self.apply_format, "bold"),
+            ("italic", "<i>I</i>", self.apply_format, "italic"),
+            ("underline", "<u>U</u>", self.apply_format, "underline"),
+            ("strikethrough", "<s>S</s>", self.apply_format, "strikethrough"),
+            ("list", "≡", self.toggle_bullet_list, None)
         ]
 
         has_any_btn = False
-        for label, tag_name in formats:
-            if fmt_config.get(tag_name, True):
+        for key, label, callback, arg in buttons_config:
+            if fmt_config.get(key, True):
                 btn = Gtk.Button(has_frame=False)
                 btn.set_child(Gtk.Label(label=label, use_markup=True))
                 btn.add_css_class("format-btn-tiny")
                 btn.set_size_request(icon_size, icon_size)
-                btn.connect("clicked", lambda _, t=tag_name: self.apply_format(t))
+                if arg:
+                    btn.connect("clicked", lambda _, a=arg: callback(a))
+                else:
+                    btn.connect("clicked", lambda _: callback())
                 self.format_bar.append(btn)
                 has_any_btn = True
 
-        if fmt_config.get("list", True):
-            btn_list = Gtk.Button(has_frame=False)
-            btn_list.set_child(Gtk.Label(label="≡"))
-            btn_list.add_css_class("format-btn-tiny")
-            btn_list.set_size_request(icon_size, icon_size)
-            btn_list.connect("clicked", lambda _: self.toggle_bullet_list())
-            self.format_bar.append(btn_list)
-            has_any_btn = True
-
-        # Popovers for color and font size
         show_color = fmt_config.get("text_color", True)
         show_font = fmt_config.get("font_size", True)
 
         if has_any_btn and (show_color or show_font):
-            sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
-            sep.set_margin_start(int(3 * scale))
-            sep.set_margin_end(int(3 * scale))
+            sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL, margin_start=int(3*scale), margin_end=int(3*scale))
             self.format_bar.append(sep)
 
         if show_color:

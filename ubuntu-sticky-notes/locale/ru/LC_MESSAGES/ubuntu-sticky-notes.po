@@ -1,0 +1,191 @@
+# Ubuntu Sticky Notes translation.
+# Copyright (C) 2026
+# This file is distributed under the same license as the Ubuntu Sticky Notes package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubuntu Sticky Notes\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-21 01:36+0500\n"
+"PO-Revision-Date: 2026-01-21 02:00+0500\n"
+"Last-Translator: Gemini <ai@google.com>\n"
+"Language-Team: Russian <ru@li.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: ubuntu-sticky-notes/tray.py:79
+msgid "Open Main Window"
+msgstr "Открыть главное окно"
+
+#: ubuntu-sticky-notes/tray.py:83
+msgid "Open All Notes"
+msgstr "Открыть все заметки"
+
+#: ubuntu-sticky-notes/tray.py:89
+msgid "About"
+msgstr "О программе"
+
+#: ubuntu-sticky-notes/tray.py:93
+msgid "Quit"
+msgstr "Выход"
+
+#: ubuntu-sticky-notes/views/main_view/main_view.py:15
+msgid "Ubuntu Sticky Notes"
+msgstr "Заметки Ubuntu"
+
+#: ubuntu-sticky-notes/views/main_view/main_view.py:65
+msgid "Search..."
+msgstr "Поиск..."
+
+#: ubuntu-sticky-notes/views/main_view/main_view.py:229
+msgid "Move to Trash"
+msgstr "Переместить в корзину"
+
+#: ubuntu-sticky-notes/views/trash_view.py:17
+#: ubuntu-sticky-notes/views/settings_view.py:24
+msgid "<<- Back"
+msgstr "<<- Назад"
+
+#: ubuntu-sticky-notes/views/trash_view.py:21
+msgid "Trash Bin"
+msgstr "Корзина"
+
+#: ubuntu-sticky-notes/views/trash_view.py:41
+#: ubuntu-sticky-notes/views/trash_view.py:123
+#: ubuntu-sticky-notes/views/trash_view.py:129
+msgid "Empty Trash"
+msgstr "Очистить корзину"
+
+#: ubuntu-sticky-notes/views/trash_view.py:72
+msgid "Trash is empty"
+msgstr "Корзина пуста"
+
+#: ubuntu-sticky-notes/views/trash_view.py:97
+msgid "Restore Note"
+msgstr "Восстановить заметку"
+
+#: ubuntu-sticky-notes/views/trash_view.py:103
+msgid "Delete Permanently"
+msgstr "Удалить навсегда"
+
+#: ubuntu-sticky-notes/views/trash_view.py:124
+msgid ""
+"Are you sure you want to permanently delete all items in the trash? This "
+"action cannot be undone."
+msgstr ""
+"Вы уверены, что хотите навсегда удалить все объекты из корзины? Это "
+"действие нельзя будет отменить."
+
+#: ubuntu-sticky-notes/views/trash_view.py:128
+msgid "Cancel"
+msgstr "Отмена"
+
+#: ubuntu-sticky-notes/views/settings_view.py:28
+msgid "Settings"
+msgstr "Настройки"
+
+#: ubuntu-sticky-notes/views/settings_view.py:47
+msgid "Language"
+msgstr "Язык"
+
+#: ubuntu-sticky-notes/views/settings_view.py:48
+msgid "Requires app restart to take effect"
+msgstr "Для применения изменений требуется перезапуск приложения"
+
+#: ubuntu-sticky-notes/views/settings_view.py:64
+msgid "Display Backend"
+msgstr "Движок отображения"
+
+#: ubuntu-sticky-notes/views/settings_view.py:65
+msgid "Wayland (Default) or X11 (For sticker positioning)"
+msgstr "Wayland (по умолчанию) или X11 (для позиционирования стикеров)"
+
+#: ubuntu-sticky-notes/views/settings_view.py:75
+msgid "Interface Scale"
+msgstr "Масштаб интерфейса"
+
+#: ubuntu-sticky-notes/views/settings_view.py:76
+msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
+msgstr "Увеличение элементов интерфейса и шрифтов (напр., 1.25 = 125%)"
+
+#: ubuntu-sticky-notes/views/settings_view.py:90
+msgid "Database Path"
+msgstr "Путь к базе данных"
+
+#: ubuntu-sticky-notes/views/settings_view.py:102
+msgid "Formatting Buttons"
+msgstr "Кнопки форматирования"
+
+#: ubuntu-sticky-notes/views/settings_view.py:102
+msgid "Choose which buttons to show on stickers"
+msgstr "Выберите, какие кнопки отображать на стикерах"
+
+#: ubuntu-sticky-notes/views/settings_view.py:106
+msgid "Bold (B)"
+msgstr "Жирный (B)"
+
+#: ubuntu-sticky-notes/views/settings_view.py:106
+msgid "Italic (I)"
+msgstr "Курсив (I)"
+
+#: ubuntu-sticky-notes/views/settings_view.py:107
+msgid "Underline (U)"
+msgstr "Подчеркнутый (U)"
+
+#: ubuntu-sticky-notes/views/settings_view.py:107
+msgid "Strikethrough (S)"
+msgstr "Зачеркнутый (S)"
+
+#: ubuntu-sticky-notes/views/settings_view.py:108
+msgid "Bullet List"
+msgstr "Маркированный список"
+
+#: ubuntu-sticky-notes/views/settings_view.py:108
+msgid "Text Color"
+msgstr "Цвет текста"
+
+#: ubuntu-sticky-notes/views/settings_view.py:109
+msgid "Font Size"
+msgstr "Размер шрифта"
+
+#: ubuntu-sticky-notes/views/settings_view.py:124
+msgid "Save Settings"
+msgstr "Сохранить настройки"
+
+#: ubuntu-sticky-notes/views/settings_view.py:128
+msgid "Some changes may require a restart to apply."
+msgstr "Некоторые изменения вступят в силу только после перезагрузки."
+
+#: ubuntu-sticky-notes/views/settings_view.py:135
+msgid "Select Database File"
+msgstr "Выберите файл базы данных"
+
+#: ubuntu-sticky-notes/views/settings_view.py:137
+msgid "Database files"
+msgstr "Файлы базы данных"
+
+#: ubuntu-sticky-notes/views/settings_view.py:182
+msgid "Restart Required"
+msgstr "Требуется перезапуск"
+
+#: ubuntu-sticky-notes/views/settings_view.py:183
+msgid ""
+"The language change will take full effect after you restart the application."
+msgstr "Смена языка произойдет полностью после перезапуска приложения."
+
+#: ubuntu-sticky-notes/views/settings_view.py:185
+msgid "OK"
+msgstr "ОК"
+
+#: ubuntu-sticky-notes/main.py:240
+msgid "A simple and fast sticky notes app for Ubuntu."
+msgstr "Простое и быстрое приложение для заметок в Ubuntu."
+
+#: ubuntu-sticky-notes/main.py:250
+#, python-brace-format
+msgid "© {year} {author}"
+msgstr "© {year} {author}"

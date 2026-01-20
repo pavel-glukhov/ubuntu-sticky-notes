@@ -1,15 +1,18 @@
-from gi.repository import Gtk, Adw, Gio, GObject, GLib, Pango, Gdk
+import builtins
+from gi.repository import Gtk, Adw, Gio, Gdk, GLib
 from views.main_view.note_card import NoteCard
 from sticky.sticky_window import StickyWindow
 from views.settings_view import SettingsView
 from views.trash_view import TrashView
+
+_ = builtins._
 
 STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
 
 class MainWindow(Adw.ApplicationWindow):
     def __init__(self, db, application, **kwargs):
         super().__init__(application=application,
-                         title="Ubuntu Sticky Notes",
+                         title=_("Ubuntu Sticky Notes"),
                          default_width=200,
                          default_height=600, **kwargs)
         self.set_size_request(100, -1)
@@ -59,7 +62,7 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.main_page_box.append(header_bar)
 
-        self.search_entry = Gtk.SearchEntry(placeholder_text="Search...")
+        self.search_entry = Gtk.SearchEntry(placeholder_text=_("Search..."))
         self.search_entry.set_margin_start(10)
         self.search_entry.set_margin_end(10)
         self.search_entry.set_margin_top(10)
@@ -223,7 +226,7 @@ class MainWindow(Adw.ApplicationWindow):
         vbox.append(grid)
         vbox.append(Gtk.Separator())
 
-        btn_del = Gtk.Button(label="Move to Trash", has_frame=False)
+        btn_del = Gtk.Button(label=_("Move to Trash"), has_frame=False)
         btn_del.connect("clicked", lambda _: (self.on_action_delete_manual(note_id), popover.popdown()))
         vbox.append(btn_del)
 

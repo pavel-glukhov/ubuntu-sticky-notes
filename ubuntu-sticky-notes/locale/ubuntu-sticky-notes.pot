@@ -1,0 +1,189 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-21 01:36+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ubuntu-sticky-notes/tray.py:79
+msgid "Open Main Window"
+msgstr ""
+
+#: ubuntu-sticky-notes/tray.py:83
+msgid "Open All Notes"
+msgstr ""
+
+#: ubuntu-sticky-notes/tray.py:89
+msgid "About"
+msgstr ""
+
+#: ubuntu-sticky-notes/tray.py:93
+msgid "Quit"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/main_view/main_view.py:15
+msgid "Ubuntu Sticky Notes"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/main_view/main_view.py:65
+msgid "Search..."
+msgstr ""
+
+#: ubuntu-sticky-notes/views/main_view/main_view.py:229
+msgid "Move to Trash"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/trash_view.py:17
+#: ubuntu-sticky-notes/views/settings_view.py:24
+msgid "<<- Back"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/trash_view.py:21
+msgid "Trash Bin"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/trash_view.py:41
+#: ubuntu-sticky-notes/views/trash_view.py:123
+#: ubuntu-sticky-notes/views/trash_view.py:129
+msgid "Empty Trash"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/trash_view.py:72
+msgid "Trash is empty"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/trash_view.py:97
+msgid "Restore Note"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/trash_view.py:103
+msgid "Delete Permanently"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/trash_view.py:124
+msgid ""
+"Are you sure you want to permanently delete all items in the trash? This "
+"action cannot be undone."
+msgstr ""
+
+#: ubuntu-sticky-notes/views/trash_view.py:128
+msgid "Cancel"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:28
+msgid "Settings"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:47
+msgid "Language"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:48
+msgid "Requires app restart to take effect"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:64
+msgid "Display Backend"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:65
+msgid "Wayland (Default) or X11 (For sticker positioning)"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:75
+msgid "Interface Scale"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:76
+msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:90
+msgid "Database Path"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:102
+msgid "Formatting Buttons"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:102
+msgid "Choose which buttons to show on stickers"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:106
+msgid "Bold (B)"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:106
+msgid "Italic (I)"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:107
+msgid "Underline (U)"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:107
+msgid "Strikethrough (S)"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:108
+msgid "Bullet List"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:108
+msgid "Text Color"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:109
+msgid "Font Size"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:124
+msgid "Save Settings"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:128
+msgid "Some changes may require a restart to apply."
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:135
+msgid "Select Database File"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:137
+msgid "Database files"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:182
+msgid "Restart Required"
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:183
+msgid ""
+"The language change will take full effect after you restart the application."
+msgstr ""
+
+#: ubuntu-sticky-notes/views/settings_view.py:185
+msgid "OK"
+msgstr ""
+
+#: ubuntu-sticky-notes/main.py:240
+msgid "A simple and fast sticky notes app for Ubuntu."
+msgstr ""
+
+#: ubuntu-sticky-notes/main.py:250
+#, python-brace-format
+msgid "© {year} {author}"
+msgstr ""

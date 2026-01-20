@@ -14,72 +14,44 @@ class NotesDB:
         if self.get_setting("always_on_top") is None:
             self.set_setting("always_on_top", "0")
 
+    def close(self):
+        """Closes the database connection."""
+        if self.conn:
+            self.conn.close()
+            print("DEBUG: Database connection closed.")
+
     def _create_table(self):
         """
-        Создает таблицы и обновляет структуру (миграции).
+        Creates tables and updates the structure (migrations).
         """
         with self.conn:
             self.conn.execute("""
                               CREATE TABLE IF NOT EXISTS notes
                               (
-                                  id
-                                  INTEGER
-                                  PRIMARY
-                                  KEY,
-                                  title
-                                  TEXT,
-                                  content
-                                  TEXT,
-                                  x
-                                  INTEGER
-                                  DEFAULT
-                                  0,
-                                  y
-                                  INTEGER
-                                  DEFAULT
-                                  0,
-                                  w
-                                  INTEGER
-                                  DEFAULT
-                                  300,
-                                  h
-                                  INTEGER
-                                  DEFAULT
-                                  300,
-                                  color
-                                  TEXT
-                                  DEFAULT
-                                  '#FFF59D',
-                                  deleted
-                                  INTEGER
-                                  DEFAULT
-                                  0,
-                                  deleted_at
-                                  TEXT,
-                                  always_on_top
-                                  INTEGER
-                                  DEFAULT
-                                  0,
-                                  is_open
-                                  INTEGER
-                                  DEFAULT
-                                  0
+                                  id INTEGER PRIMARY KEY,
+                                  title TEXT,
+                                  content TEXT,
+                                  x INTEGER DEFAULT 0,
+                                  y INTEGER DEFAULT 0,
+                                  w INTEGER DEFAULT 300,
+                                  h INTEGER DEFAULT 300,
+                                  color TEXT DEFAULT '#FFF59D',
+                                  deleted INTEGER DEFAULT 0,
+                                  deleted_at TEXT,
+                                  always_on_top INTEGER DEFAULT 0,
+                                  is_open INTEGER DEFAULT 0
                               )
                               """)
 
             self.conn.execute("""
                               CREATE TABLE IF NOT EXISTS settings
                               (
-                                  key
-                                  TEXT
-                                  PRIMARY
-                                  KEY,
-                                  value
-                                  TEXT
+                                  key TEXT PRIMARY KEY,
+                                  value TEXT
                               )
                               """)
 
-            # МИГРАЦИИ: Проверяем, есть ли колонки, и добавляем, если нет
+            # Migrations
             cur = self.conn.execute("PRAGMA table_info(notes)")
             columns = [row[1] for row in cur.fetchall()]
 
@@ -93,8 +65,6 @@ class NotesDB:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN deleted INTEGER DEFAULT 0")
             if "deleted_at" not in columns:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN deleted_at TEXT")
-
-            # === ДОБАВЛЕНО: Миграция для координат и размеров ===
             if "x" not in columns:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN x INTEGER DEFAULT 0")
             if "y" not in columns:
@@ -106,7 +76,7 @@ class NotesDB:
 
     def add(self, title=None, content="", x=300, y=200, w=260, h=200, color="#FFF59D", always_on_top=0):
         if title is None:
-            cur = self.conn.execute("SELECT COUNT(*) FROM notes")
+            cur = self.conn.execute("SELECT COUNT(*) FROM notes WHERE deleted = 0")
             count = cur.fetchone()[0]
             title = f"Sticker {count + 1}"
         with self.conn:

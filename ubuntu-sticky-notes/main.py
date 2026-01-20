@@ -2,15 +2,39 @@ import sys
 import os
 from datetime import datetime
 
+# --- Basic Setup ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
+# --- Translation Setup ---
+import gettext
+import locale
+import builtins
+
+APP_ID = 'ubuntu-sticky-notes'
+LOCALE_DIR = os.path.join(current_dir, 'locale')
+
 try:
     from config.config_manager import ConfigManager
-
     config = ConfigManager.load()
+    lang_code = config.get("language", "en")
 
+    # Set up gettext
+    translation = gettext.translation(APP_ID, localedir=LOCALE_DIR, languages=[lang_code], fallback=True)
+    builtins._ = translation.gettext
+    print(f"SYSTEM: Language set to '{lang_code}'")
+
+except FileNotFoundError:
+    builtins._ = lambda s: s
+    print("SYSTEM: No translation files found. Falling back to default language.")
+except Exception as e:
+    builtins._ = lambda s: s
+    print(f"CRITICAL: Translation setup failed: {e}")
+
+
+# --- Backend Selection ---
+try:
     if "--x11" in sys.argv or config.get("backend") == "x11":
         os.environ["GDK_BACKEND"] = "x11"
         print("SYSTEM: Environment forced to X11")
@@ -19,6 +43,7 @@ try:
         print("SYSTEM: Environment set to Wayland")
 except Exception as e:
     print(f"CRITICAL: Config pre-init error: {e}")
+
 
 import threading
 import subprocess
@@ -69,23 +94,22 @@ class StickyApp(Adw.Application):
             except Exception as e:
                 print(f"ERROR: CSS loading failed: {e}")
 
-    def apply_ui_scale(self):
+    def apply_ui_scale(self, scale):
+        """Applies UI scaling by setting DPI and custom CSS."""
         try:
-            raw_scale = self.config.get("ui_scale", 1.0)
-            scale = float(str(raw_scale)[:4])
-
-            if not (0.5 <= scale <= 2.0): scale = 1.0
-        except (ValueError, TypeError):
-            scale = 1.0
-
-        new_dpi = int(96 * scale * 1024)
-        settings = Gtk.Settings.get_default()
-        if settings:
-            settings.set_property("gtk-xft-dpi", new_dpi)
+            new_dpi = int(96 * scale * 1024)
+            settings = Gtk.Settings.get_default()
+            if settings:
+                settings.set_property("gtk-xft-dpi", new_dpi)
+        except Exception as e:
+            print(f"ERROR: Failed to set DPI: {e}")
 
         custom_css = f"""
-        * {{ 
-            -gtk-icon-size: {int(16 * scale)}px; 
+        * {{
+            -gtk-icon-size: {int(16 * scale)}px;
+        }}
+        .sticky-window {{
+            font-size: {10 * scale}pt;
         }}
         .sticky-text-edit {{
             font-size: {int(12 * scale)}pt;
@@ -100,27 +124,19 @@ class StickyApp(Adw.Application):
         )
         print(f"SYSTEM: UI Scale applied: {scale}")
 
-    def apply_custom_scale_css(self, scale):
-        css = f"""
-        * {{ 
-            -gtk-icon-size: {int(16 * scale)}px;
-        }}
-        .sticky-window {{
-            font-size: {10 * scale}pt;
-        }}
-        """
-        provider = Gtk.CssProvider()
-        provider.load_from_data(css.encode())
-        Gtk.StyleContext.add_provider_for_display(
-            Gdk.Display.get_default(),
-            provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
-
     def do_activate(self):
         """Инициализация главного окна приложения."""
         self.config = ConfigManager.load()
-        self.apply_ui_scale()
+        
+        try:
+            raw_scale = self.config.get("ui_scale", 1.0)
+            scale = float(str(raw_scale)[:4])
+            if not (0.5 <= scale <= 2.0):
+                scale = 1.0
+        except (ValueError, TypeError):
+            scale = 1.0
+        
+        self.apply_ui_scale(scale)
 
         display = Gdk.Display.get_default()
         print(f"DEBUG: Actual running backend: {display.__class__.__name__}")
@@ -131,7 +147,6 @@ class StickyApp(Adw.Application):
         if os.path.exists(icons_dir):
             icon_theme = Gtk.IconTheme.get_for_display(display)
             icon_theme.add_search_path(icons_dir)
-
             Gtk.Window.set_default_icon_name("app")
 
         self.load_css()
@@ -152,31 +167,40 @@ class StickyApp(Adw.Application):
         """Starts the GTK3 tray icon as a separate process to avoid library conflicts."""
         script_path = os.path.join(os.path.dirname(__file__), "tray.py")
         env = os.environ.copy()
-        # Ensure tray knows which display to use
+        
+        # Pass language setting to tray process
+        lang_code = self.config.get("language", "en")
+        env['STICKY_NOTES_LANG'] = lang_code
+        
         if "GDK_BACKEND" in os.environ:
-            del env["GDK_BACKEND"]  # Let tray decide its own backend (usually X11)
+            del env["GDK_BACKEND"]
 
         self.tray_process = subprocess.Popen(
             [sys.executable, script_path],
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
+            stderr=subprocess.PIPE, # Capture stderr for logging
             text=True,
             bufsize=1,
             env=env
         )
 
-        self.monitor_thread = threading.Thread(target=self.monitor_tray_output, daemon=True)
-        self.monitor_thread.start()
+        # Monitor both stdout and stderr
+        threading.Thread(target=self.monitor_tray_output, args=(self.tray_process.stdout, "TRAY"), daemon=True).start()
+        threading.Thread(target=self.monitor_tray_output, args=(self.tray_process.stderr, "TRAY_ERROR"), daemon=True).start()
 
-    def monitor_tray_output(self):
-        """Monitors commands sent from the tray process via stdout."""
-        if not self.tray_process or not self.tray_process.stdout:
+
+    def monitor_tray_output(self, pipe, prefix):
+        """Monitors commands or errors from the tray process."""
+        if not pipe:
             return
-
         try:
-            for line in iter(self.tray_process.stdout.readline, ''):
+            for line in iter(pipe.readline, ''):
                 cmd = line.strip()
                 if not cmd: continue
+
+                if prefix == "TRAY_ERROR":
+                    print(f"{prefix}: {cmd}")
+                    continue
 
                 if cmd == "quit":
                     GLib.idle_add(self.quit_app)
@@ -213,22 +237,25 @@ class StickyApp(Adw.Application):
             developer_name=info.get("author"),
             license_type=Gtk.License.MIT_X11,
             website=info.get("website"),
-            comments=info.get("description"),
+            comments=_("A simple and fast sticky notes app for Ubuntu."),
             application_icon="app"
         )
 
-        # Set developers list (replaces debug info for contact)
         author = info.get("author")
         email = info.get("email")
         if email:
             dialog.set_developers([f"{author} <{email}>"])
         else:
             dialog.set_developers([author])
-        dialog.set_copyright(f"© {datetime.now().year} {author}")
+        dialog.set_copyright(_("© {year} {author}").format(year=datetime.now().year, author=author))
         dialog.present()
 
     def quit_app(self):
         """Safely shuts down the tray process and the application."""
+        # Close DB connection first
+        if self.db:
+            self.db.close()
+
         if self.tray_process:
             self.tray_process.terminate()
 

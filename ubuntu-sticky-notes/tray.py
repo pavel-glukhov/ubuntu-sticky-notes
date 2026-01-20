@@ -3,6 +3,25 @@ import os
 import signal
 import gi
 
+# --- Translation Setup ---
+import gettext
+import builtins
+
+APP_ID_GETTEXT = 'ubuntu-sticky-notes'
+current_dir = os.path.dirname(os.path.abspath(__file__))
+LOCALE_DIR = os.path.join(current_dir, 'locale')
+
+try:
+    lang_code = os.environ.get('STICKY_NOTES_LANG', 'en')
+    translation = gettext.translation(APP_ID_GETTEXT, localedir=LOCALE_DIR, languages=[lang_code], fallback=True)
+    builtins._ = translation.gettext
+except FileNotFoundError:
+    builtins._ = lambda s: s
+except Exception as e:
+    print(f"Tray translation setup failed: {e}", file=sys.stderr)
+    builtins._ = lambda s: s
+# --- End Translation Setup ---
+
 try:
     gi.require_version('Gtk', '3.0')
     gi.require_version('AyatanaAppIndicator3', '0.1')
@@ -12,7 +31,7 @@ except ValueError:
         gi.require_version('AppIndicator3', '0.1')
         from gi.repository import AppIndicator3 as AppIndicator
     except ValueError:
-        print("Tray indicator library not found.")
+        print("Tray indicator library not found.", file=sys.stderr)
         sys.exit(1)
 
 from gi.repository import Gtk as Gtk3
@@ -57,21 +76,21 @@ def main():
     # --- Menu ---
     menu = Gtk3.Menu()
 
-    item_main = Gtk3.MenuItem(label="Open Main Window")
+    item_main = Gtk3.MenuItem(label=_("Open Main Window"))
     item_main.connect("activate", on_show_main)
     menu.append(item_main)
 
-    item_all = Gtk3.MenuItem(label="Open All Notes")
+    item_all = Gtk3.MenuItem(label=_("Open All Notes"))
     item_all.connect("activate", on_open_all)
     menu.append(item_all)
 
     menu.append(Gtk3.SeparatorMenuItem())
 
-    item_about = Gtk3.MenuItem(label="About")
+    item_about = Gtk3.MenuItem(label=_("About"))
     item_about.connect("activate", on_about)
     menu.append(item_about)
 
-    item_quit = Gtk3.MenuItem(label="Quit")
+    item_quit = Gtk3.MenuItem(label=_("Quit"))
     item_quit.connect("activate", on_quit)
     menu.append(item_quit)
 
@@ -88,7 +107,7 @@ def main():
         )
         indicator.set_icon_theme_path(icon_dir)
     else:
-        print("Warning: app.png not found, using system icon.")
+        print("Warning: app.png not found, using system icon.", file=sys.stderr)
         indicator = AppIndicator.Indicator.new(
             APP_ID,
             "accessories-text-editor",

@@ -12,6 +12,7 @@ class ConfigManager:
             "backend": "wayland",
             "db_path": os.path.expanduser("~/.local/share/ubuntu-sticky-notes/notes.db"),
             "ui_scale": 1.0,
+            "language": "en",
             "formatting": {
                 "bold": True,
                 "italic": True,
@@ -25,35 +26,41 @@ class ConfigManager:
 
     @classmethod
     def load(cls):
-        if not os.path.exists(CONF_DIR):
-            os.makedirs(CONF_DIR, exist_ok=True)
-
         defaults = cls.get_defaults()
-
+        
         if not os.path.exists(CONF_PATH):
-            cls.save(defaults)
+            # If config doesn't exist, create it with defaults and return
+            try:
+                os.makedirs(CONF_DIR, exist_ok=True)
+                cls.save(defaults)
+            except OSError as e:
+                print(f"ERROR: Could not create config directory or file: {e}")
             return defaults
 
         try:
             with open(CONF_PATH, "r", encoding="utf-8") as f:
                 loaded_config = json.load(f)
+            
+            # Start with defaults and update with loaded values
             config = defaults.copy()
             config.update(loaded_config)
 
+            # Ensure critical nested structures are valid
             if not isinstance(config.get("formatting"), dict):
                 config["formatting"] = defaults["formatting"]
 
             return config
 
         except (json.JSONDecodeError, OSError) as e:
-            print(f"Error loading config (resetting to defaults): {e}")
+            print(f"WARNING: Error loading config file '{CONF_PATH}'. Resetting to defaults. Error: {e}")
+            # If file is corrupted or unreadable, return defaults
             return defaults
 
     @staticmethod
     def save(config_dict):
         try:
+            os.makedirs(CONF_DIR, exist_ok=True)
             with open(CONF_PATH, "w", encoding="utf-8") as f:
                 json.dump(config_dict, f, ensure_ascii=False, indent=4)
-            print(f"DEBUG: Config saved to {CONF_PATH}")
-        except Exception as e:
-            print(f"ERROR: Could not save config: {e}")
+        except OSError as e:
+            print(f"ERROR: Could not save config to '{CONF_PATH}': {e}")
