@@ -1,3 +1,9 @@
+"""Main view module for Ubuntu Sticky Notes.
+
+Provides the primary application window with note list, search functionality,
+and navigation to settings and trash views.
+"""
+
 from gi.repository import Gtk, Adw, Gio, GObject, GLib, Pango, Gdk
 from views.main_view.note_card import NoteCard
 from sticky.sticky_window import StickyWindow
@@ -6,8 +12,30 @@ from views.trash_view import TrashView
 
 STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
 
+
 class MainWindow(Adw.ApplicationWindow):
+    """Main application window.
+    
+    Displays a list of notes with search functionality and provides
+    navigation to settings and trash views. Manages sticky note windows.
+    
+    Attributes:
+        app: Application instance.
+        db: Database controller instance.
+        config: Current configuration dictionary.
+        stickies: Dictionary mapping note IDs to StickyWindow instances.
+        stack: Stack container for main/settings/trash views.
+        flowbox: Container for note cards.
+    """
+    
     def __init__(self, db, application, **kwargs):
+        """Initialize the main window.
+        
+        Args:
+            db: Database controller instance.
+            application: Parent application instance.
+            **kwargs: Additional keyword arguments for ApplicationWindow.
+        """
         super().__init__(application=application,
                          title="Ubuntu Sticky Notes",
                          default_width=200,
@@ -30,13 +58,11 @@ class MainWindow(Adw.ApplicationWindow):
 
         self.setup_actions()
 
-        # === STACK ===
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         self.stack.set_transition_duration(300)
         self.set_content(self.stack)
 
-        # 2. (MAIN)
         self.main_page_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
         header_bar = Adw.HeaderBar()
@@ -76,7 +102,6 @@ class MainWindow(Adw.ApplicationWindow):
         scrolled.set_has_frame(False)
         self.main_page_box.append(scrolled)
 
-        # Pages
         self.stack.add_named(self.main_page_box, "main")
 
         self.trash_view = TrashView(self.db, on_back_callback=self.go_back_to_main)
@@ -92,6 +117,10 @@ class MainWindow(Adw.ApplicationWindow):
         self.refresh_list()
 
     def on_settings_changed(self):
+        """Apply settings changes without restart.
+        
+        Reloads configuration and propagates changes to all open sticky windows.
+        """
         print("DEBUG: Applying settings live...")
         from config.config_manager import ConfigManager
         self.config = ConfigManager.load()
@@ -101,17 +130,24 @@ class MainWindow(Adw.ApplicationWindow):
                 sticky_window.reload_config(self.config)
 
     def on_show_settings(self, btn):
+        """Show the settings view."""
         self.stack.set_visible_child_name("settings")
 
     def on_show_trash(self, btn):
+        """Show the trash view."""
         self.trash_view.refresh_list()
         self.stack.set_visible_child_name("trash")
 
     def go_back_to_main(self):
+        """Return to the main notes list view."""
         self.refresh_list()
         self.stack.set_visible_child_name("main")
 
     def refresh_list(self):
+        """Refresh the list of notes.
+        
+        Clears and rebuilds the flowbox with all notes from the database.
+        """
         while child := self.flowbox.get_first_child():
             self.flowbox.remove(child)
 
@@ -147,11 +183,20 @@ class MainWindow(Adw.ApplicationWindow):
                 flow_child.set_halign(Gtk.Align.FILL)
 
     def create_note(self):
+        """Create a new note and open it."""
         note_id = self.db.add()
         self.refresh_list()
         self.open_note(note_id)
 
     def open_note(self, note_id):
+        """Open a sticky note window.
+        
+        If the note is already open, brings it to front. Otherwise creates
+        a new sticky window.
+        
+        Args:
+            note_id: ID of the note to open.
+        """
         if note_id in self.stickies:
             self.stickies[note_id].present()
             return
@@ -160,6 +205,11 @@ class MainWindow(Adw.ApplicationWindow):
         new_sticky.present()
 
     def on_search(self, entry):
+        """Filter notes based on search query.
+        
+        Args:
+            entry: Search entry widget.
+        """
         query = entry.get_text().lower()
         child = self.flowbox.get_first_child()
         while child:
@@ -172,6 +222,12 @@ class MainWindow(Adw.ApplicationWindow):
             child = child.get_next_sibling()
 
     def update_card_text(self, note_id, serialized_content):
+        """Update the text of a note card in the list.
+        
+        Args:
+            note_id: ID of the note to update.
+            serialized_content: Serialized content from the sticky window.
+        """
         child = self.flowbox.get_first_child()
         while child:
             card = child.get_child()
@@ -182,6 +238,12 @@ class MainWindow(Adw.ApplicationWindow):
             child = child.get_next_sibling()
 
     def update_card_color_live(self, note_id, color):
+        """Update the color of a note card in the list.
+        
+        Args:
+            note_id: ID of the note to update.
+            color: New hex color code.
+        """
         child = self.flowbox.get_first_child()
         while child:
             card = child.get_child()
@@ -191,16 +253,28 @@ class MainWindow(Adw.ApplicationWindow):
             child = child.get_next_sibling()
 
     def on_action_delete_manual(self, note_id):
+        """Move a note to trash.
+        
+        Args:
+            note_id: ID of the note to delete.
+        """
         self.db.move_to_trash(note_id)
         if note_id in self.stickies: self.stickies[note_id].close()
         self.refresh_list()
 
     def setup_actions(self):
+        """Set up application actions."""
         action_delete = Gio.SimpleAction.new("delete_note", GLib.VariantType.new("i"))
         action_delete.connect("activate", lambda a, v: self.on_action_delete_manual(v.get_int32()))
         self.add_action(action_delete)
 
     def create_combined_context_menu(self, note_id, target_widget):
+        """Create and show context menu for a note.
+        
+        Args:
+            note_id: ID of the note.
+            target_widget: Widget to attach the popover to.
+        """
         popover = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
 
@@ -232,6 +306,14 @@ class MainWindow(Adw.ApplicationWindow):
         popover.popup()
 
     def update_note_color(self, note_id, color, widget, popover):
+        """Update note color in database and UI.
+        
+        Args:
+            note_id: ID of the note.
+            color: New hex color code.
+            widget: Target widget (unused).
+            popover: Popover to close.
+        """
         self.db.update_color(note_id, color)
         self.refresh_list()
         if note_id in self.stickies: self.stickies[note_id].apply_color(color)
