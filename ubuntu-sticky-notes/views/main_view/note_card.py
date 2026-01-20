@@ -1,10 +1,33 @@
+"""Note card module for Ubuntu Sticky Notes.
+
+Provides card widgets that display note previews in the main view.
+"""
+
 import json
 import html as html_lib
 from gi.repository import Gtk, Pango
 
 
 class NoteCard(Gtk.Box):
+    """Visual card representation of a note.
+    
+    Displays a preview of note content with color and formatting.
+    Handles click and right-click gestures for opening and context menu.
+    
+    Attributes:
+        note_id: ID of the note being displayed.
+        menu_callback: Optional callback for right-click menu.
+        card_canvas: Container box with colored background.
+        label: Label displaying formatted note content.
+    """
     def __init__(self, note, db, menu_callback=None):
+        """Initialize the note card.
+        
+        Args:
+            note: Dictionary containing note data (id, content, color).
+            db: Database controller instance (unused in current implementation).
+            menu_callback: Optional callback for custom context menu.
+        """
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.note_id = note["id"]
         self.menu_callback = menu_callback
@@ -50,6 +73,17 @@ class NoteCard(Gtk.Box):
         self.setup_gestures()
 
     def _generate_markup(self, raw_content):
+        """Generate Pango markup from serialized note content.
+        
+        Parses hex-encoded JSON with text segments and formatting tags,
+        converting them to Pango markup. Limits output to 5 lines.
+        
+        Args:
+            raw_content: Hex-encoded JSON string or plain text.
+            
+        Returns:
+            Pango markup string with formatting tags.
+        """
         if not raw_content: return ""
 
         try:
@@ -104,6 +138,11 @@ class NoteCard(Gtk.Box):
             return html_lib.escape(text_content).rstrip()
 
     def update_color(self, hex_color):
+        """Update the background color of the card.
+        
+        Args:
+            hex_color: Hex color code (e.g., '#FFF59D').
+        """
         if not hex_color: hex_color = "#FFF59D"
         provider = Gtk.CssProvider()
         css = f"""
@@ -117,6 +156,7 @@ class NoteCard(Gtk.Box):
         self.card_canvas.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def setup_gestures(self):
+        """Set up mouse gesture handlers for the card."""
         click = Gtk.GestureClick()
         click.connect("released", lambda *args: self.get_native().open_note(self.note_id))
         self.add_controller(click)
@@ -126,6 +166,14 @@ class NoteCard(Gtk.Box):
         self.add_controller(menu)
 
     def _on_right_click(self, gesture, n, x, y):
+        """Handle right-click to show context menu.
+        
+        Args:
+            gesture: Gesture that triggered the event.
+            n: Number of clicks.
+            x: X coordinate.
+            y: Y coordinate.
+        """
         if self.menu_callback:
             self.menu_callback(self.note_id, self.card_canvas)
         else:
