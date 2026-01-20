@@ -1,6 +1,6 @@
 # Python
 *.pyc
-__pycache__/
+config/__pycache__/
 *.pyo
 *.pyd
 .Python
