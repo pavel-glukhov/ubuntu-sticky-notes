@@ -1,13 +1,29 @@
+"""User interface module for sticky note windows.
+
+This module provides UI construction methods for sticky note windows including
+header bars, menus, text editing areas, formatting popovers, and resize handles.
+"""
+
 from gi.repository import Gtk, Gdk, GLib
 
 
 class StickyUI:
     """
     Mixin class responsible for constructing the user interface of a StickyWindow.
+    
+    Provides UI setup methods for header bar, menus, text editing area,
+    formatting popovers, and resize handles. Designed to be used as a
+    mixin with StickyWindow.
     """
 
     def setup_header(self):
-        """Creates the compact header bar with window controls."""
+        """
+        Create the compact header bar with window controls.
+        
+        Constructs a header bar containing add button, draggable spacer,
+        menu button, and close button. Sets up drag gesture for window
+        movement via the spacer area.
+        """
         self.header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.header_box.set_size_request(-1, int(22 * self.scale))
         self.header_box.add_css_class("compact-header")
@@ -40,7 +56,15 @@ class StickyUI:
         self.main_box.append(self.header_box)
 
     def setup_main_menu(self, btn):
-        """Constructs the Popover menu for note colors and print actions."""
+        """
+        Construct the popover menu for note colors and print actions.
+        
+        Creates a popover containing a color grid for note background
+        color selection and a print button.
+        
+        Args:
+            btn (Gtk.MenuButton): The menu button to attach the popover to.
+        """
         popover = Gtk.Popover()
         main_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=int(4 * self.scale))
         main_vbox.add_css_class("menu-box")
@@ -82,7 +106,15 @@ class StickyUI:
         btn.set_popover(popover)
 
     def setup_text_color_popover(self, btn):
-        """Creates the text color selection grid popover."""
+        """
+        Create the text color selection grid popover.
+        
+        Builds a popover containing a grid of color buttons for applying
+        foreground colors to selected text.
+        
+        Args:
+            btn (Gtk.MenuButton): The menu button to attach the popover to.
+        """
         popover = Gtk.Popover()
         grid = Gtk.Grid(column_spacing=2, row_spacing=2)
         grid.set_margin_top(4)
@@ -107,7 +139,15 @@ class StickyUI:
         btn.set_popover(popover)
 
     def setup_font_size_popover(self, btn):
-        """Creates the font size selection list popover."""
+        """
+        Create the font size selection list popover.
+        
+        Builds a scrollable popover containing buttons for all available
+        font sizes that can be applied to selected text.
+        
+        Args:
+            btn (Gtk.MenuButton): The menu button to attach the popover to.
+        """
         popover = Gtk.Popover()
         scrolled = Gtk.ScrolledWindow(max_content_height=200, propagate_natural_height=True)
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -122,14 +162,27 @@ class StickyUI:
         btn.set_popover(popover)
 
     def apply_color(self, hex_color):
-        """Applies a background color to the sticky note."""
+        """
+        Apply a background color to the sticky note.
+        
+        Updates the current color, refreshes the UI design, and notifies
+        the main window to update the corresponding note card color.
+        
+        Args:
+            hex_color (str): Hexadecimal color code (e.g., '#FFEB3B').
+        """
         self.current_color = hex_color
         self._update_ui_design()
         if self.main_window:
             self.main_window.update_card_color_live(self.note_id, hex_color)
 
     def setup_resize_handle(self):
-        """Adds a native resize handle to the bottom-right corner."""
+        """
+        Add a native resize handle to the bottom-right corner.
+        
+        Creates a small clickable area with a resize cursor that allows
+        users to drag and resize the window from the corner.
+        """
         self.resize_handle = Gtk.Box()
         size = int(16 * self.scale)
         self.resize_handle.set_size_request(size, size)
@@ -144,7 +197,12 @@ class StickyUI:
         self.overlay.add_overlay(self.resize_handle)
 
     def setup_text_area(self):
-        """Initializes the main text editing area."""
+        """
+        Initialize the main text editing area.
+        
+        Creates a TextView with word wrapping inside a ScrolledWindow and
+        connects the buffer changed signal for real-time content updates.
+        """
         self.text_view = Gtk.TextView(wrap_mode=Gtk.WrapMode.WORD_CHAR)
         self.text_view.add_css_class("sticky-text-edit")
         self.buffer = self.text_view.get_buffer()
