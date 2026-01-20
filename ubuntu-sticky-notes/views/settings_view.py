@@ -1,21 +1,43 @@
+"""Settings view module for Ubuntu Sticky Notes.
+
+Provides a settings interface for configuring display backend, UI scaling,
+database location, and formatting toolbar customization.
+"""
+
 from gi.repository import Gtk, Adw, Gio, Gdk
 from config.config_manager import ConfigManager
 
 
 class SettingsView(Gtk.Box):
+    """Settings view for application configuration.
+    
+    Provides UI for configuring backend, UI scale, database path, and
+    formatting toolbar options. Changes can be applied without restart.
+    
+    Attributes:
+        on_back_callback: Function to call when back button is clicked.
+        on_settings_change_callback: Function to call after settings are saved.
+        config: Current configuration dictionary.
+        switches: Dictionary mapping formatting option keys to CheckButtons.
+    """
+    
     def __init__(self, on_back_callback, on_settings_change_callback=None):
+        """Initialize the settings view.
+        
+        Args:
+            on_back_callback: Function to call when returning to main view.
+            on_settings_change_callback: Optional function to call after saving.
+        """
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.on_back_callback = on_back_callback
         self.on_settings_change_callback = on_settings_change_callback
 
         self.config = ConfigManager.load()
 
-        # --- ЗАЩИТА ОТ ПОВРЕЖДЕННОГО КОНФИГА ---
         if "formatting" not in self.config or not isinstance(self.config["formatting"], dict):
             print("DEBUG: Formatting config was missing or corrupted. Resetting to defaults.")
             self.config["formatting"] = {}
 
-        # --- Header ---
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         header.set_margin_top(10);
         header.set_margin_bottom(10)
@@ -32,7 +54,6 @@ class SettingsView(Gtk.Box):
         header.append(lbl_title)
         self.append(header)
 
-        # --- Content Container ---
         content_scroll = Gtk.ScrolledWindow(vexpand=True)
         self.append(content_scroll)
 
@@ -45,7 +66,6 @@ class SettingsView(Gtk.Box):
         list_box.add_css_class("boxed-list")
         content_scroll.set_child(list_box)
 
-        # Row 1: Backend
         row_backend = Adw.ActionRow(
             title="Display Backend",
             subtitle="Wayland (Default) or X11 (For sticker positioning)"
@@ -56,7 +76,6 @@ class SettingsView(Gtk.Box):
         row_backend.add_suffix(self.backend_dropdown)
         list_box.append(row_backend)
 
-        # Row 2: UI Scale
         row_scale = Adw.ActionRow(
             title="Interface Scale",
             subtitle="Upscale UI elements and fonts (e.g. 1.25 = 125%)"
@@ -72,7 +91,6 @@ class SettingsView(Gtk.Box):
         row_scale.add_suffix(self.scale_spin)
         list_box.append(row_scale)
 
-        # Row 3: DB Path
         row_db = Adw.ActionRow(title="Database Path")
         self.db_entry = Gtk.Entry(text=str(self.config.get("db_path", "")))
         self.db_entry.set_hexpand(True)
@@ -84,7 +102,6 @@ class SettingsView(Gtk.Box):
         row_db.add_suffix(btn_browse)
         list_box.append(row_db)
 
-        # === FORMATTING TOOLBAR ===
         fmt_expander = Adw.ExpanderRow(title="Formatting Buttons", subtitle="Choose which buttons to show on stickers")
 
         self.switches = {}
@@ -104,7 +121,6 @@ class SettingsView(Gtk.Box):
         for key, name in buttons_to_toggle:
             row = Adw.ActionRow(title=name)
 
-            # --- ИЗМЕНЕНИЕ: Используем CheckButton (галочку) вместо Switch (тумблера) ---
             switch = Gtk.CheckButton()
             switch.set_valign(Gtk.Align.CENTER)
 
@@ -113,16 +129,13 @@ class SettingsView(Gtk.Box):
 
             row.add_suffix(switch)
 
-            # Позволяет переключать галочку кликом по всей строке
             row.set_activatable_widget(switch)
 
             fmt_expander.add_row(row)
             self.switches[key] = switch
 
         list_box.append(fmt_expander)
-        # =======================================
 
-        # --- Save Button ---
         footer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         footer.set_margin_top(20);
         footer.set_margin_bottom(20)
@@ -142,6 +155,11 @@ class SettingsView(Gtk.Box):
         self.append(footer)
 
     def on_browse_db(self, btn):
+        """Open file dialog to browse for database file.
+        
+        Args:
+            btn: The button that triggered this callback.
+        """
         dialog = Gtk.FileDialog(title="Select Database File")
         filters = Gio.ListStore.new(Gtk.FileFilter)
         db_filter = Gtk.FileFilter()
@@ -161,6 +179,14 @@ class SettingsView(Gtk.Box):
         dialog.open(self.get_native(), None, callback)
 
     def save_settings(self, _):
+        """Save all settings to configuration file.
+        
+        Collects values from all UI elements, validates them, saves to
+        ConfigManager, and triggers the settings change callback.
+        
+        Args:
+            _: The button that triggered this callback (unused).
+        """
         print("DEBUG: Saving settings process started...")
 
         new_backend = "wayland" if self.backend_dropdown.get_selected() == 0 else "x11"
@@ -176,7 +202,6 @@ class SettingsView(Gtk.Box):
         self.config["db_path"] = new_db_path
         self.config["ui_scale"] = final_scale
 
-        # Собираем данные
         fmt_settings = {}
         for key, switch in self.switches.items():
             state = switch.get_active()
@@ -192,6 +217,5 @@ class SettingsView(Gtk.Box):
         except Exception as e:
             print(f"ERROR: Failed to save config: {e}")
 
-        # Обновляем интерфейс без перезапуска
         if self.on_settings_change_callback:
             self.on_settings_change_callback()
