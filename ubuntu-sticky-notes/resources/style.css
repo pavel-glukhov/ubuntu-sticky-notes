@@ -1,17 +1,23 @@
-/* Базовое окно всегда прозрачное для поддержки теней и скруглений */
-/* Возвращаем базовый вид окна */
+/* ========================================
+   Sticky Window - Base Container
+   ======================================== */
+
+/* Main sticky note window with rounded corners */
 window.sticky-window {
-    background-color: #FFF59D; /* Наш классический желтый */
+    background-color: #FFF59D; /* Classic sticky note yellow */
     border-radius: 12px;
 }
 
-/* Убираем все внешние тени и маргины, которые делали его прозрачным */
+/* Main content area - transparent to inherit window background */
 .sticky-main-area {
     margin: 0;
     background: transparent;
 }
 
-/* Заголовок */
+/* ========================================
+   Header Panel
+   ======================================== */
+
 .header-panel {
     background: rgba(0,0,0,0.05);
     border-bottom: 1px solid rgba(0,0,0,0.08);
@@ -29,7 +35,10 @@ window.sticky-window {
     background-color: rgba(0,0,0,0.1);
 }
 
-/* Текстовая область */
+/* ========================================
+   Text Editing Area
+   ======================================== */
+
 .sticky-text-edit {
     padding: 4px 12px;
 }
@@ -38,20 +47,25 @@ textview text {
     background-color: transparent;
     font-size: 15px;
 }
-/* Убеждаемся, что всё внутри стикера прозрачное */
+
+/* Ensure all text containers are transparent */
 .sticky-text-edit,
 textview,
 textview text {
     background-color: transparent;
     border: none;
 }
-/* Убираем рамки у прокрутки */
+
+/* Remove scrolled window borders */
 scrolledwindow {
     background-color: transparent;
     border: none;
 }
 
-/* Панель форматирования */
+/* ========================================
+   Formatting Toolbar
+   ======================================== */
+
 .format-bar {
     background-color: rgba(0, 0, 0, 0.03);
     border-top: 1px solid rgba(0, 0, 0, 0.08);
@@ -60,7 +74,7 @@ scrolledwindow {
     padding: 6px;
 }
 
-/* Исправление двойной кнопки и лишних рамок */
+/* Format buttons - flat style without borders */
 .format-btn,
 menubutton.format-btn button {
     border: none;
@@ -76,7 +90,10 @@ menubutton.format-btn button:hover {
     border-radius: 4px;
 }
 
-/* Поповер выбора цвета */
+/* ========================================
+   Color Picker Popover
+   ======================================== */
+
 popover > contents {
     border-radius: 12px;
     padding: 8px;
@@ -88,13 +105,17 @@ popover grid {
     border: none;
 }
 
-/* Убираем фокусные рамки вокруг кнопок */
+/* Remove focus outlines from buttons */
 button:focus, button:active {
     outline: none;
     box-shadow: none;
 }
 
-/* Делаем скроллбар менее заметным (как на стикерах) */
+/* ========================================
+   Scrollbar Styling
+   ======================================== */
+
+/* Subtle scrollbar with fade-in on hover */
 scrolledwindow scrollbar {
     opacity: 0.3;
     transition: opacity 200ms;
@@ -102,6 +123,10 @@ scrolledwindow scrollbar {
 scrolledwindow scrollbar:hover {
     opacity: 1;
 }
+
+/* ========================================
+   Note Cards - Main View
+   ======================================== */
 
 .note-card {
     min-width: 150px;
