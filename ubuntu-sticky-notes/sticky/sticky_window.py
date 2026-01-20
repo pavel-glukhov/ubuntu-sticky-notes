@@ -1,3 +1,10 @@
+"""Main sticky note window module.
+
+This module provides the main StickyWindow class that combines multiple mixins
+to create a fully functional sticky note window with formatting, UI, events,
+and action handling capabilities.
+"""
+
 import json
 import gi
 from gi.repository import Gtk, Gdk, GLib, Pango
@@ -15,10 +22,33 @@ FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 24, 32, 48, 72]
 
 class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, StickyEvents):
     """
-    Main Window class for a single sticky note.
-    Inherits from multiple mixins to separate concerns (UI, Events, Actions, Formatting).
+    Main window class for a single sticky note.
+    
+    Combines multiple mixins to provide a complete sticky note experience
+    including text formatting, UI construction, event handling, and database
+    persistence. Manages window state, appearance, and user interactions.
+    
+    Attributes:
+        db: Database controller for note persistence.
+        note_id: Unique identifier for the note.
+        main_window: Reference to the main application window.
+        config: Application configuration dictionary.
+        current_color: Current background color of the note.
+        scale: UI scaling factor.
     """
     def __init__(self, db, note_id=None, main_window=None):
+        """
+        Initialize a sticky note window.
+        
+        Sets up the window state, loads CSS styling, constructs the UI
+        hierarchy, loads data from database, and establishes auto-save
+        mechanisms.
+        
+        Args:
+            db: Database controller instance for note persistence.
+            note_id: Unique identifier for the note. If None, creates a new note.
+            main_window: Reference to the main application window.
+        """
         super().__init__()
 
         # 1. State and Data Initialization
@@ -75,21 +105,37 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         GLib.timeout_add_seconds(2, self.save)
 
     def _connect_main_signals(self):
-        """Connects core window and buffer signals."""
+        """
+        Connect core window and buffer signals.
+        
+        Establishes signal connections for window close requests, mapping,
+        cursor position changes, and text buffer modifications.
+        """
         self.connect("close-request", self._on_close_requested)
         self.connect("map", self._on_map)
         self.buffer.connect("notify::cursor-position", self.on_cursor_moved)
         self.buffer.connect("changed", self._on_buffer_changed)
 
     def is_x11(self):
-        """Determines if the application is running under the X11 backend."""
+        """
+        Determine if the application is running under the X11 backend.
+        
+        Returns:
+            bool: True if running on X11, False otherwise (e.g., Wayland).
+        """
         display = Gdk.Display.get_default()
         return "X11" in display.__class__.__name__
 
     def _update_ui_design(self, hex_color=None):
         """
-        Dynamically generates and applies CSS to update the note's
-        background color and UI scaling.
+        Dynamically generate and apply CSS to update note appearance.
+        
+        Generates CSS styling for the note's background color, UI scaling,
+        and component appearance, then applies it to the window.
+        
+        Args:
+            hex_color (str, optional): New background color in hex format.
+                If None, uses current color.
         """
         if hex_color:
             self.current_color = hex_color.strip()
@@ -128,7 +174,11 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
 
     def setup_formatting_bar(self):
         """
-        Configures the bottom toolbar with formatting buttons based on user preferences.
+        Configure the bottom toolbar with formatting buttons.
+        
+        Creates formatting buttons (bold, italic, underline, strikethrough,
+        list, text color, font size) based on user preferences and
+        configuration settings.
         """
         if hasattr(self, 'format_bar'):
             while child := self.format_bar.get_first_child():
@@ -196,7 +246,16 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
             self.format_bar.append(self.btn_font_size)
 
     def on_cursor_moved(self, buffer, pspec):
-        """Updates the font size label in the UI based on the cursor's current text tags."""
+        """
+        Update the font size label based on cursor position.
+        
+        Inspects the text tags at the current cursor position and updates
+        the font size button label to reflect the active font size.
+        
+        Args:
+            buffer (Gtk.TextBuffer): The text buffer that triggered the signal.
+            pspec (GObject.ParamSpec): Parameter specification for the property.
+        """
         if not hasattr(self, 'btn_font_size'):
             return
         cursor_iter = buffer.get_iter_at_mark(buffer.get_insert())
@@ -212,5 +271,10 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         self.btn_font_size.set_label(str(current_size))
 
     def update_pin_ui(self):
-        """Placeholder for updating the 'Pinned' status icon in the UI."""
+        """
+        Update the 'Pinned' status icon in the UI.
+        
+        Placeholder method for updating visual indicators when a note's
+        pinned status changes.
+        """
         pass
