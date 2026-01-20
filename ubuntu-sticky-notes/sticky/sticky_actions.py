@@ -1,15 +1,25 @@
+"""Sticky note actions mixin module.
+
+Provides database persistence, loading, serialization, and printing functionality
+for sticky note windows.
+"""
+
 import json
 from gi.repository import Gtk, Gdk, GLib, Pango, PangoCairo
 
 
 class StickyActions:
-    """
-    Mixin class providing persistence, database loading, and printing actions.
+    """Mixin class providing persistence and action handlers for sticky notes.
+    
+    Handles database operations, content serialization with formatting tags,
+    and print functionality.
     """
 
     def load_from_db(self):
-        """
-        Fetches note data from the database and populates the text buffer and UI.
+        """Load note data from database and populate text buffer.
+        
+        Decodes hex-encoded JSON content with formatting tags and applies them
+        to the text buffer. Restores window dimensions and color.
         """
         if not self.note_id:
             return
@@ -18,14 +28,12 @@ class StickyActions:
         if not row:
             return
 
-        # Block saving signals during initial data load
         self._loading = True
 
         content = row["content"] or ""
         self.buffer.set_text("")
 
         try:
-            # Decode hex-encoded JSON content and apply tags
             segments = json.loads(bytes.fromhex(content).decode('utf-8'))
             iter_pos = self.buffer.get_start_iter()
             for seg in segments:
@@ -35,10 +43,8 @@ class StickyActions:
                 else:
                     self.buffer.insert(iter_pos, text)
         except Exception:
-            # Fallback for legacy plain text format
             self.buffer.set_text(content.replace("<br>", "\n"))
 
-        # Restore window state: color and dimensions
         self.apply_color(row["color"] or "#FFF59D")
         self.saved_width = row['w'] or 300
         self.saved_height = row['h'] or 380
@@ -46,8 +52,13 @@ class StickyActions:
         self._loading = False
 
     def save(self):
-        """
-        Saves the current state of the note to the database.
+        """Save note state to database.
+        
+        Serializes buffer content with formatting tags to hex-encoded JSON
+        and persists window dimensions, color, and pin state.
+        
+        Returns:
+            True to indicate operation completion.
         """
         if getattr(self, '_loading', True):
             return True
@@ -75,7 +86,11 @@ class StickyActions:
         return True
 
     def _serialize_buffer(self):
-        """Serializes text buffer and tags into a hex JSON string."""
+        """Serialize text buffer with formatting tags to hex-encoded JSON.
+        
+        Returns:
+            Hex-encoded JSON string containing text segments with their tags.
+        """
         start_iter, end_iter = self.buffer.get_bounds()
         segments = []
         while not start_iter.equal(end_iter):
@@ -92,14 +107,24 @@ class StickyActions:
         return json.dumps(segments).encode('utf-8').hex()
 
     def on_print_clicked(self, _):
-        """Initializes a print operation for the note."""
+        """Initialize print operation for the note.
+        
+        Args:
+            _: Widget that triggered the event (unused).
+        """
         print_op = Gtk.PrintOperation()
         print_op.connect("draw-page", self._draw_page)
         print_op.set_n_pages(1)
         print_op.run(Gtk.PrintOperationAction.PRINT_DIALOG, self)
 
     def _draw_page(self, operation, context, page_nr):
-        """Renders the buffer content for printing."""
+        """Render buffer content for printing.
+        
+        Args:
+            operation: Print operation instance.
+            context: Print context.
+            page_nr: Page number being rendered.
+        """
         cr = context.get_cairo_context()
         layout = context.create_pango_layout()
         start, end = self.buffer.get_bounds()
@@ -108,7 +133,16 @@ class StickyActions:
         PangoCairo.show_layout(cr, layout)
 
     def _on_close_requested(self, window):
-        """Handles data persistence before window destruction."""
+        """Handle window close request.
+        
+        Saves note data and removes window from main window's sticky list.
+        
+        Args:
+            window: Window being closed.
+            
+        Returns:
+            False to allow window destruction.
+        """
         self.save()
         if self.main_window and self.note_id in self.main_window.stickies:
             del self.main_window.stickies[self.note_id]
