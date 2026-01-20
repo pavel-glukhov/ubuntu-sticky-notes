@@ -5,14 +5,6 @@ This module handles persistent user configuration storage and retrieval using
 JSON files. It follows the XDG Base Directory specification by storing
 configuration in ~/.config/ubuntu-sticky-notes/config.json.
 
-The ConfigManager class provides a simple interface for loading, saving, and
-managing user preferences including display backend, UI scaling, database
-location, and formatting toolbar customization.
-
-Author: Pavel Glukhov
-Version: 2.0.0-beta1
-License: MIT
-
 Configuration Structure:
     {
         "backend": "wayland" | "x11",
@@ -51,32 +43,6 @@ CONF_PATH = os.path.join(CONF_DIR, "config.json")
 
 
 class ConfigManager:
-    """Static configuration manager for persistent user settings.
-    
-    This class provides static methods for loading and saving user configuration
-    to a JSON file. It handles default values, config directory creation, and
-    error recovery in case of corrupted configuration files.
-    
-    All methods are static as this class serves as a namespace for configuration
-    operations rather than maintaining instance state.
-    
-    Class Methods:
-        get_defaults(): Returns default configuration dictionary
-        load(): Loads configuration from file or creates with defaults
-        save(config_dict): Saves configuration dictionary to file
-    
-    Configuration File Location:
-        ~/.config/ubuntu-sticky-notes/config.json
-    
-    Examples:
-        >>> config = ConfigManager.load()
-        >>> config['backend'] = 'x11'
-        >>> ConfigManager.save(config)
-    
-    Note:
-        The class automatically creates the config directory if it doesn't exist.
-        Corrupted JSON files are logged and replaced with defaults.
-    """
     """Static configuration manager for persistent user settings.
     
     This class provides static methods for loading and saving user configuration
@@ -146,36 +112,6 @@ class ConfigManager:
 
     @classmethod
     def load(cls):
-        """Load user configuration from file or create with defaults.
-        
-        Attempts to load the configuration from the JSON file. If the file
-        doesn't exist, creates it with default values. If the file is corrupted
-        or unreadable, logs the error and returns defaults.
-        
-        The method also validates the 'formatting' section to ensure it's a
-        dictionary, resetting it to defaults if it's corrupted.
-        
-        Returns:
-            Dictionary containing user configuration merged with defaults.
-            User settings override defaults where present.
-        
-        Raises:
-            No exceptions are raised. All errors are caught and logged.
-        
-        Side Effects:
-            - Creates config directory if it doesn't exist
-            - Creates config.json with defaults if missing
-            - Prints error messages to stdout on load failures
-        
-        Examples:
-            >>> config = ConfigManager.load()
-            >>> print(config.get('backend', 'wayland'))
-            wayland
-        
-        Note:
-            This method ensures that the returned config always has all
-            required keys by merging user settings with defaults.
-        """
         """Load user configuration from file or create with defaults.
         
         Attempts to load the configuration from the JSON file. If the file
