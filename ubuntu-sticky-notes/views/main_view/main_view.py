@@ -135,7 +135,7 @@ class MainWindow(Adw.ApplicationWindow):
 
         notes = self.db.all_notes(full=True)
         for note in notes:
-            card = NoteCard(note, self.db)
+            card = NoteCard(note, self.db, refresh_callback=self.refresh_list)
             self.flowbox.append(card)
 
             flow_child = card.get_parent()
@@ -156,11 +156,23 @@ class MainWindow(Adw.ApplicationWindow):
 
     def open_note(self, note_id):
         if note_id in self.stickies:
-            self.stickies[note_id].present()
-            return
+            existing_win = self.stickies[note_id]
+            # Check if the window is still valid (not destroyed)
+            if existing_win.get_native():
+                existing_win.present()
+                return
+            else:
+                # Window is destroyed but still in the list, remove it
+                del self.stickies[note_id]
+
         new_sticky = StickyWindow(self.db, note_id, self)
         self.stickies[note_id] = new_sticky
         new_sticky.present()
+
+    def on_sticky_closed(self, note_id):
+        """Called by StickyWindow when it is about to close."""
+        if note_id in self.stickies:
+            del self.stickies[note_id]
 
     def on_search(self, entry):
         query = entry.get_text().lower()

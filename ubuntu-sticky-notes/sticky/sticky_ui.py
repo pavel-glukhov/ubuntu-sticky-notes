@@ -1,5 +1,5 @@
 from gi.repository import Gtk, Gdk, GLib
-
+from config.config import STICKY_COLORS, TEXT_COLORS, FONT_SIZES
 
 class StickyUI:
     """
@@ -51,7 +51,6 @@ class StickyUI:
 
         grid = Gtk.Grid(column_spacing=6, row_spacing=6)
         btn_size = int(22 * self.scale)
-        from .sticky_window import STICKY_COLORS
         for i, color in enumerate(STICKY_COLORS):
             b = Gtk.Button()
             b.set_size_request(btn_size, btn_size)
@@ -91,7 +90,6 @@ class StickyUI:
         grid.set_margin_end(4)
 
         btn_size = int(18 * self.scale)
-        from .sticky_window import TEXT_COLORS
         for i, color in enumerate(TEXT_COLORS):
             b = Gtk.Button()
             b.set_size_request(btn_size, btn_size)
@@ -111,7 +109,6 @@ class StickyUI:
         popover = Gtk.Popover()
         scrolled = Gtk.ScrolledWindow(max_content_height=200, propagate_natural_height=True)
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        from .sticky_window import FONT_SIZES
         for size in FONT_SIZES:
             b = Gtk.Button(label=str(size), has_frame=False)
             b.add_css_class("format-btn-tiny")

@@ -39,7 +39,8 @@ class NotesDB:
                                   deleted INTEGER DEFAULT 0,
                                   deleted_at TEXT,
                                   always_on_top INTEGER DEFAULT 0,
-                                  is_open INTEGER DEFAULT 0
+                                  is_open INTEGER DEFAULT 0,
+                                  is_pinned INTEGER DEFAULT 0
                               )
                               """)
 
@@ -73,6 +74,8 @@ class NotesDB:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN w INTEGER DEFAULT 300")
             if "h" not in columns:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN h INTEGER DEFAULT 300")
+            if "is_pinned" not in columns:
+                self.conn.execute("ALTER TABLE notes ADD COLUMN is_pinned INTEGER DEFAULT 0")
 
     def add(self, title=None, content="", x=300, y=200, w=260, h=200, color="#FFF59D", always_on_top=0):
         if title is None:
@@ -99,10 +102,16 @@ class NotesDB:
 
     def all_notes(self, full=False):
         if full:
-            query = "SELECT id, title, color, content FROM notes WHERE deleted = 0 ORDER BY id DESC"
+            query = "SELECT * FROM notes WHERE deleted = 0 ORDER BY is_pinned DESC, id DESC"
         else:
-            query = "SELECT id, title FROM notes WHERE deleted = 0 ORDER BY id DESC"
+            query = "SELECT id, title FROM notes WHERE deleted = 0 ORDER BY is_pinned DESC, id DESC"
         return self.conn.execute(query).fetchall()
+
+    def toggle_pin_status(self, note_id):
+        """Toggles the is_pinned status for a given note."""
+        with self.conn:
+            # The expression (is_pinned - 1) * -1 toggles 0 to 1 and 1 to 0
+            self.conn.execute("UPDATE notes SET is_pinned = (is_pinned - 1) * -1 WHERE id = ?", (note_id,))
 
     def move_to_trash(self, note_id):
         deleted_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

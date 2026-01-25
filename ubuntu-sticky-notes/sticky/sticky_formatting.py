@@ -1,6 +1,6 @@
 import json
 from gi.repository import Gtk, Pango
-
+from config.config import TEXT_COLORS, FONT_SIZES
 
 class StickyFormatting:
     """
@@ -20,8 +20,6 @@ class StickyFormatting:
         self.buffer.create_tag("italic", style=Pango.Style.ITALIC)
         self.buffer.create_tag("underline", underline=Pango.Underline.SINGLE)
         self.buffer.create_tag("strikethrough", strikethrough=True)
-
-        from .sticky_window import TEXT_COLORS, FONT_SIZES
 
         # Dynamic color tags
         for color in TEXT_COLORS:
@@ -46,6 +44,7 @@ class StickyFormatting:
                 self.buffer.apply_tag(tag, start, end)
 
         self.text_view.grab_focus()
+        self._on_buffer_changed(self.buffer) # Force update
 
     def apply_text_color(self, hex_color):
         """
@@ -55,8 +54,7 @@ class StickyFormatting:
         res = self.buffer.get_selection_bounds()
         if res:
             start, end = res
-            from .sticky_window import TEXT_COLORS
-
+            
             # Clear existing color tags to prevent overlaps
             for color in TEXT_COLORS:
                 self.buffer.remove_tag_by_name(f"text_color_{color}", start, end)
@@ -64,6 +62,7 @@ class StickyFormatting:
             self.buffer.apply_tag_by_name(f"text_color_{hex_color}", start, end)
 
         self.text_view.grab_focus()
+        self._on_buffer_changed(self.buffer) # Force update
 
     def apply_font_size(self, size):
         """
@@ -73,7 +72,6 @@ class StickyFormatting:
         res = self.buffer.get_selection_bounds()
         if res:
             start, end = res
-            from .sticky_window import FONT_SIZES
 
             # Clear existing font tags
             for s in FONT_SIZES:
@@ -85,6 +83,7 @@ class StickyFormatting:
             self.btn_font_size.set_label(str(size))
 
         self.text_view.grab_focus()
+        self._on_buffer_changed(self.buffer) # Force update
 
     def toggle_bullet_list(self):
         """
@@ -123,3 +122,4 @@ class StickyFormatting:
         self.buffer.end_user_action()
 
         self.text_view.grab_focus()
+        self._on_buffer_changed(self.buffer) # Force update

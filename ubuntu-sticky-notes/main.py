@@ -125,7 +125,7 @@ class StickyApp(Adw.Application):
         print(f"SYSTEM: UI Scale applied: {scale}")
 
     def do_activate(self):
-        """Инициализация главного окна приложения."""
+        """Initializes the main application window."""
         self.config = ConfigManager.load()
         
         try:
@@ -229,6 +229,11 @@ class StickyApp(Adw.Application):
 
         paths = get_app_paths()
         info = paths.get("APP_INFO", {})
+        
+        author = info.get("author")
+        email = info.get("email")
+        developers = [f"{author} <{email}>"] if email else [author]
+        copyright_text = _("© {year} {author}").format(year=datetime.now().year, author=author)
 
         dialog = Adw.AboutWindow(
             transient_for=self.win if self.win.get_visible() else None,
@@ -238,32 +243,31 @@ class StickyApp(Adw.Application):
             license_type=Gtk.License.MIT_X11,
             website=info.get("website"),
             comments=_("A simple and fast sticky notes app for Ubuntu."),
-            application_icon="app"
+            application_icon="app",
+            developers=developers,
+            copyright=copyright_text
         )
 
-        author = info.get("author")
-        email = info.get("email")
-        if email:
-            dialog.set_developers([f"{author} <{email}>"])
-        else:
-            dialog.set_developers([author])
-        dialog.set_copyright(_("© {year} {author}").format(year=datetime.now().year, author=author))
         dialog.present()
 
     def quit_app(self):
         """Safely shuts down the tray process and the application."""
-        # Close DB connection first
-        if self.db:
-            self.db.close()
-
-        if self.tray_process:
-            self.tray_process.terminate()
-
+        
+        # 1. Close all sticky windows FIRST. This triggers their auto-save logic.
         if self.win:
             for note_id in list(self.win.stickies.keys()):
                 win = self.win.stickies.get(note_id)
-                if win: win.close()
+                if win: 
+                    win.close() # This calls save(), which needs the DB open
             self.win.destroy()
+
+        # 2. Terminate tray process
+        if self.tray_process:
+            self.tray_process.terminate()
+
+        # 3. Close DB connection LAST
+        if self.db:
+            self.db.close()
 
         self.quit()
 

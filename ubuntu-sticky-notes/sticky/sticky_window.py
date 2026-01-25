@@ -7,9 +7,9 @@ from .sticky_formatting import StickyFormatting
 from .sticky_actions import StickyActions
 from .sticky_ui import StickyUI
 from .sticky_events import StickyEvents
+from config.config import STICKY_COLORS
 
 # UI Constants
-STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
 TEXT_COLORS = ['#000000', '#424242', '#D32F2F', '#C2185B', '#7B1FA2', '#303F9F', '#1976D2', '#0288D1', '#0097A7', '#00796B', '#388E3C', '#689F38', '#AFB42B', '#FBC02D', '#FFA000', '#E64A19']
 FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 24, 32, 48, 72]
 
@@ -27,6 +27,7 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         self.main_window = main_window
         self.config = getattr(main_window, 'config', {})
         self._loading = True
+        self._is_destroying = False # Flag to prevent operations during destruction
         self.scale = 1.0
         self.current_color = "#FFF59D"
         self.default_font_size = 12
@@ -65,7 +66,9 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         focus_ctrl = Gtk.EventControllerFocus()
         focus_ctrl.connect("leave", lambda *_: self.save())
         self.add_controller(focus_ctrl)
-        GLib.timeout_add_seconds(2, self.save)
+        
+        # Store timer ID to remove it later
+        self.save_timer_id = GLib.timeout_add_seconds(2, self.save)
 
     def _connect_main_signals(self):
         """Connects core window and buffer signals."""
@@ -125,9 +128,9 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
                 btn.add_css_class("format-btn-tiny")
                 btn.set_size_request(icon_size, icon_size)
                 if arg:
-                    btn.connect("clicked", lambda _, a=arg: callback(a))
+                    btn.connect("clicked", (lambda cb, a: lambda _: cb(a))(callback, arg))
                 else:
-                    btn.connect("clicked", lambda _: callback())
+                    btn.connect("clicked", (lambda cb: lambda _: cb())(callback))
                 self.format_bar.append(btn)
                 has_any_btn = True
 

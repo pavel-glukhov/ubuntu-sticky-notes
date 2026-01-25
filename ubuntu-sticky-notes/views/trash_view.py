@@ -82,7 +82,7 @@ class TrashView(Gtk.Box):
             return
 
         for note in trash_items:
-            card = NoteCard(note, self.db, menu_callback=self.show_context_menu)
+            card = NoteCard(note, self.db, menu_callback=self.show_context_menu, refresh_callback=self.refresh_list)
             self.flowbox.append(card)
             flow_child = card.get_parent()
             if flow_child:

@@ -66,7 +66,7 @@ class StickyEvents:
         Finalizes coordinate updates after dragging (X11 specific).
         """
         if self.is_x11():
-            self.saved_x = getattr(self, "last_x", 0)
+            self.saved_x = getattr(self, "last_x", 0),
             self.saved_y = getattr(self, "last_y", 0)
 
     def _on_map(self, widget):
@@ -83,7 +83,9 @@ class StickyEvents:
         """
         if not getattr(self, '_loading', True):
             if self.main_window:
-                # Serialize current buffer content
+                # Serialize current buffer content (now returns JSON object)
                 content = self._serialize_buffer()
                 # Direct push notification to the main UI list
                 self.main_window.update_card_text(self.note_id, content)
+
+    # Removed _on_text_view_clicked as it's no longer needed for link activation
