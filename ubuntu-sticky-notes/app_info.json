@@ -1,5 +1,5 @@
 {
-    "service_name": "com.ubuntu.sticky.notes",
+    "service_name": "ubuntu.sticky.notes",
     "app_name": "Ubuntu Sticky Notes",
     "version": "2.0.0-beta2",
     "author": "Pavel Glukhov",
