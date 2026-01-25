@@ -175,3 +175,16 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
     def update_pin_ui(self):
         """Placeholder for updating the 'Pinned' status icon in the UI."""
         pass
+
+    def reload_config(self, new_config):
+        """Reloads configuration and updates UI elements."""
+        self.config = new_config
+        # Re-setup header to update the menu with new palette
+        if hasattr(self, 'header_box'):
+            self.main_box.remove(self.header_box)
+        self.setup_header()
+        # Re-insert header at the top
+        self.main_box.reorder_child_after(self.header_box, None)
+        
+        # Also update formatting bar if needed (e.g. if buttons visibility changed)
+        self.setup_formatting_bar()

@@ -1,5 +1,5 @@
 import builtins
-from gi.repository import Gtk, Adw, Gio
+from gi.repository import Gtk, Adw, Gio, Gdk
 from config.config_manager import ConfigManager
 
 _ = builtins._
@@ -75,6 +75,40 @@ class SettingsView(Gtk.Box):
         row_db.add_suffix(btn_browse)
         list_box.append(row_db)
 
+        # --- Palette Settings ---
+        palette_expander = Adw.ExpanderRow(title=_("Color Palette"), subtitle=_("Customize sticker colors"))
+        self.palette_buttons = []
+        current_palette = self.config.get("palette", [])
+        
+        # Create a grid for color buttons
+        palette_grid = Gtk.Grid(column_spacing=10, row_spacing=10)
+        palette_grid.set_margin_top(10); palette_grid.set_margin_bottom(10)
+        palette_grid.set_margin_start(10); palette_grid.set_margin_end(10)
+        palette_grid.set_halign(Gtk.Align.CENTER)
+
+        for i, color in enumerate(current_palette):
+            btn = Gtk.Button()
+            btn.set_size_request(40, 40)
+            self._set_button_color(btn, color)
+            btn.connect("clicked", self.on_color_btn_clicked, i)
+            self.palette_buttons.append(btn)
+            palette_grid.attach(btn, i % 4, i // 4, 1, 1)
+        
+        # Wrap grid in a row to add to expander
+        palette_row = Adw.ActionRow()
+        palette_row.add_suffix(palette_grid)
+        palette_expander.add_row(palette_row)
+        
+        # Reset button
+        reset_row = Adw.ActionRow(title=_("Reset Palette"))
+        btn_reset = Gtk.Button(label=_("Reset"), valign=Gtk.Align.CENTER)
+        btn_reset.connect("clicked", self.on_reset_palette)
+        reset_row.add_suffix(btn_reset)
+        palette_expander.add_row(reset_row)
+
+        list_box.append(palette_expander)
+        # ------------------------
+
         fmt_expander = Adw.ExpanderRow(title=_("Formatting Buttons"), subtitle=_("Choose which buttons to show on stickers"))
         self.switches = {}
         buttons_to_toggle = [
@@ -101,6 +135,60 @@ class SettingsView(Gtk.Box):
         self.lbl_hint = Gtk.Label(label=_("Some changes may require a restart to apply."), css_classes=["caption"], margin_top=10)
         footer.append(self.lbl_hint)
         self.append(footer)
+
+    def _set_button_color(self, btn, color):
+        cp = Gtk.CssProvider()
+        cp.load_from_data(f"button {{ background-color: {color}; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); }}".encode())
+        btn.get_style_context().add_provider(cp, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+    def on_color_btn_clicked(self, btn, index):
+        # Use Gtk.ColorDialog for GTK 4.10+, fallback or alternative for older versions
+        # Since we are targeting GTK4, we should try to use the modern approach.
+        # However, Gtk.ColorDialog is new. Let's use a simple Gtk.ColorChooserDialog if available or similar.
+        # Actually, Gtk.ColorChooserDialog is deprecated in 4.10.
+        # Let's try to use Gtk.ColorDialog if available, otherwise fallback.
+        
+        try:
+            dialog = Gtk.ColorDialog()
+            dialog.choose_rgba(self.get_native(), None, None, self._on_color_chosen, index)
+        except AttributeError:
+            # Fallback for older GTK4 versions (before 4.10)
+            # We can use Gtk.ColorChooserDialog
+            dialog = Gtk.ColorChooserDialog(title=_("Select Color"), transient_for=self.get_native())
+            dialog.set_use_alpha(False)
+            
+            # Parse current color
+            current_hex = self.config["palette"][index]
+            rgba = Gdk.RGBA()
+            rgba.parse(current_hex)
+            dialog.set_rgba(rgba)
+            
+            dialog.connect("response", self._on_color_chooser_response, index)
+            dialog.show()
+
+    def _on_color_chosen(self, dialog, result, index):
+        try:
+            rgba = dialog.choose_rgba_finish(result)
+            hex_color = f"#{int(rgba.red*255):02x}{int(rgba.green*255):02x}{int(rgba.blue*255):02x}".upper()
+            self.config["palette"][index] = hex_color
+            self._set_button_color(self.palette_buttons[index], hex_color)
+        except Exception as e:
+            print(f"Color selection failed: {e}")
+
+    def _on_color_chooser_response(self, dialog, response, index):
+        if response == Gtk.ResponseType.OK:
+            rgba = dialog.get_rgba()
+            hex_color = f"#{int(rgba.red*255):02x}{int(rgba.green*255):02x}{int(rgba.blue*255):02x}".upper()
+            self.config["palette"][index] = hex_color
+            self._set_button_color(self.palette_buttons[index], hex_color)
+        dialog.destroy()
+
+    def on_reset_palette(self, btn):
+        from config.config import STICKY_COLORS
+        self.config["palette"] = list(STICKY_COLORS)
+        for i, btn in enumerate(self.palette_buttons):
+            if i < len(self.config["palette"]):
+                self._set_button_color(btn, self.config["palette"][i])
 
     def on_browse_db(self, btn):
         dialog = Gtk.FileDialog(title=_("Select Database File"))
@@ -132,6 +220,8 @@ class SettingsView(Gtk.Box):
             
         fmt_settings = {key: switch.get_active() for key, switch in self.switches.items()}
         self.config["formatting"] = fmt_settings
+
+        # Palette is already updated in self.config["palette"]
 
         ConfigManager.save(self.config)
 

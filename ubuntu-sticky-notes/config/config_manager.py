@@ -13,6 +13,8 @@ class ConfigManager:
             "db_path": os.path.expanduser("~/.local/share/ubuntu-sticky-notes/notes.db"),
             "ui_scale": 1.0,
             "language": "en",
+            # Define default palette directly here to avoid circular import
+            "palette": ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC'],
             "formatting": {
                 "bold": True,
                 "italic": True,
@@ -29,7 +31,6 @@ class ConfigManager:
         defaults = cls.get_defaults()
         
         if not os.path.exists(CONF_PATH):
-            # If config doesn't exist, create it with defaults and return
             try:
                 os.makedirs(CONF_DIR, exist_ok=True)
                 cls.save(defaults)
@@ -41,19 +42,25 @@ class ConfigManager:
             with open(CONF_PATH, "r", encoding="utf-8") as f:
                 loaded_config = json.load(f)
             
-            # Start with defaults and update with loaded values
             config = defaults.copy()
+            # Deep update for formatting dict
+            if 'formatting' in loaded_config and isinstance(loaded_config['formatting'], dict):
+                config['formatting'].update(loaded_config['formatting'])
+                loaded_config['formatting'] = config['formatting']
+            
             config.update(loaded_config)
 
-            # Ensure critical nested structures are valid
             if not isinstance(config.get("formatting"), dict):
                 config["formatting"] = defaults["formatting"]
+            
+            # Ensure palette exists and is a list
+            if "palette" not in config or not isinstance(config["palette"], list):
+                config["palette"] = defaults["palette"]
 
             return config
 
         except (json.JSONDecodeError, OSError) as e:
             print(f"WARNING: Error loading config file '{CONF_PATH}'. Resetting to defaults. Error: {e}")
-            # If file is corrupted or unreadable, return defaults
             return defaults
 
     @staticmethod

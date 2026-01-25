@@ -7,8 +7,6 @@ from views.trash_view import TrashView
 
 _ = builtins._
 
-STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
-
 class MainWindow(Adw.ApplicationWindow):
     def __init__(self, db, application, **kwargs):
         super().__init__(application=application,
@@ -150,7 +148,7 @@ class MainWindow(Adw.ApplicationWindow):
                 flow_child.set_halign(Gtk.Align.FILL)
 
     def create_note(self):
-        note_id = self.db.add()
+        note_id = self.db.add(color=self.config.get("palette", ["#FFF59D"])[0])
         self.refresh_list()
         self.open_note(note_id)
 
@@ -225,7 +223,11 @@ class MainWindow(Adw.ApplicationWindow):
         vbox.set_margin_end(8)
 
         grid = Gtk.Grid(column_spacing=8, row_spacing=8, halign=Gtk.Align.CENTER)
-        for i, color in enumerate(STICKY_COLORS):
+        
+        # Use palette from config
+        palette = self.config.get("palette", [])
+        
+        for i, color in enumerate(palette):
             b = Gtk.Button()
             b.set_size_request(28, 28)
             cp = Gtk.CssProvider()
@@ -233,7 +235,7 @@ class MainWindow(Adw.ApplicationWindow):
                 f"button {{ background-color: {color}; border-radius: 14px; min-width: 28px; min-height: 28px; padding: 0; }}".encode())
             b.get_style_context().add_provider(cp, Gtk.STYLE_PROVIDER_PRIORITY_USER)
             b.connect("clicked", lambda _, c=color: self.update_note_color(note_id, c, target_widget, popover))
-            grid.attach(b, i % 2, i // 2, 1, 1)
+            grid.attach(b, i % 4, i // 4, 1, 1)
 
         vbox.append(grid)
         vbox.append(Gtk.Separator())

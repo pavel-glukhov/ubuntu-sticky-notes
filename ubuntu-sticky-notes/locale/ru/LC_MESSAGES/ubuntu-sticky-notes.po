@@ -189,3 +189,39 @@ msgstr "Простое и быстрое приложение для замет�
 #, python-brace-format
 msgid "© {year} {author}"
 msgstr "© {year} {author}"
+
+#: ubuntu-sticky-notes/views/settings_view.py:100
+msgid "Color Palette"
+msgstr "Цветовая палитра"
+
+#: ubuntu-sticky-notes/views/settings_view.py:100
+msgid "Customize sticker colors"
+msgstr "Настройка цветов стикеров"
+
+#: ubuntu-sticky-notes/views/settings_view.py:118
+msgid "Reset Palette"
+msgstr "Сбросить палитру"
+
+#: ubuntu-sticky-notes/views/settings_view.py:119
+msgid "Reset"
+msgstr "Сброс"
+
+#: ubuntu-sticky-notes/views/settings_view.py:137
+msgid "Select Color"
+msgstr "Выберите цвет"
+
+#: ubuntu-sticky-notes/views/main_view/note_card.py:65
+msgid "Pin Note"
+msgstr "Закрепить заметку"
+
+#: ubuntu-sticky-notes/views/main_view/note_card.py:65
+msgid "Unpin Note"
+msgstr "Открепить заметку"
+
+#: ubuntu-sticky-notes/sticky/sticky_ui.py:40
+msgid "Color"
+msgstr "Цвет"
+
+#: ubuntu-sticky-notes/sticky/sticky_ui.py:60
+msgid "Print note"
+msgstr "Печать заметки"

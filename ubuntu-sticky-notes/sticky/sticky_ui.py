@@ -51,7 +51,11 @@ class StickyUI:
 
         grid = Gtk.Grid(column_spacing=6, row_spacing=6)
         btn_size = int(22 * self.scale)
-        for i, color in enumerate(STICKY_COLORS):
+        
+        # Use palette from config
+        palette = self.config.get("palette", [])
+        
+        for i, color in enumerate(palette):
             b = Gtk.Button()
             b.set_size_request(btn_size, btn_size)
             cp = Gtk.CssProvider()
