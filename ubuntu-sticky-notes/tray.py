@@ -23,18 +23,13 @@ except Exception as e:
 # --- End Translation Setup ---
 
 try:
-    gi.require_version('Gtk', '3.0')
-    gi.require_version('AyatanaAppIndicator3', '0.1')
-    from gi.repository import AyatanaAppIndicator3 as AppIndicator
-except ValueError:
-    try:
-        gi.require_version('AppIndicator3', '0.1')
-        from gi.repository import AppIndicator3 as AppIndicator
-    except ValueError:
-        print("Tray indicator library not found.", file=sys.stderr)
-        sys.exit(1)
-
-from gi.repository import Gtk as Gtk3
+    gi.require_version('Gtk', '3.0') # Glib indicator still uses Gtk3 for menu
+    gi.require_version('AyatanaAppIndicatorGlib', '2.0')
+    from gi.repository import AyatanaAppIndicatorGlib as AppIndicator
+    from gi.repository import Gio, Gtk as Gtk3, GLib # Import Gio and Gtk3 for menu, GLib for mainloop
+except (ValueError, ImportError) as e:
+    print(f"CRITICAL: AyatanaAppIndicatorGlib not found: {e}", file=sys.stderr)
+    sys.exit(1)
 
 APP_ID = "stickynotes-tray"
 
@@ -71,30 +66,38 @@ def main():
 
     def on_quit(_):
         print("quit", flush=True)
-        Gtk3.main_quit()
+        # Gtk3.main_quit() # No longer needed with GLib.MainLoop
+        GLib.MainLoop().quit() # Quit the GLib main loop
 
     # --- Menu ---
-    menu = Gtk3.Menu()
+    # Create a Gio.Menu (model-based menu)
+    menu = Gio.Menu.new()
 
-    item_main = Gtk3.MenuItem(label=_("Open Main Window"))
-    item_main.connect("activate", on_show_main)
-    menu.append(item_main)
+    menu.append(_("Open Main Window"), "app.show_main")
+    menu.append(_("Open All Notes"), "app.open_all")
+    menu.append(_("About"), "app.about")
+    menu.append(_("Quit"), "app.quit")
 
-    item_all = Gtk3.MenuItem(label=_("Open All Notes"))
-    item_all.connect("activate", on_open_all)
-    menu.append(item_all)
+    # Create a Gtk.Application (even if it's a dummy one) to hold the actions
+    # This is necessary for Gio.Menu actions to work
+    app_actions = Gtk3.Application.new("org.ubuntu.StickyNotesTray", Gio.ApplicationFlags.FLAGS_NONE)
+    
+    # Add actions to the dummy application
+    action_show_main = Gio.SimpleAction.new("show_main", None)
+    action_show_main.connect("activate", on_show_main)
+    app_actions.add_action(action_show_main)
 
-    menu.append(Gtk3.SeparatorMenuItem())
+    action_open_all = Gio.SimpleAction.new("open_all", None)
+    action_open_all.connect("activate", on_open_all)
+    app_actions.add_action(action_open_all)
 
-    item_about = Gtk3.MenuItem(label=_("About"))
-    item_about.connect("activate", on_about)
-    menu.append(item_about)
+    action_about = Gio.SimpleAction.new("about", None)
+    action_about.connect("activate", on_about)
+    app_actions.add_action(action_about)
 
-    item_quit = Gtk3.MenuItem(label=_("Quit"))
-    item_quit.connect("activate", on_quit)
-    menu.append(item_quit)
-
-    menu.show_all()
+    action_quit = Gio.SimpleAction.new("quit", None)
+    action_quit.connect("activate", on_quit)
+    app_actions.add_action(action_quit)
 
     # --- Icon Setup ---
     icon_dir, icon_name = get_custom_icon()
@@ -115,9 +118,11 @@ def main():
         )
 
     indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE)
-    indicator.set_menu(menu)
+    indicator.set_menu(menu) # Pass the Gio.Menu here
 
-    Gtk3.main()
+    # Run the GLib main loop
+    main_loop = GLib.MainLoop()
+    main_loop.run()
 
 
 if __name__ == "__main__":
