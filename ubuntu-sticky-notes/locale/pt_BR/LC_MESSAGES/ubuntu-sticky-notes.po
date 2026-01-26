@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-26 17:49+0500\n"
-"PO-Revision-Date: 2026-01-26 17:54+0500\n"
+"POT-Creation-Date: 2026-01-27 01:17+0500\n"
+"PO-Revision-Date: 2026-01-27 01:19+0500\n"
 "Last-Translator: Pavel Glukhov <glukhov.p@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <ldpbr-"
 "translation@lists.sourceforge.net>\n"
@@ -44,7 +44,7 @@ msgstr "Desafixar nota"
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:13
 msgid "Ubuntu Sticky Notes"
-msgstr "Notas adesivas do Ubuntu"
+msgstr "Ubuntu Sticky Notes"
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:63
 msgid "Search..."
@@ -55,7 +55,7 @@ msgid "Move to Trash"
 msgstr "Mover para a lixeira"
 
 #: ubuntu-sticky-notes/views/trash_view.py:18
-#: ubuntu-sticky-notes/views/settings_view.py:22
+#: ubuntu-sticky-notes/views/settings_view.py:23
 msgid "<<- Back"
 msgstr "<<- Voltar"
 
@@ -93,165 +93,127 @@ msgstr ""
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: ubuntu-sticky-notes/views/settings_view.py:26
+#: ubuntu-sticky-notes/views/settings_view.py:27
 msgid "Settings"
 msgstr "Configurações"
 
-#: ubuntu-sticky-notes/views/settings_view.py:42
+#: ubuntu-sticky-notes/views/settings_view.py:43
 msgid "Language"
 msgstr "Idioma"
 
-#: ubuntu-sticky-notes/views/settings_view.py:42
+#: ubuntu-sticky-notes/views/settings_view.py:43
 msgid "Requires app restart to take effect"
 msgstr "Requer reinicialização do aplicativo para ter efeito"
 
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "English"
-msgstr "Inglês"
-
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "Русский"
-msgstr "Russo"
-
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "Spanish"
-msgstr "Espanhol"
-
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "German"
-msgstr "Alemão"
-
-#: ubuntu-sticky-notes/views/settings_view.py:45
-msgid "French"
-msgstr "Francês"
-
-#: ubuntu-sticky-notes/views/settings_view.py:45
-msgid "Simplified Chinese"
-msgstr "Chinês simplificado"
-
-#: ubuntu-sticky-notes/views/settings_view.py:45
-msgid "Brazilian Portuguese"
-msgstr "Português do Brasil"
-
-#: ubuntu-sticky-notes/views/settings_view.py:46
-msgid "Turkish"
-msgstr "Turco"
-
-#: ubuntu-sticky-notes/views/settings_view.py:46
-msgid "Kazakh"
-msgstr "Cazaque"
-
-#: ubuntu-sticky-notes/views/settings_view.py:60
+#: ubuntu-sticky-notes/views/settings_view.py:61
 msgid "Display Backend"
 msgstr "Backend de exibição"
 
-#: ubuntu-sticky-notes/views/settings_view.py:60
+#: ubuntu-sticky-notes/views/settings_view.py:61
 msgid "Wayland (Default) or X11 (For sticker positioning)"
-msgstr "Wayland (padrão) ou X11 (para posicionamento das notas)"
+msgstr "Wayland (Padrão) ou X11 (para posicionamento dos adesivos)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:67
+#: ubuntu-sticky-notes/views/settings_view.py:68
 msgid "Interface Scale"
 msgstr "Escala da interface"
 
-#: ubuntu-sticky-notes/views/settings_view.py:67
+#: ubuntu-sticky-notes/views/settings_view.py:68
 msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
-msgstr "Aumentar elementos e fontes da interface (ex.: 1.25 = 125%)"
+msgstr "Aumentar elementos da interface e fontes (ex.: 1.25 = 125%)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:78
+#: ubuntu-sticky-notes/views/settings_view.py:79
 msgid "Database Path"
 msgstr "Caminho do banco de dados"
 
-#: ubuntu-sticky-notes/views/settings_view.py:89
+#: ubuntu-sticky-notes/views/settings_view.py:90
 msgid "Color Palette"
 msgstr "Paleta de cores"
 
-#: ubuntu-sticky-notes/views/settings_view.py:89
+#: ubuntu-sticky-notes/views/settings_view.py:90
 msgid "Customize sticker colors"
-msgstr "Personalizar cores das notas"
+msgstr "Personalizar cores dos adesivos"
 
-#: ubuntu-sticky-notes/views/settings_view.py:113
+#: ubuntu-sticky-notes/views/settings_view.py:111
 msgid "Reset Palette"
 msgstr "Redefinir paleta"
 
-#: ubuntu-sticky-notes/views/settings_view.py:114
+#: ubuntu-sticky-notes/views/settings_view.py:112
 msgid "Reset"
 msgstr "Redefinir"
 
-#: ubuntu-sticky-notes/views/settings_view.py:122
+#: ubuntu-sticky-notes/views/settings_view.py:120
 msgid "Formatting Buttons"
 msgstr "Botões de formatação"
 
-#: ubuntu-sticky-notes/views/settings_view.py:122
+#: ubuntu-sticky-notes/views/settings_view.py:120
 msgid "Choose which buttons to show on stickers"
-msgstr "Escolha quais botões mostrar nas notas"
+msgstr "Escolha quais botões mostrar nos adesivos"
 
-#: ubuntu-sticky-notes/views/settings_view.py:125
+#: ubuntu-sticky-notes/views/settings_view.py:123
 msgid "Bold (B)"
 msgstr "Negrito (B)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:125
+#: ubuntu-sticky-notes/views/settings_view.py:123
 msgid "Italic (I)"
 msgstr "Itálico (I)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:126
+#: ubuntu-sticky-notes/views/settings_view.py:124
 msgid "Underline (U)"
 msgstr "Sublinhado (U)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:126
+#: ubuntu-sticky-notes/views/settings_view.py:124
 msgid "Strikethrough (S)"
 msgstr "Tachado (S)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:127
+#: ubuntu-sticky-notes/views/settings_view.py:125
 msgid "Bullet List"
 msgstr "Lista com marcadores"
 
-#: ubuntu-sticky-notes/views/settings_view.py:128
+#: ubuntu-sticky-notes/views/settings_view.py:126
 msgid "Text Color"
 msgstr "Cor do texto"
 
-#: ubuntu-sticky-notes/views/settings_view.py:128
+#: ubuntu-sticky-notes/views/settings_view.py:126
 msgid "Font Size"
 msgstr "Tamanho da fonte"
 
-#: ubuntu-sticky-notes/views/settings_view.py:142
+#: ubuntu-sticky-notes/views/settings_view.py:140
 msgid "Save Settings"
 msgstr "Salvar configurações"
 
-#: ubuntu-sticky-notes/views/settings_view.py:145
+#: ubuntu-sticky-notes/views/settings_view.py:143
 msgid "Some changes may require a restart to apply."
-msgstr "Algumas alterações podem exigir reinicialização."
+msgstr "Algumas alterações podem exigir reinicialização para serem aplicadas."
 
-#: ubuntu-sticky-notes/views/settings_view.py:167
+#: ubuntu-sticky-notes/views/settings_view.py:157
 msgid "Select Color"
 msgstr "Selecionar cor"
 
-#: ubuntu-sticky-notes/views/settings_view.py:204
+#: ubuntu-sticky-notes/views/settings_view.py:191
 msgid "Select Database File"
-msgstr "Selecionar arquivo do banco de dados"
+msgstr "Selecionar arquivo de banco de dados"
 
-#: ubuntu-sticky-notes/views/settings_view.py:205
+#: ubuntu-sticky-notes/views/settings_view.py:192
 msgid "Database files"
 msgstr "Arquivos de banco de dados"
 
-#: ubuntu-sticky-notes/views/settings_view.py:248
+#: ubuntu-sticky-notes/views/settings_view.py:244
 msgid "Restart Required"
 msgstr "Reinicialização necessária"
 
-#: ubuntu-sticky-notes/views/settings_view.py:249
-msgid ""
-"The language change will take full effect after you restart the application."
-msgstr ""
-"A alteração de idioma terá efeito completo após reiniciar o aplicativo."
+#: ubuntu-sticky-notes/views/settings_view.py:245
+msgid "Some changes require an application restart to take full effect."
+msgstr "Algumas alterações exigem a reinicialização do aplicativo para terem efeito completo."
 
-#: ubuntu-sticky-notes/views/settings_view.py:251
+#: ubuntu-sticky-notes/views/settings_view.py:247
 msgid "OK"
 msgstr "OK"
 
-#: ubuntu-sticky-notes/main.py:236
+#: ubuntu-sticky-notes/main.py:241
 #, python-brace-format
 msgid "© {year} {author}"
 msgstr "© {year} {author}"
 
-#: ubuntu-sticky-notes/main.py:245
+#: ubuntu-sticky-notes/main.py:250
 msgid "A simple and fast sticky notes app for Ubuntu."
-msgstr "Um aplicativo de notas adesivas simples e rápido para Ubuntu."
+msgstr "Um aplicativo simples e rápido de notas adesivas para o Ubuntu."

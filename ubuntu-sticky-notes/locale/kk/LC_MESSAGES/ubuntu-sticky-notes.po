@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-26 17:49+0500\n"
-"PO-Revision-Date: 2026-01-26 17:54+0500\n"
+"POT-Creation-Date: 2026-01-27 01:17+0500\n"
+"PO-Revision-Date: 2026-01-27 01:19+0500\n"
 "Last-Translator: Pavel Glukhov <glukhov.p@gmail.com>\n"
 "Language-Team: Kazakh <(nothing)>\n"
 "Language: kk\n"
@@ -26,7 +26,7 @@ msgstr "Барлық жазбаларды ашу"
 
 #: ubuntu-sticky-notes/tray.py:89
 msgid "About"
-msgstr "Бағдарлама туралы"
+msgstr "Қосымша туралы"
 
 #: ubuntu-sticky-notes/tray.py:93
 msgid "Quit"
@@ -42,7 +42,7 @@ msgstr "Жазбаны бекітуден шығару"
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:13
 msgid "Ubuntu Sticky Notes"
-msgstr "Ubuntu жапсырма жазбалары"
+msgstr "Ubuntu жабысқақ жазбалары"
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:63
 msgid "Search..."
@@ -50,10 +50,10 @@ msgstr "Іздеу..."
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:243
 msgid "Move to Trash"
-msgstr "Қоқысқа жылжыту"
+msgstr "Қоқыс жәшігіне жылжыту"
 
 #: ubuntu-sticky-notes/views/trash_view.py:18
-#: ubuntu-sticky-notes/views/settings_view.py:22
+#: ubuntu-sticky-notes/views/settings_view.py:23
 msgid "<<- Back"
 msgstr "<<- Артқа"
 
@@ -65,11 +65,11 @@ msgstr "Қоқыс жәшігі"
 #: ubuntu-sticky-notes/views/trash_view.py:123
 #: ubuntu-sticky-notes/views/trash_view.py:128
 msgid "Empty Trash"
-msgstr "Қоқысты тазалау"
+msgstr "Қоқыс жәшігін тазалау"
 
 #: ubuntu-sticky-notes/views/trash_view.py:72
 msgid "Trash is empty"
-msgstr "Қоқыс бос"
+msgstr "Қоқыс жәшігі бос"
 
 #: ubuntu-sticky-notes/views/trash_view.py:97
 msgid "Restore Note"
@@ -77,179 +77,141 @@ msgstr "Жазбаны қалпына келтіру"
 
 #: ubuntu-sticky-notes/views/trash_view.py:103
 msgid "Delete Permanently"
-msgstr "Толығымен жою"
+msgstr "Мүлдем жою"
 
 #: ubuntu-sticky-notes/views/trash_view.py:124
 msgid ""
 "Are you sure you want to permanently delete all items in the trash? This "
 "action cannot be undone."
 msgstr ""
-"Қоқыстағы барлық элементтерді толығымен жойғыңыз келетініне сенімдісіз бе? "
-"Бұл әрекетті қайтару мүмкін емес."
+"Қоқыс жәшігіндегі барлық элементтерді біржола жоюды қалайсыз ба? Бұл әрекетті "
+"қайтару мүмкін емес."
 
 #: ubuntu-sticky-notes/views/trash_view.py:127
 msgid "Cancel"
-msgstr "Бас тарту"
+msgstr "Болдырмау"
 
-#: ubuntu-sticky-notes/views/settings_view.py:26
+#: ubuntu-sticky-notes/views/settings_view.py:27
 msgid "Settings"
 msgstr "Баптаулар"
 
-#: ubuntu-sticky-notes/views/settings_view.py:42
+#: ubuntu-sticky-notes/views/settings_view.py:43
 msgid "Language"
 msgstr "Тіл"
 
-#: ubuntu-sticky-notes/views/settings_view.py:42
+#: ubuntu-sticky-notes/views/settings_view.py:43
 msgid "Requires app restart to take effect"
-msgstr "Өзгерістер күшіне енуі үшін қолданбаны қайта іске қосу қажет"
+msgstr "Күшіне енуі үшін қолданбаны қайта іске қосу қажет"
 
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "English"
-msgstr "Ағылшын"
-
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "Русский"
-msgstr "Орысша"
-
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "Spanish"
-msgstr "Испан"
-
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "German"
-msgstr "Неміс"
-
-#: ubuntu-sticky-notes/views/settings_view.py:45
-msgid "French"
-msgstr "Француз"
-
-#: ubuntu-sticky-notes/views/settings_view.py:45
-msgid "Simplified Chinese"
-msgstr "Қарапайым қытай тілі"
-
-#: ubuntu-sticky-notes/views/settings_view.py:45
-msgid "Brazilian Portuguese"
-msgstr "Бразилиялық португал"
-
-#: ubuntu-sticky-notes/views/settings_view.py:46
-msgid "Turkish"
-msgstr "Түрік"
-
-#: ubuntu-sticky-notes/views/settings_view.py:46
-msgid "Kazakh"
-msgstr "Қазақша"
-
-#: ubuntu-sticky-notes/views/settings_view.py:60
+#: ubuntu-sticky-notes/views/settings_view.py:61
 msgid "Display Backend"
 msgstr "Көрсету жүйесі"
 
-#: ubuntu-sticky-notes/views/settings_view.py:60
+#: ubuntu-sticky-notes/views/settings_view.py:61
 msgid "Wayland (Default) or X11 (For sticker positioning)"
-msgstr "Wayland (әдепкі) немесе X11 (жазбаларды орналастыру үшін)"
+msgstr "Wayland (әдепкі) немесе X11 (жазбалардың орналасуы үшін)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:67
+#: ubuntu-sticky-notes/views/settings_view.py:68
 msgid "Interface Scale"
 msgstr "Интерфейс масштабы"
 
-#: ubuntu-sticky-notes/views/settings_view.py:67
+#: ubuntu-sticky-notes/views/settings_view.py:68
 msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
-msgstr "Интерфейс элементтері мен қаріптерін үлкейту (мысалы, 1.25 = 125%)"
+msgstr "Интерфейс элементтері мен қаріптерді үлкейту (мысалы, 1.25 = 125%)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:78
+#: ubuntu-sticky-notes/views/settings_view.py:79
 msgid "Database Path"
 msgstr "Дерекқор жолы"
 
-#: ubuntu-sticky-notes/views/settings_view.py:89
+#: ubuntu-sticky-notes/views/settings_view.py:90
 msgid "Color Palette"
-msgstr "Түс палитрасы"
+msgstr "Түстер палитрасы"
 
-#: ubuntu-sticky-notes/views/settings_view.py:89
+#: ubuntu-sticky-notes/views/settings_view.py:90
 msgid "Customize sticker colors"
 msgstr "Жазбалардың түстерін баптау"
 
-#: ubuntu-sticky-notes/views/settings_view.py:113
+#: ubuntu-sticky-notes/views/settings_view.py:111
 msgid "Reset Palette"
 msgstr "Палитраны қалпына келтіру"
 
-#: ubuntu-sticky-notes/views/settings_view.py:114
+#: ubuntu-sticky-notes/views/settings_view.py:112
 msgid "Reset"
 msgstr "Қалпына келтіру"
 
-#: ubuntu-sticky-notes/views/settings_view.py:122
+#: ubuntu-sticky-notes/views/settings_view.py:120
 msgid "Formatting Buttons"
 msgstr "Пішімдеу батырмалары"
 
-#: ubuntu-sticky-notes/views/settings_view.py:122
+#: ubuntu-sticky-notes/views/settings_view.py:120
 msgid "Choose which buttons to show on stickers"
-msgstr "Жазбаларда көрсетілетін батырмаларды таңдаңыз"
+msgstr "Жазбаларда көрсетілетін батырмаларды таңдау"
 
-#: ubuntu-sticky-notes/views/settings_view.py:125
+#: ubuntu-sticky-notes/views/settings_view.py:123
 msgid "Bold (B)"
 msgstr "Қалың (B)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:125
+#: ubuntu-sticky-notes/views/settings_view.py:123
 msgid "Italic (I)"
 msgstr "Көлбеу (I)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:126
+#: ubuntu-sticky-notes/views/settings_view.py:124
 msgid "Underline (U)"
-msgstr "Астын сызу (U)"
+msgstr "Асты сызылған (U)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:126
+#: ubuntu-sticky-notes/views/settings_view.py:124
 msgid "Strikethrough (S)"
 msgstr "Сызылған (S)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:127
+#: ubuntu-sticky-notes/views/settings_view.py:125
 msgid "Bullet List"
 msgstr "Маркерленген тізім"
 
-#: ubuntu-sticky-notes/views/settings_view.py:128
+#: ubuntu-sticky-notes/views/settings_view.py:126
 msgid "Text Color"
 msgstr "Мәтін түсі"
 
-#: ubuntu-sticky-notes/views/settings_view.py:128
+#: ubuntu-sticky-notes/views/settings_view.py:126
 msgid "Font Size"
 msgstr "Қаріп өлшемі"
 
-#: ubuntu-sticky-notes/views/settings_view.py:142
+#: ubuntu-sticky-notes/views/settings_view.py:140
 msgid "Save Settings"
 msgstr "Баптауларды сақтау"
 
-#: ubuntu-sticky-notes/views/settings_view.py:145
+#: ubuntu-sticky-notes/views/settings_view.py:143
 msgid "Some changes may require a restart to apply."
 msgstr "Кейбір өзгерістерді қолдану үшін қайта іске қосу қажет болуы мүмкін."
 
-#: ubuntu-sticky-notes/views/settings_view.py:167
+#: ubuntu-sticky-notes/views/settings_view.py:157
 msgid "Select Color"
 msgstr "Түсті таңдау"
 
-#: ubuntu-sticky-notes/views/settings_view.py:204
+#: ubuntu-sticky-notes/views/settings_view.py:191
 msgid "Select Database File"
 msgstr "Дерекқор файлын таңдау"
 
-#: ubuntu-sticky-notes/views/settings_view.py:205
+#: ubuntu-sticky-notes/views/settings_view.py:192
 msgid "Database files"
 msgstr "Дерекқор файлдары"
 
-#: ubuntu-sticky-notes/views/settings_view.py:248
+#: ubuntu-sticky-notes/views/settings_view.py:244
 msgid "Restart Required"
 msgstr "Қайта іске қосу қажет"
 
-#: ubuntu-sticky-notes/views/settings_view.py:249
-msgid ""
-"The language change will take full effect after you restart the application."
-msgstr ""
-"Тілді өзгерту қолданбаны қайта іске қосқаннан кейін толық күшіне енеді."
+#: ubuntu-sticky-notes/views/settings_view.py:245
+msgid "Some changes require an application restart to take full effect."
+msgstr "Кейбір өзгерістердің толық күшіне енуі үшін қолданбаны қайта іске қосу қажет."
 
-#: ubuntu-sticky-notes/views/settings_view.py:251
+#: ubuntu-sticky-notes/views/settings_view.py:247
 msgid "OK"
 msgstr "Жарайды"
 
-#: ubuntu-sticky-notes/main.py:236
+#: ubuntu-sticky-notes/main.py:241
 #, python-brace-format
 msgid "© {year} {author}"
 msgstr "© {year} {author}"
 
-#: ubuntu-sticky-notes/main.py:245
+#: ubuntu-sticky-notes/main.py:250
 msgid "A simple and fast sticky notes app for Ubuntu."
-msgstr "Ubuntu үшін қарапайым әрі жылдам жапсырма жазбалар қолданбасы."
+msgstr "Ubuntu үшін қарапайым әрі жылдам жабысқақ жазбалар қолданбасы."

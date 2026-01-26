@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-26 17:49+0500\n"
-"PO-Revision-Date: 2026-01-26 17:54+0500\n"
+"POT-Creation-Date: 2026-01-27 01:17+0500\n"
+"PO-Revision-Date: 2026-01-27 01:19+0500\n"
 "Last-Translator: Pavel Glukhov <glukhov.p@gmail.com>\n"
 "Language-Team: Turkish <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -19,11 +19,11 @@ msgstr ""
 
 #: ubuntu-sticky-notes/tray.py:79
 msgid "Open Main Window"
-msgstr "Ana Pencereyi Aç"
+msgstr "Ana pencereyi aç"
 
 #: ubuntu-sticky-notes/tray.py:83
 msgid "Open All Notes"
-msgstr "Tüm Notları Aç"
+msgstr "Tüm notları aç"
 
 #: ubuntu-sticky-notes/tray.py:89
 msgid "About"
@@ -35,15 +35,15 @@ msgstr "Çıkış"
 
 #: ubuntu-sticky-notes/views/main_view/note_card.py:75
 msgid "Pin Note"
-msgstr "Notu Sabitle"
+msgstr "Notu sabitle"
 
 #: ubuntu-sticky-notes/views/main_view/note_card.py:75
 msgid "Unpin Note"
-msgstr "Notun Sabitlemesini Kaldır"
+msgstr "Not sabitlemesini kaldır"
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:13
 msgid "Ubuntu Sticky Notes"
-msgstr "Ubuntu Yapışkan Notlar"
+msgstr "Ubuntu Sticky Notes"
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:63
 msgid "Search..."
@@ -51,22 +51,22 @@ msgstr "Ara..."
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:243
 msgid "Move to Trash"
-msgstr "Çöp Kutusuna Taşı"
+msgstr "Çöp kutusuna taşı"
 
 #: ubuntu-sticky-notes/views/trash_view.py:18
-#: ubuntu-sticky-notes/views/settings_view.py:22
+#: ubuntu-sticky-notes/views/settings_view.py:23
 msgid "<<- Back"
 msgstr "<<- Geri"
 
 #: ubuntu-sticky-notes/views/trash_view.py:22
 msgid "Trash Bin"
-msgstr "Çöp Kutusu"
+msgstr "Çöp kutusu"
 
 #: ubuntu-sticky-notes/views/trash_view.py:42
 #: ubuntu-sticky-notes/views/trash_view.py:123
 #: ubuntu-sticky-notes/views/trash_view.py:128
 msgid "Empty Trash"
-msgstr "Çöp Kutusunu Boşalt"
+msgstr "Çöpü boşalt"
 
 #: ubuntu-sticky-notes/views/trash_view.py:72
 msgid "Trash is empty"
@@ -74,11 +74,11 @@ msgstr "Çöp kutusu boş"
 
 #: ubuntu-sticky-notes/views/trash_view.py:97
 msgid "Restore Note"
-msgstr "Notu Geri Yükle"
+msgstr "Notu geri yükle"
 
 #: ubuntu-sticky-notes/views/trash_view.py:103
 msgid "Delete Permanently"
-msgstr "Kalıcı Olarak Sil"
+msgstr "Kalıcı olarak sil"
 
 #: ubuntu-sticky-notes/views/trash_view.py:124
 msgid ""
@@ -92,165 +92,127 @@ msgstr ""
 msgid "Cancel"
 msgstr "İptal"
 
-#: ubuntu-sticky-notes/views/settings_view.py:26
+#: ubuntu-sticky-notes/views/settings_view.py:27
 msgid "Settings"
 msgstr "Ayarlar"
 
-#: ubuntu-sticky-notes/views/settings_view.py:42
+#: ubuntu-sticky-notes/views/settings_view.py:43
 msgid "Language"
 msgstr "Dil"
 
-#: ubuntu-sticky-notes/views/settings_view.py:42
+#: ubuntu-sticky-notes/views/settings_view.py:43
 msgid "Requires app restart to take effect"
-msgstr "Değişikliklerin uygulanması için uygulamanın yeniden başlatılması gerekir"
+msgstr "Etkili olması için uygulamanın yeniden başlatılması gerekir"
 
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "English"
-msgstr "İngilizce"
-
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "Русский"
-msgstr "Rusça"
-
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "Spanish"
-msgstr "İspanyolca"
-
-#: ubuntu-sticky-notes/views/settings_view.py:44
-msgid "German"
-msgstr "Almanca"
-
-#: ubuntu-sticky-notes/views/settings_view.py:45
-msgid "French"
-msgstr "Fransızca"
-
-#: ubuntu-sticky-notes/views/settings_view.py:45
-msgid "Simplified Chinese"
-msgstr "Basitleştirilmiş Çince"
-
-#: ubuntu-sticky-notes/views/settings_view.py:45
-msgid "Brazilian Portuguese"
-msgstr "Brezilya Portekizcesi"
-
-#: ubuntu-sticky-notes/views/settings_view.py:46
-msgid "Turkish"
-msgstr "Türkçe"
-
-#: ubuntu-sticky-notes/views/settings_view.py:46
-msgid "Kazakh"
-msgstr "Kazakça"
-
-#: ubuntu-sticky-notes/views/settings_view.py:60
+#: ubuntu-sticky-notes/views/settings_view.py:61
 msgid "Display Backend"
-msgstr "Görüntüleme Altyapısı"
+msgstr "Görüntüleme altyapısı"
 
-#: ubuntu-sticky-notes/views/settings_view.py:60
+#: ubuntu-sticky-notes/views/settings_view.py:61
 msgid "Wayland (Default) or X11 (For sticker positioning)"
-msgstr "Wayland (Varsayılan) veya X11 (Not konumlandırma için)"
+msgstr "Wayland (Varsayılan) veya X11 (etiket konumlandırma için)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:67
+#: ubuntu-sticky-notes/views/settings_view.py:68
 msgid "Interface Scale"
-msgstr "Arayüz Ölçeği"
+msgstr "Arayüz ölçeği"
 
-#: ubuntu-sticky-notes/views/settings_view.py:67
+#: ubuntu-sticky-notes/views/settings_view.py:68
 msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
 msgstr "Arayüz öğelerini ve yazı tiplerini büyüt (örn. 1.25 = %125)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:78
+#: ubuntu-sticky-notes/views/settings_view.py:79
 msgid "Database Path"
-msgstr "Veritabanı Yolu"
+msgstr "Veritabanı yolu"
 
-#: ubuntu-sticky-notes/views/settings_view.py:89
+#: ubuntu-sticky-notes/views/settings_view.py:90
 msgid "Color Palette"
-msgstr "Renk Paleti"
+msgstr "Renk paleti"
 
-#: ubuntu-sticky-notes/views/settings_view.py:89
+#: ubuntu-sticky-notes/views/settings_view.py:90
 msgid "Customize sticker colors"
-msgstr "Not renklerini özelleştir"
+msgstr "Etiket renklerini özelleştir"
 
-#: ubuntu-sticky-notes/views/settings_view.py:113
+#: ubuntu-sticky-notes/views/settings_view.py:111
 msgid "Reset Palette"
-msgstr "Paleti Sıfırla"
+msgstr "Paleti sıfırla"
 
-#: ubuntu-sticky-notes/views/settings_view.py:114
+#: ubuntu-sticky-notes/views/settings_view.py:112
 msgid "Reset"
 msgstr "Sıfırla"
 
-#: ubuntu-sticky-notes/views/settings_view.py:122
+#: ubuntu-sticky-notes/views/settings_view.py:120
 msgid "Formatting Buttons"
-msgstr "Biçimlendirme Düğmeleri"
+msgstr "Biçimlendirme düğmeleri"
 
-#: ubuntu-sticky-notes/views/settings_view.py:122
+#: ubuntu-sticky-notes/views/settings_view.py:120
 msgid "Choose which buttons to show on stickers"
-msgstr "Notlarda gösterilecek düğmeleri seçin"
+msgstr "Etiketlerde gösterilecek düğmeleri seçin"
 
-#: ubuntu-sticky-notes/views/settings_view.py:125
+#: ubuntu-sticky-notes/views/settings_view.py:123
 msgid "Bold (B)"
 msgstr "Kalın (B)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:125
+#: ubuntu-sticky-notes/views/settings_view.py:123
 msgid "Italic (I)"
 msgstr "İtalik (I)"
 
-#: ubuntu-sticky-notes/views/settings_view.py:126
+#: ubuntu-sticky-notes/views/settings_view.py:124
 msgid "Underline (U)"
-msgstr "Altı Çizili (U)"
+msgstr "Altı çizili (U)"
+
+#: ubuntu-sticky-notes/views/settings_view.py:124
+msgid "Strikethrough (S)"
+msgstr "Üstü çizili (S)"
+
+#: ubuntu-sticky-notes/views/settings_view.py:125
+msgid "Bullet List"
+msgstr "Madde işaretli liste"
 
 #: ubuntu-sticky-notes/views/settings_view.py:126
-msgid "Strikethrough (S)"
-msgstr "Üstü Çizili (S)"
-
-#: ubuntu-sticky-notes/views/settings_view.py:127
-msgid "Bullet List"
-msgstr "Madde İşaretli Liste"
-
-#: ubuntu-sticky-notes/views/settings_view.py:128
 msgid "Text Color"
-msgstr "Metin Rengi"
+msgstr "Metin rengi"
 
-#: ubuntu-sticky-notes/views/settings_view.py:128
+#: ubuntu-sticky-notes/views/settings_view.py:126
 msgid "Font Size"
-msgstr "Yazı Tipi Boyutu"
+msgstr "Yazı tipi boyutu"
 
-#: ubuntu-sticky-notes/views/settings_view.py:142
+#: ubuntu-sticky-notes/views/settings_view.py:140
 msgid "Save Settings"
-msgstr "Ayarları Kaydet"
+msgstr "Ayarları kaydet"
 
-#: ubuntu-sticky-notes/views/settings_view.py:145
+#: ubuntu-sticky-notes/views/settings_view.py:143
 msgid "Some changes may require a restart to apply."
 msgstr "Bazı değişikliklerin uygulanması için yeniden başlatma gerekebilir."
 
-#: ubuntu-sticky-notes/views/settings_view.py:167
+#: ubuntu-sticky-notes/views/settings_view.py:157
 msgid "Select Color"
-msgstr "Renk Seç"
+msgstr "Renk seç"
 
-#: ubuntu-sticky-notes/views/settings_view.py:204
+#: ubuntu-sticky-notes/views/settings_view.py:191
 msgid "Select Database File"
-msgstr "Veritabanı Dosyasını Seç"
+msgstr "Veritabanı dosyası seç"
 
-#: ubuntu-sticky-notes/views/settings_view.py:205
+#: ubuntu-sticky-notes/views/settings_view.py:192
 msgid "Database files"
 msgstr "Veritabanı dosyaları"
 
-#: ubuntu-sticky-notes/views/settings_view.py:248
+#: ubuntu-sticky-notes/views/settings_view.py:244
 msgid "Restart Required"
-msgstr "Yeniden Başlatma Gerekli"
+msgstr "Yeniden başlatma gerekli"
 
-#: ubuntu-sticky-notes/views/settings_view.py:249
-msgid ""
-"The language change will take full effect after you restart the application."
-msgstr ""
-"Dil değişikliği, uygulamayı yeniden başlattıktan sonra tamamen geçerli olacaktır."
+#: ubuntu-sticky-notes/views/settings_view.py:245
+msgid "Some changes require an application restart to take full effect."
+msgstr "Bazı değişikliklerin tam olarak etkili olması için uygulamanın yeniden başlatılması gerekir."
 
-#: ubuntu-sticky-notes/views/settings_view.py:251
+#: ubuntu-sticky-notes/views/settings_view.py:247
 msgid "OK"
 msgstr "Tamam"
 
-#: ubuntu-sticky-notes/main.py:236
+#: ubuntu-sticky-notes/main.py:241
 #, python-brace-format
 msgid "© {year} {author}"
 msgstr "© {year} {author}"
 
-#: ubuntu-sticky-notes/main.py:245
+#: ubuntu-sticky-notes/main.py:250
 msgid "A simple and fast sticky notes app for Ubuntu."
 msgstr "Ubuntu için basit ve hızlı bir yapışkan notlar uygulaması."

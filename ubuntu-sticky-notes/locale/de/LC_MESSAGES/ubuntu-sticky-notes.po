@@ -1,4 +1,4 @@
-# Chinese translations for PACKAGE package.
+# German translations for PACKAGE package.
 # Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Pavel Glukhov <glukhov.p@gmail.com>, 2026.
@@ -8,203 +8,205 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-27 01:17+0500\n"
-"PO-Revision-Date: 2026-01-27 01:19+0500\n"
+"PO-Revision-Date: 2026-01-27 01:18+0500\n"
 "Last-Translator: Pavel Glukhov <glukhov.p@gmail.com>\n"
-"Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
-"Language: zh_CN\n"
+"Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ubuntu-sticky-notes/tray.py:79
 msgid "Open Main Window"
-msgstr "打开主窗口"
+msgstr "Hauptfenster öffnen"
 
 #: ubuntu-sticky-notes/tray.py:83
 msgid "Open All Notes"
-msgstr "打开所有便签"
+msgstr "Alle Notizen öffnen"
 
 #: ubuntu-sticky-notes/tray.py:89
 msgid "About"
-msgstr "关于"
+msgstr "Über"
 
 #: ubuntu-sticky-notes/tray.py:93
 msgid "Quit"
-msgstr "退出"
+msgstr "Beenden"
 
 #: ubuntu-sticky-notes/views/main_view/note_card.py:75
 msgid "Pin Note"
-msgstr "置顶便签"
+msgstr "Notiz anheften"
 
 #: ubuntu-sticky-notes/views/main_view/note_card.py:75
 msgid "Unpin Note"
-msgstr "取消置顶"
+msgstr "Notiz lösen"
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:13
 msgid "Ubuntu Sticky Notes"
-msgstr "Ubuntu 便签"
+msgstr "Ubuntu Haftnotizen"
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:63
 msgid "Search..."
-msgstr "搜索..."
+msgstr "Suchen..."
 
 #: ubuntu-sticky-notes/views/main_view/main_view.py:243
 msgid "Move to Trash"
-msgstr "移至回收站"
+msgstr "In den Papierkorb verschieben"
 
 #: ubuntu-sticky-notes/views/trash_view.py:18
 #: ubuntu-sticky-notes/views/settings_view.py:23
 msgid "<<- Back"
-msgstr "<<- 返回"
+msgstr "<<- Zurück"
 
 #: ubuntu-sticky-notes/views/trash_view.py:22
 msgid "Trash Bin"
-msgstr "回收站"
+msgstr "Papierkorb"
 
 #: ubuntu-sticky-notes/views/trash_view.py:42
 #: ubuntu-sticky-notes/views/trash_view.py:123
 #: ubuntu-sticky-notes/views/trash_view.py:128
 msgid "Empty Trash"
-msgstr "清空回收站"
+msgstr "Papierkorb leeren"
 
 #: ubuntu-sticky-notes/views/trash_view.py:72
 msgid "Trash is empty"
-msgstr "回收站为空"
+msgstr "Papierkorb ist leer"
 
 #: ubuntu-sticky-notes/views/trash_view.py:97
 msgid "Restore Note"
-msgstr "恢复便签"
+msgstr "Notiz wiederherstellen"
 
 #: ubuntu-sticky-notes/views/trash_view.py:103
 msgid "Delete Permanently"
-msgstr "永久删除"
+msgstr "Dauerhaft löschen"
 
 #: ubuntu-sticky-notes/views/trash_view.py:124
 msgid ""
 "Are you sure you want to permanently delete all items in the trash? This "
 "action cannot be undone."
 msgstr ""
-"确定要永久删除回收站中的所有项目吗？此操作无法撤销。"
+"Möchten Sie wirklich alle Elemente im Papierkorb dauerhaft löschen? Diese "
+"Aktion kann nicht rückgängig gemacht werden."
 
 #: ubuntu-sticky-notes/views/trash_view.py:127
 msgid "Cancel"
-msgstr "取消"
+msgstr "Abbrechen"
 
 #: ubuntu-sticky-notes/views/settings_view.py:27
 msgid "Settings"
-msgstr "设置"
+msgstr "Einstellungen"
 
 #: ubuntu-sticky-notes/views/settings_view.py:43
 msgid "Language"
-msgstr "语言"
+msgstr "Sprache"
 
 #: ubuntu-sticky-notes/views/settings_view.py:43
 msgid "Requires app restart to take effect"
-msgstr "需要重启应用后生效"
+msgstr "Erfordert einen Neustart der Anwendung, um wirksam zu werden"
 
 #: ubuntu-sticky-notes/views/settings_view.py:61
 msgid "Display Backend"
-msgstr "显示后端"
+msgstr "Anzeige-Backend"
 
 #: ubuntu-sticky-notes/views/settings_view.py:61
 msgid "Wayland (Default) or X11 (For sticker positioning)"
-msgstr "Wayland（默认）或 X11（用于便签定位）"
+msgstr "Wayland (Standard) oder X11 (für die Positionierung der Haftnotizen)"
 
 #: ubuntu-sticky-notes/views/settings_view.py:68
 msgid "Interface Scale"
-msgstr "界面缩放"
+msgstr "Oberflächenskalierung"
 
 #: ubuntu-sticky-notes/views/settings_view.py:68
 msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
-msgstr "放大界面元素和字体（例如：1.25 = 125%）"
+msgstr "UI-Elemente und Schriftarten vergrößern (z. B. 1,25 = 125 %)"
 
 #: ubuntu-sticky-notes/views/settings_view.py:79
 msgid "Database Path"
-msgstr "数据库路径"
+msgstr "Datenbankpfad"
 
 #: ubuntu-sticky-notes/views/settings_view.py:90
 msgid "Color Palette"
-msgstr "调色板"
+msgstr "Farbpalette"
 
 #: ubuntu-sticky-notes/views/settings_view.py:90
 msgid "Customize sticker colors"
-msgstr "自定义便签颜色"
+msgstr "Farben der Haftnotizen anpassen"
 
 #: ubuntu-sticky-notes/views/settings_view.py:111
 msgid "Reset Palette"
-msgstr "重置调色板"
+msgstr "Palette zurücksetzen"
 
 #: ubuntu-sticky-notes/views/settings_view.py:112
 msgid "Reset"
-msgstr "重置"
+msgstr "Zurücksetzen"
 
 #: ubuntu-sticky-notes/views/settings_view.py:120
 msgid "Formatting Buttons"
-msgstr "格式化按钮"
+msgstr "Formatierungsschaltflächen"
 
 #: ubuntu-sticky-notes/views/settings_view.py:120
 msgid "Choose which buttons to show on stickers"
-msgstr "选择在便签上显示的按钮"
+msgstr "Auswählen, welche Schaltflächen auf den Haftnotizen angezeigt werden"
 
 #: ubuntu-sticky-notes/views/settings_view.py:123
 msgid "Bold (B)"
-msgstr "加粗（B）"
+msgstr "Fett (B)"
 
 #: ubuntu-sticky-notes/views/settings_view.py:123
 msgid "Italic (I)"
-msgstr "斜体（I）"
+msgstr "Kursiv (I)"
 
 #: ubuntu-sticky-notes/views/settings_view.py:124
 msgid "Underline (U)"
-msgstr "下划线（U）"
+msgstr "Unterstrichen (U)"
 
 #: ubuntu-sticky-notes/views/settings_view.py:124
 msgid "Strikethrough (S)"
-msgstr "删除线（S）"
+msgstr "Durchgestrichen (S)"
 
 #: ubuntu-sticky-notes/views/settings_view.py:125
 msgid "Bullet List"
-msgstr "项目符号列表"
+msgstr "Aufzählungsliste"
 
 #: ubuntu-sticky-notes/views/settings_view.py:126
 msgid "Text Color"
-msgstr "文本颜色"
+msgstr "Textfarbe"
 
 #: ubuntu-sticky-notes/views/settings_view.py:126
 msgid "Font Size"
-msgstr "字体大小"
+msgstr "Schriftgröße"
 
 #: ubuntu-sticky-notes/views/settings_view.py:140
 msgid "Save Settings"
-msgstr "保存设置"
+msgstr "Einstellungen speichern"
 
 #: ubuntu-sticky-notes/views/settings_view.py:143
 msgid "Some changes may require a restart to apply."
-msgstr "某些更改可能需要重启后才能生效。"
+msgstr "Einige Änderungen erfordern möglicherweise einen Neustart."
 
 #: ubuntu-sticky-notes/views/settings_view.py:157
 msgid "Select Color"
-msgstr "选择颜色"
+msgstr "Farbe auswählen"
 
 #: ubuntu-sticky-notes/views/settings_view.py:191
 msgid "Select Database File"
-msgstr "选择数据库文件"
+msgstr "Datenbankdatei auswählen"
 
 #: ubuntu-sticky-notes/views/settings_view.py:192
 msgid "Database files"
-msgstr "数据库文件"
+msgstr "Datenbankdateien"
 
 #: ubuntu-sticky-notes/views/settings_view.py:244
 msgid "Restart Required"
-msgstr "需要重启"
+msgstr "Neustart erforderlich"
 
 #: ubuntu-sticky-notes/views/settings_view.py:245
 msgid "Some changes require an application restart to take full effect."
-msgstr "某些更改需要重启应用才能完全生效。"
+msgstr "Einige Änderungen erfordern einen Neustart der Anwendung, um vollständig wirksam zu werden."
 
 #: ubuntu-sticky-notes/views/settings_view.py:247
 msgid "OK"
-msgstr "确定"
+msgstr "OK"
 
 #: ubuntu-sticky-notes/main.py:241
 #, python-brace-format
@@ -213,4 +215,4 @@ msgstr "© {year} {author}"
 
 #: ubuntu-sticky-notes/main.py:250
 msgid "A simple and fast sticky notes app for Ubuntu."
-msgstr "一款适用于 Ubuntu 的简单快速的便签应用。"
+msgstr "Eine einfache und schnelle Haftnotizen-App für Ubuntu."
