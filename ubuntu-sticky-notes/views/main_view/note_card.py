@@ -1,7 +1,9 @@
 import json
 import html as html_lib
 from gi.repository import Gtk, Pango
+import builtins # Import builtins to access the _() function
 
+_ = builtins._ # Assign the translation function to _
 
 class NoteCard(Gtk.Box):
     def __init__(self, note, db, menu_callback=None, refresh_callback=None):
@@ -70,7 +72,7 @@ class NoteCard(Gtk.Box):
     def _update_pin_icon(self):
         icon_name = "starred-symbolic" if self.is_pinned else "non-starred-symbolic"
         self.pin_button.set_icon_name(icon_name)
-        self.pin_button.set_tooltip_text("Pin Note" if not self.is_pinned else "Unpin Note")
+        self.pin_button.set_tooltip_text(_("Pin Note") if not self.is_pinned else _("Unpin Note"))
 
     def on_pin_clicked(self, gesture, n_press, x, y):
         self.db.toggle_pin_status(self.note_id)

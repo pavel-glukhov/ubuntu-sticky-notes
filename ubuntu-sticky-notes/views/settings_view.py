@@ -40,10 +40,20 @@ class SettingsView(Gtk.Box):
         content_scroll.set_child(list_box)
 
         lang_row = Adw.ComboRow(title=_("Language"), subtitle=_("Requires app restart to take effect"))
-        self.lang_model = Gtk.StringList.new(["English", "Русский"])
+        self.lang_model = Gtk.StringList.new([
+            _("English"), _("Русский"), _("Spanish"), _("German"),
+            _("French"), _("Simplified Chinese"), _("Brazilian Portuguese"),
+            _("Turkish"), _("Kazakh")
+        ])
         lang_row.set_model(self.lang_model)
-        current_lang = self.config.get("language", "en")
-        lang_row.set_selected(1 if current_lang == "ru" else 0)
+        
+        # Map language codes to display names for initial selection
+        self.lang_map = {
+            "en": 0, "ru": 1, "es": 2, "de": 3, "fr": 4, "zh_CN": 5, "pt_BR": 6, "tr": 7, "kk": 8
+        }
+        current_lang_code = self.config.get("language", "en")
+        lang_row.set_selected(self.lang_map.get(current_lang_code, 0))
+        
         list_box.append(lang_row)
         self.lang_row = lang_row
 
@@ -208,7 +218,8 @@ class SettingsView(Gtk.Box):
         old_lang = self.config.get("language", "en")
         
         selected_lang_idx = self.lang_row.get_selected()
-        new_lang = "ru" if selected_lang_idx == 1 else "en"
+        lang_codes = ["en", "ru", "es", "de", "fr", "zh_CN", "pt_BR", "tr", "kk"]
+        new_lang = lang_codes[selected_lang_idx]
         self.config["language"] = new_lang
 
         self.config["backend"] = "wayland" if self.backend_dropdown.get_selected() == 0 else "x11"

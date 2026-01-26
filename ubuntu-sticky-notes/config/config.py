@@ -22,6 +22,19 @@ STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
 TEXT_COLORS = ['#000000', '#424242', '#D32F2F', '#C2185B', '#7B1FA2', '#303F9F', '#1976D2', '#0288D1', '#0097A7', '#00796B', '#388E3C', '#689F38', '#AFB42B', '#FBC02D', '#FFA000', '#E64A19']
 FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 24, 32, 48, 72]
 
+# Supported Languages
+SUPPORTED_LANGUAGES = {
+    "English": "en",
+    "Русский": "ru",
+    "Español": "es",
+    "Deutsch": "de",
+    "Français": "fr",
+    "简体中文": "zh_CN",
+    "Português (Brasil)": "pt_BR",
+    "Türkçe": "tr",
+    "Қазақша": "kk"
+}
+
 
 def load_app_info(path: str = APP_INFO_FILE) -> dict:
     """Loads application metadata from a JSON file."""
