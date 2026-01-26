@@ -31,29 +31,38 @@ Personalize your notes by choosing colors that match your workflow and mood.
 - ✍️ Rich Text Preservation
 All text formatting is reliably saved, so your notes always look exactly as intended.
 - 🌍 Multilingual Support
-Use the app in multiple languages, including Russian, and switch languages anytime in settings.
+Use the app in multiple languages, including:
+  - English
+  - Русский
+  - Español
+  - Deutsch
+  - Français
+  - 简体中文
+  - Português (Brasil)
+  - Türkçe
+  - Қазақша
 - 🖥️ Modern GNOME Experience
 A refreshed interface that follows current GNOME / Adwaita design guidelines for a native look and feel.
 
 ## Download:
 You can download the beta deb package here:
-https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta2/ubuntu.sticky.notes_2.0.0.beta2_all.deb
+https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta3/ubuntu.sticky.notes_2.0.0.beta3_all.deb
 ______________________________________________________________________________________
 
 ## Installation:
 
-To install version 2.0.0-beta, run the following commands in your terminal:
+To install version 2.0.0-beta3, run the following commands in your terminal:
 
 ```bash
 # 1. Download the package
-curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta2/ubuntu.sticky.notes_2.0.0.beta2_all.deb
+curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta3/ubuntu.sticky.notes_2.0.0.beta3_all.deb
 
 # 2. Update and install system dependencies (GTK4 & Libadwaita)
 sudo apt update
 sudo apt install -y python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gtk-3.0 gir1.2-ayatanaappindicator3-0.1
 
 # 3. Install the package
-sudo dpkg -i ubuntu-sticky-notes_2.0.0.beta2_all.deb
+sudo dpkg -i ubuntu-sticky-notes_2.0.0.beta3_all.deb
 sudo apt-get install -f
 ```
 
