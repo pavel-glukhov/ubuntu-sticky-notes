@@ -85,7 +85,6 @@ class MainWindow(Adw.ApplicationWindow):
         scrolled.set_has_frame(False)
         self.main_page_box.append(scrolled)
 
-        # Pages
         self.stack.add_named(self.main_page_box, "main")
 
         self.trash_view = TrashView(self.db, on_back_callback=self.go_back_to_main)
@@ -105,7 +104,6 @@ class MainWindow(Adw.ApplicationWindow):
         Callback for when settings are changed in the SettingsView.
         Reloads the configuration and updates all open sticky note windows.
         """
-        print("DEBUG: Applying settings live...")
         from config.config_manager import ConfigManager
         self.config = ConfigManager.load()
 

@@ -49,7 +49,6 @@ class ApplicationManager:
         self._load_css()
 
         display = Gdk.Display.get_default()
-        print(f"DEBUG: Actual running backend: {display.__class__.__name__}")
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
         icons_dir = os.path.join(base_dir, "resources", "icons")
@@ -107,7 +106,6 @@ class ApplicationManager:
                     css_provider,
                     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
                 )
-                print(f"DEBUG: CSS loaded from {css_path}")
             except Exception as e:
                 print(f"ERROR: CSS loading failed: {e}")
 

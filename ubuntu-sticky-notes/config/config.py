@@ -32,6 +32,18 @@ LANGUAGE_NAMES = {
     "kk": "Қазақша"
 }
 
+LOCALE_MAP = {
+    "en": "en_US.UTF-8",
+    "ru": "ru_RU.UTF-8",
+    "es": "es_ES.UTF-8",
+    "de": "de_DE.UTF-8",
+    "fr": "fr_FR.UTF-8",
+    "zh_CN": "zh_CN.UTF-8",
+    "pt_BR": "pt_BR.UTF-8",
+    "tr": "tr_TR.UTF-8",
+    "kk": "kk_KZ.UTF-8"
+}
+
 def get_supported_languages() -> dict:
     """
     Scans the locale directory for available languages and returns a dictionary

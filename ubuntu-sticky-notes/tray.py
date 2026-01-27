@@ -64,19 +64,23 @@ def main():
 
     def on_show_main(_):
         """Callback for 'Open Main Window' menu item."""
-        print("show_main", flush=True)
+        sys.stdout.write("show_main\n")
+        sys.stdout.flush()
 
     def on_open_all(_):
         """Callback for 'Open All Notes' menu item."""
-        print("open_all", flush=True)
+        sys.stdout.write("open_all\n")
+        sys.stdout.flush()
 
     def on_about(_):
         """Callback for 'About' menu item."""
-        print("about", flush=True)
+        sys.stdout.write("about\n")
+        sys.stdout.flush()
 
     def on_quit(_):
         """Callback for 'Quit' menu item. Exits the tray application."""
-        print("quit", flush=True)
+        sys.stdout.write("quit\n")
+        sys.stdout.flush()
         Gtk3.main_quit()
 
     # --- Menu (Gtk.Menu) ---
@@ -113,6 +117,7 @@ def main():
         )
         indicator.set_icon_theme_path(icon_dir)
     else:
+        # Fallback to a generic icon if custom icon is not found
         indicator = AppIndicator.Indicator.new(
             APP_ID,
             "accessories-text-editor",

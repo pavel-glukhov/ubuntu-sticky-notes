@@ -17,29 +17,12 @@ APP_ID = 'ubuntu.sticky.notes'
 LOCALE_DIR = os.path.join(current_dir, 'locale')
 
 # Map short language codes to full locale names
-LOCALE_MAP = {
-    "en": "en_US.UTF-8",
-    "ru": "ru_RU.UTF-8",
-    "es": "es_ES.UTF-8",
-    "de": "de_DE.UTF-8",
-    "fr": "fr_FR.UTF-8",
-    "zh_CN": "zh_CN.UTF-8",
-    "pt_BR": "pt_BR.UTF-8",
-    "tr": "tr_TR.UTF-8",
-    "kk": "kk_KZ.UTF-8"
-}
 
 try:
     from config.config_manager import ConfigManager
     config = ConfigManager.load()
     lang_code = config.get("language", "en")
     
-    mo_path = os.path.join(LOCALE_DIR, lang_code, 'LC_MESSAGES', f'{APP_ID}.mo')
-    if os.path.exists(mo_path):
-        print(f"DEBUG: Found translation file at: {mo_path}")
-    else:
-        print(f"DEBUG: Translation file NOT found at: {mo_path}")
-
     # Set environment variables for gettext
     full_locale = LOCALE_MAP.get(lang_code, f"{lang_code}.UTF-8")
     os.environ["LANG"] = full_locale
@@ -52,7 +35,7 @@ try:
         print(f"WARNING: Locale {full_locale} not supported by system. Falling back.")
 
     translation = gettext.translation(APP_ID, localedir=LOCALE_DIR, languages=[lang_code], fallback=True)
-    translation.install()
+    translation.install() 
     builtins._ = translation.gettext
     
     print(f"SYSTEM: Language set to '{lang_code}' (Locale: {full_locale})")
@@ -66,7 +49,8 @@ except Exception as e:
 
 # --- Backend Selection ---
 try:
-    from config.config import get_app_paths
+    from config.config import get_app_paths, LOCALE_MAP
+
     app_paths = get_app_paths(user_config=config)
     if "--x11" in sys.argv or config.get("backend") == "x11":
         os.environ["GDK_BACKEND"] = "x11"
@@ -75,6 +59,7 @@ try:
         os.environ["GDK_BACKEND"] = "wayland"
         print("SYSTEM: Environment set to Wayland")
 except Exception as e:
+    builtins._ = lambda s: s # Ensure _ is defined even if backend setup fails
     print(f"CRITICAL: Config pre-init error: {e}")
 
 gi.require_version('Gtk', '4.0')
