@@ -13,8 +13,14 @@ class ConfigManager:
             "db_path": os.path.expanduser("~/.local/share/ubuntu-sticky-notes/notes.db"),
             "ui_scale": 1.0,
             "language": "en",
-            # Define default palette directly here to avoid circular import
             "palette": ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC'],
+            "text_colors": ['#000000', '#424242', '#D32F2F',
+                            '#C2185B', '#7B1FA2', '#303F9F',
+                            '#1976D2', '#0288D1', '#0097A7',
+                            '#00796B', '#388E3C', '#689F38',
+                            '#AFB42B', '#FBC02D', '#FFA000',
+                            '#E64A19'],
+            "font_sizes": [8, 10, 12, 14, 16, 18, 20, 24, 32, 48, 72],
             "formatting": {
                 "bold": True,
                 "italic": True,
@@ -56,6 +62,14 @@ class ConfigManager:
             # Ensure palette exists and is a list
             if "palette" not in config or not isinstance(config["palette"], list):
                 config["palette"] = defaults["palette"]
+            
+            # Ensure text_colors exists and is a list
+            if "text_colors" not in config or not isinstance(config["text_colors"], list):
+                config["text_colors"] = defaults["text_colors"]
+            
+            # Ensure font_sizes exists and is a list
+            if "font_sizes" not in config or not isinstance(config["font_sizes"], list):
+                config["font_sizes"] = defaults["font_sizes"]
 
             return config
 

@@ -45,12 +45,14 @@ class StickyActions:
 
         self._loading = False
 
-    def save(self):
+    def save(self, force=False):
         """
         Saves the current state of the note to the database.
+        Args:
+            force (bool): If True, bypasses the _is_destroying check.
         """
-        # Prevent saving if window is being destroyed or already destroyed
-        if getattr(self, '_is_destroying', False) or not self.get_native():
+        # Prevent saving if window is being destroyed or already destroyed, unless forced
+        if not force and (getattr(self, '_is_destroying', False) or not self.get_native()):
             return False
 
         if getattr(self, '_loading', True):
@@ -81,7 +83,11 @@ class StickyActions:
         return True
 
     def _serialize_buffer(self):
-        """Serializes text buffer and tags into a list of dictionaries (JSON object)."""
+        """
+        Serializes text buffer and tags into a list of dictionaries (JSON object).
+        Returns:
+            list[dict]: A list of segments, each with 'text' and 'tags'.
+        """
         start_iter, end_iter = self.buffer.get_bounds()
         segments = []
         while not start_iter.equal(end_iter):
@@ -99,14 +105,24 @@ class StickyActions:
         return segments
 
     def on_print_clicked(self, _):
-        """Initializes a print operation for the note."""
+        """
+        Initializes a print operation for the note.
+        Args:
+            _: The widget that triggered the action (ignored).
+        """
         print_op = Gtk.PrintOperation()
         print_op.connect("draw-page", self._draw_page)
         print_op.set_n_pages(1)
         print_op.run(Gtk.PrintOperationAction.PRINT_DIALOG, self)
 
     def _draw_page(self, operation, context, page_nr):
-        """Renders the buffer content for printing."""
+        """
+        Renders the buffer content for printing.
+        Args:
+            operation (Gtk.PrintOperation): The print operation.
+            context (Gtk.PrintContext): The print context.
+            page_nr (int): The page number.
+        """
         cr = context.get_cairo_context()
         layout = context.create_pango_layout()
         start, end = self.buffer.get_bounds()
@@ -115,19 +131,21 @@ class StickyActions:
         PangoCairo.show_layout(cr, layout)
 
     def _on_close_requested(self, window):
-        """Handles data persistence before window destruction."""
+        """
+        Handles data persistence before window destruction.
+        Args:
+            window (Gtk.Window): The window being closed.
+        Returns:
+            bool: True to indicate the close request has been handled.
+        """
         # Mark as destroying to prevent further saves
         self._is_destroying = True
         
-        # Perform one last save
+        # Perform one last save, forcing it to bypass the _is_destroying check
         try:
-            # Revert flag setting for a moment to allow this save
-            self._is_destroying = False
-            self.save()
-            self._is_destroying = True
-            
+            self.save(force=True)
         except Exception as e:
-            print(f"Error saving on close: {e}")
+            print(f"ERROR: Save error on close: {e}")
         
         # Stop the auto-save timer if it exists
         if hasattr(self, 'save_timer_id') and self.save_timer_id:

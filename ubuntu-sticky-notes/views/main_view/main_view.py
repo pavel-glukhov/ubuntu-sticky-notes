@@ -148,7 +148,10 @@ class MainWindow(Adw.ApplicationWindow):
                 flow_child.set_halign(Gtk.Align.FILL)
 
     def create_note(self):
-        note_id = self.db.add(color=self.config.get("palette", ["#FFF59D"])[0])
+        # Use palette from config, default to #FFF59D if not found or empty
+        palette = self.config.get("palette", [])
+        default_color = palette[0] if palette else "#FFF59D"
+        note_id = self.db.add(color=default_color)
         self.refresh_list()
         self.open_note(note_id)
 

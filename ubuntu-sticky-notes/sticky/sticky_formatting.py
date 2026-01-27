@@ -1,6 +1,6 @@
 import json
 from gi.repository import Gtk, Pango
-from config.config import TEXT_COLORS, FONT_SIZES
+
 
 class StickyFormatting:
     """
@@ -22,16 +22,20 @@ class StickyFormatting:
         self.buffer.create_tag("strikethrough", strikethrough=True)
 
         # Dynamic color tags
-        for color in TEXT_COLORS:
+        text_colors = self.config.get("text_colors", [])
+        for color in text_colors:
             self.buffer.create_tag(f"text_color_{color}", foreground=color)
 
         # Dynamic font size tags (using Pango.SCALE for correct rendering)
-        for size in FONT_SIZES:
+        font_sizes = self.config.get("font_sizes", [])
+        for size in font_sizes:
             self.buffer.create_tag(f"font_size_{size}", size=size * Pango.SCALE)
 
-    def apply_format(self, tag_name):
+    def apply_format(self, tag_name: str):
         """
         Toggles a basic format tag (bold, italic, etc.) on the selected text range.
+        Args:
+            tag_name (str): The name of the tag to apply/remove.
         """
         res = self.buffer.get_selection_bounds()
         if res:
@@ -46,17 +50,20 @@ class StickyFormatting:
         self.text_view.grab_focus()
         self._on_buffer_changed(self.buffer) # Force update
 
-    def apply_text_color(self, hex_color):
+    def apply_text_color(self, hex_color: str):
         """
         Applies a foreground color tag to the selection.
         Removes any existing color tags in the range before applying the new one.
+        Args:
+            hex_color (str): The hexadecimal color string to apply.
         """
         res = self.buffer.get_selection_bounds()
         if res:
             start, end = res
             
             # Clear existing color tags to prevent overlaps
-            for color in TEXT_COLORS:
+            text_colors = self.config.get("text_colors", [])
+            for color in text_colors:
                 self.buffer.remove_tag_by_name(f"text_color_{color}", start, end)
 
             self.buffer.apply_tag_by_name(f"text_color_{hex_color}", start, end)
@@ -64,17 +71,20 @@ class StickyFormatting:
         self.text_view.grab_focus()
         self._on_buffer_changed(self.buffer) # Force update
 
-    def apply_font_size(self, size):
+    def apply_font_size(self, size: int):
         """
         Applies a font size tag to the selection and updates the UI button label.
         Removes existing font size tags in the range before applying the new one.
+        Args:
+            size (int): The font size to apply.
         """
         res = self.buffer.get_selection_bounds()
         if res:
             start, end = res
 
             # Clear existing font tags
-            for s in FONT_SIZES:
+            font_sizes = self.config.get("font_sizes", [])
+            for s in font_sizes:
                 self.buffer.remove_tag_by_name(f"font_size_{s}", start, end)
 
             self.buffer.apply_tag_by_name(f"font_size_{size}", start, end)

@@ -7,11 +7,8 @@ from .sticky_formatting import StickyFormatting
 from .sticky_actions import StickyActions
 from .sticky_ui import StickyUI
 from .sticky_events import StickyEvents
-from config.config import STICKY_COLORS
-
-# UI Constants
-TEXT_COLORS = ['#000000', '#424242', '#D32F2F', '#C2185B', '#7B1FA2', '#303F9F', '#1976D2', '#0288D1', '#0097A7', '#00796B', '#388E3C', '#689F38', '#AFB42B', '#FBC02D', '#FFA000', '#E64A19']
-FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 24, 32, 48, 72]
+# Removed direct import of STICKY_COLORS, TEXT_COLORS, FONT_SIZES
+# from config.config import STICKY_COLORS, TEXT_COLORS, FONT_SIZES
 
 class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, StickyEvents):
     """
@@ -25,7 +22,7 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         self.db = db
         self.note_id = note_id
         self.main_window = main_window
-        self.config = getattr(main_window, 'config', {})
+        self.config = getattr(main_window, 'config', {}) # Get initial config from main_window
         self._loading = True
         self._is_destroying = False # Flag to prevent operations during destruction
         self.scale = 1.0

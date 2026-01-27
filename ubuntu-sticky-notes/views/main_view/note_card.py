@@ -1,12 +1,24 @@
 import json
 import html as html_lib
 from gi.repository import Gtk, Pango
-import builtins # Import builtins to access the _() function
+import builtins
 
-_ = builtins._ # Assign the translation function to _
+_ = builtins._
 
 class NoteCard(Gtk.Box):
-    def __init__(self, note, db, menu_callback=None, refresh_callback=None):
+    """
+    A custom Gtk.Box widget representing a single sticky note card in the main window.
+    Displays a preview of the note's content, color, and pin status.
+    """
+    def __init__(self, note: dict, db, menu_callback=None, refresh_callback=None):
+        """
+        Initializes a NoteCard.
+        Args:
+            note (dict): A dictionary containing note data (id, content, color, is_pinned).
+            db: The database controller instance.
+            menu_callback (callable, optional): Callback for right-click menu. Defaults to None.
+            refresh_callback (callable, optional): Callback to refresh the main note list. Defaults to None.
+        """
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.note_id = note["id"]
         self.db = db
@@ -70,11 +82,20 @@ class NoteCard(Gtk.Box):
         self.setup_gestures()
 
     def _update_pin_icon(self):
+        """Updates the icon and tooltip of the pin button based on the note's pinned status."""
         icon_name = "starred-symbolic" if self.is_pinned else "non-starred-symbolic"
         self.pin_button.set_icon_name(icon_name)
         self.pin_button.set_tooltip_text(_("Pin Note") if not self.is_pinned else _("Unpin Note"))
 
     def on_pin_clicked(self, gesture, n_press, x, y):
+        """
+        Callback for when the pin button is clicked. Toggles the note's pinned status.
+        Args:
+            gesture: The Gtk.GestureClick instance.
+            n_press: Number of presses.
+            x: X-coordinate of the click.
+            y: Y-coordinate of the click.
+        """
         self.db.toggle_pin_status(self.note_id)
         self.is_pinned = not self.is_pinned
         self._update_pin_icon()
@@ -82,7 +103,15 @@ class NoteCard(Gtk.Box):
             self.refresh_callback()
         gesture.set_state(Gtk.EventSequenceState.CLAIMED)
 
-    def _generate_markup(self, segments):
+    def _generate_markup(self, segments: list[dict]) -> str:
+        """
+        Generates Pango markup from a list of text segments and their tags.
+        Limits the output to 5 lines for card preview.
+        Args:
+            segments (list[dict]): A list of dictionaries, each containing 'text' and 'tags'.
+        Returns:
+            str: The generated Pango markup string.
+        """
         if not segments: return ""
 
         full_markup = ""
@@ -90,9 +119,10 @@ class NoteCard(Gtk.Box):
 
         for seg in segments:
             text = seg.get("text", "")
-
             lines_in_seg = text.split('\n')
-            if line_count >= 5: break
+            # Limit to 5 lines for card preview
+            if line_count >= 5:
+                break
             if line_count + len(lines_in_seg) - 1 >= 5:
                 allowed = 5 - line_count
                 text = "\n".join(lines_in_seg[:allowed])
@@ -131,7 +161,12 @@ class NoteCard(Gtk.Box):
 
         return full_markup.rstrip()
 
-    def update_color(self, hex_color):
+    def update_color(self, hex_color: str):
+        """
+        Updates the background color of the note card.
+        Args:
+            hex_color (str): The new hexadecimal color string.
+        """
         if not hex_color: hex_color = "#FFF59D"
         provider = Gtk.CssProvider()
         css = f".sticky-paper-card {{ background-color: {hex_color}; border-radius: 0px; min-height: 50px; }}"
@@ -139,6 +174,7 @@ class NoteCard(Gtk.Box):
         self.card_canvas.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
     def setup_gestures(self):
+        """Sets up gesture recognizers for click and right-click actions on the card."""
         click_open = Gtk.GestureClick()
         click_open.connect("released", lambda gesture, n, x, y: self.get_native().open_note(self.note_id))
         self.card_canvas.add_controller(click_open)
@@ -153,6 +189,14 @@ class NoteCard(Gtk.Box):
         self.add_controller(menu)
 
     def _on_right_click(self, gesture, n, x, y):
+        """
+        Callback for right-click gesture. Displays a context menu.
+        Args:
+            gesture: The Gtk.GestureClick instance.
+            n: Number of presses.
+            x: X-coordinate of the click.
+            y: Y-coordinate of the click.
+        """
         if self.menu_callback:
             self.menu_callback(self.note_id, self.card_canvas)
         else:

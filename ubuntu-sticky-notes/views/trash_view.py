@@ -5,7 +5,16 @@ from views.main_view.note_card import NoteCard
 _ = builtins._
 
 class TrashView(Gtk.Box):
+    """
+    A Gtk.Box widget that displays deleted notes and allows restoring or permanently deleting them.
+    """
     def __init__(self, db, on_back_callback):
+        """
+        Initializes the TrashView.
+        Args:
+            db: The database controller instance.
+            on_back_callback (callable): Callback function to return to the main view.
+        """
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.db = db
         self.on_back_callback = on_back_callback
@@ -48,10 +57,12 @@ class TrashView(Gtk.Box):
         self.refresh_list()
 
     def _on_back_clicked(self, btn):
+        """Callback for the back button."""
         if self.on_back_callback:
             self.on_back_callback()
 
     def refresh_list(self):
+        """Refreshes the list of deleted notes from the database."""
         while child := self.flowbox.get_first_child():
             self.flowbox.remove(child)
 
@@ -91,6 +102,12 @@ class TrashView(Gtk.Box):
                 flow_child.set_halign(Gtk.Align.FILL)
 
     def show_context_menu(self, note_id, target_widget):
+        """
+        Displays a context menu for a trashed note.
+        Args:
+            note_id (int): The ID of the note.
+            target_widget (Gtk.Widget): The widget to attach the popover to.
+        """
         popover = Gtk.Popover()
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5, margin_top=5, margin_bottom=5, margin_start=5, margin_end=5)
         
@@ -110,14 +127,17 @@ class TrashView(Gtk.Box):
         popover.popup()
 
     def restore_note(self, note_id):
+        """Restores a note from the trash."""
         self.db.restore_from_trash(note_id)
         self.refresh_list()
 
     def delete_permanently(self, note_id):
+        """Permanently deletes a note from the database."""
         self.db.delete_permanently(note_id)
         self.refresh_list()
 
     def on_empty_trash(self, btn):
+        """Shows a confirmation dialog to empty the trash."""
         dialog = Adw.MessageDialog(
             transient_for=self.get_native(),
             heading=_("Empty Trash"),
@@ -131,6 +151,7 @@ class TrashView(Gtk.Box):
         dialog.present()
 
     def _on_empty_trash_confirm(self, dialog, response_id):
+        """Callback for the empty trash confirmation dialog."""
         if response_id == "empty":
             for note in self.db.all_trash():
                 self.db.delete_permanently(note['id'])

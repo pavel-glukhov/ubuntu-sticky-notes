@@ -1,11 +1,24 @@
 import builtins
 from gi.repository import Gtk, Adw, Gio, Gdk
 from config.config_manager import ConfigManager
+from config.config import get_supported_languages
 
 _ = builtins._
 
 class SettingsView(Gtk.Box):
+    """
+    A Gtk.Box widget that serves as the settings interface for the application.
+    Allows users to configure language, display backend, UI scale, database path,
+    color palette, and formatting buttons visibility.
+    """
     def __init__(self, on_back_callback, on_settings_change_callback=None):
+        """
+        Initializes the SettingsView.
+        Args:
+            on_back_callback (callable): Callback function to return to the main view.
+            on_settings_change_callback (callable, optional): Callback function
+                                                                to notify about settings changes. Defaults to None.
+        """
         super().__init__(orientation=Gtk.Orientation.VERTICAL)
         self.on_back_callback = on_back_callback
         self.on_settings_change_callback = on_settings_change_callback
@@ -39,23 +52,32 @@ class SettingsView(Gtk.Box):
         list_box.add_css_class("boxed-list")
         content_scroll.set_child(list_box)
 
+        # --- Language Settings ---
         lang_row = Adw.ComboRow(title=_("Language"), subtitle=_("Requires app restart to take effect"))
-        self.lang_model = Gtk.StringList.new([
-            _("English"), _("Русский"), _("Spanish"), _("German"),
-            _("French"), _("Simplified Chinese"), _("Brazilian Portuguese"),
-            _("Turkish"), _("Kazakh")
-        ])
+        
+        # Dynamically load supported languages
+        supported_languages = get_supported_languages()
+        
+        # Ensure order is preserved for names and codes
+        self.lang_names = []
+        self.lang_codes = []
+        for name, code in supported_languages.items():
+            self.lang_names.append(_(name)) # Translate language names for display if possible
+            self.lang_codes.append(code)
+        
+        self.lang_model = Gtk.StringList.new(self.lang_names)
         lang_row.set_model(self.lang_model)
         
-        # Map language codes to display names for initial selection
-        self.lang_map = {
-            "en": 0, "ru": 1, "es": 2, "de": 3, "fr": 4, "zh_CN": 5, "pt_BR": 6, "tr": 7, "kk": 8
-        }
         current_lang_code = self.config.get("language", "en")
-        lang_row.set_selected(self.lang_map.get(current_lang_code, 0))
+        try:
+            current_lang_index = self.lang_codes.index(current_lang_code)
+            lang_row.set_selected(current_lang_index)
+        except ValueError:
+            lang_row.set_selected(0) # Default to English if not found
         
         list_box.append(lang_row)
         self.lang_row = lang_row
+        # ------------------------
 
         row_backend = Adw.ActionRow(title=_("Display Backend"), subtitle=_("Wayland (Default) or X11 (For sticker positioning)"))
         self.backend_dropdown = Gtk.DropDown.new_from_strings(["Wayland", "X11"])
@@ -90,7 +112,6 @@ class SettingsView(Gtk.Box):
         self.palette_buttons = []
         current_palette = self.config.get("palette", [])
         
-        # Create a grid for color buttons
         palette_grid = Gtk.Grid(column_spacing=10, row_spacing=10)
         palette_grid.set_margin_top(10); palette_grid.set_margin_bottom(10)
         palette_grid.set_margin_start(10); palette_grid.set_margin_end(10)
@@ -104,12 +125,10 @@ class SettingsView(Gtk.Box):
             self.palette_buttons.append(btn)
             palette_grid.attach(btn, i % 4, i // 4, 1, 1)
         
-        # Wrap grid in a row to add to expander
         palette_row = Adw.ActionRow()
         palette_row.add_suffix(palette_grid)
         palette_expander.add_row(palette_row)
         
-        # Reset button
         reset_row = Adw.ActionRow(title=_("Reset Palette"))
         btn_reset = Gtk.Button(label=_("Reset"), valign=Gtk.Align.CENTER)
         btn_reset.connect("clicked", self.on_reset_palette)
@@ -147,27 +166,32 @@ class SettingsView(Gtk.Box):
         self.append(footer)
 
     def _set_button_color(self, btn, color):
+        """
+        Applies the given color to a Gtk.Button's background using CSS.
+        Args:
+            btn (Gtk.Button): The button widget to style.
+            color (str): The hexadecimal color string (e.g., "#RRGGBB").
+        """
         cp = Gtk.CssProvider()
         cp.load_from_data(f"button {{ background-color: {color}; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); }}".encode())
         btn.get_style_context().add_provider(cp, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-    def on_color_btn_clicked(self, btn, index):
-        # Use Gtk.ColorDialog for GTK 4.10+, fallback or alternative for older versions
-        # Since we are targeting GTK4, we should try to use the modern approach.
-        # However, Gtk.ColorDialog is new. Let's use a simple Gtk.ColorChooserDialog if available or similar.
-        # Actually, Gtk.ColorChooserDialog is deprecated in 4.10.
-        # Let's try to use Gtk.ColorDialog if available, otherwise fallback.
-        
+    def on_color_btn_clicked(self, btn, index: int):
+        """
+        Callback for when a color button in the palette is clicked.
+        Opens a color selection dialog.
+        Args:
+            btn (Gtk.Button): The clicked button.
+            index (int): The index of the color in the palette being edited.
+        """
         try:
             dialog = Gtk.ColorDialog()
             dialog.choose_rgba(self.get_native(), None, None, self._on_color_chosen, index)
         except AttributeError:
             # Fallback for older GTK4 versions (before 4.10)
-            # We can use Gtk.ColorChooserDialog
             dialog = Gtk.ColorChooserDialog(title=_("Select Color"), transient_for=self.get_native())
             dialog.set_use_alpha(False)
             
-            # Parse current color
             current_hex = self.config["palette"][index]
             rgba = Gdk.RGBA()
             rgba.parse(current_hex)
@@ -176,7 +200,15 @@ class SettingsView(Gtk.Box):
             dialog.connect("response", self._on_color_chooser_response, index)
             dialog.show()
 
-    def _on_color_chosen(self, dialog, result, index):
+    def _on_color_chosen(self, dialog, result, index: int):
+        """
+        Callback for Gtk.ColorDialog.choose_rgba_finish.
+        Updates the palette color and the button's appearance.
+        Args:
+            dialog (Gtk.ColorDialog): The color dialog instance.
+            result (Gio.Task): The result of the color selection.
+            index (int): The index of the color in the palette that was edited.
+        """
         try:
             rgba = dialog.choose_rgba_finish(result)
             hex_color = f"#{int(rgba.red*255):02x}{int(rgba.green*255):02x}{int(rgba.blue*255):02x}".upper()
@@ -185,7 +217,15 @@ class SettingsView(Gtk.Box):
         except Exception as e:
             print(f"Color selection failed: {e}")
 
-    def _on_color_chooser_response(self, dialog, response, index):
+    def _on_color_chooser_response(self, dialog, response, index: int):
+        """
+        Callback for Gtk.ColorChooserDialog response.
+        Updates the palette color and the button's appearance.
+        Args:
+            dialog (Gtk.ColorChooserDialog): The color chooser dialog instance.
+            response (Gtk.ResponseType): The response from the dialog (e.g., OK, CANCEL).
+            index (int): The index of the color in the palette that was edited.
+        """
         if response == Gtk.ResponseType.OK:
             rgba = dialog.get_rgba()
             hex_color = f"#{int(rgba.red*255):02x}{int(rgba.green*255):02x}{int(rgba.blue*255):02x}".upper()
@@ -194,13 +234,25 @@ class SettingsView(Gtk.Box):
         dialog.destroy()
 
     def on_reset_palette(self, btn):
-        from config.config import STICKY_COLORS
-        self.config["palette"] = list(STICKY_COLORS)
+        """
+        Resets the color palette to its default values.
+        Args:
+            btn (Gtk.Button): The clicked reset button.
+        """
+        # Get default palette from ConfigManager
+        defaults = ConfigManager.get_defaults()
+        self.config["palette"] = list(defaults["palette"])
         for i, btn in enumerate(self.palette_buttons):
             if i < len(self.config["palette"]):
                 self._set_button_color(btn, self.config["palette"][i])
 
     def on_browse_db(self, btn):
+        """
+        Callback for the 'Browse' button to select a database file.
+        Opens a file dialog.
+        Args:
+            btn (Gtk.Button): The clicked browse button.
+        """
         dialog = Gtk.FileDialog(title=_("Select Database File"))
         db_filter = Gtk.FileFilter(); db_filter.set_name(_("Database files")); db_filter.add_pattern("*.db")
         filters = Gio.ListStore.new(Gtk.FileFilter); filters.append(db_filter)
@@ -208,6 +260,13 @@ class SettingsView(Gtk.Box):
         dialog.open(self.get_native(), None, self._on_browse_finish)
 
     def _on_browse_finish(self, dialog, result):
+        """
+        Callback for Gtk.FileDialog.open_finish.
+        Sets the selected database path in the entry.
+        Args:
+            dialog (Gtk.FileDialog): The file dialog instance.
+            result (Gio.Task): The result of the file selection.
+        """
         try:
             file = dialog.open_finish(result)
             if file: self.db_entry.set_text(file.get_path())
@@ -215,38 +274,52 @@ class SettingsView(Gtk.Box):
             print(f"ERROR: Could not get file path from dialog: {e}")
 
     def save_settings(self, _):
+        """
+        Saves the current settings to the configuration file.
+        Triggers a restart dialog if critical settings (language, backend, db path, scale) have changed.
+        """
         old_lang = self.config.get("language", "en")
+        old_backend = self.config.get("backend", "wayland")
+        old_db_path = self.config.get("db_path", "")
+        old_ui_scale = self.config.get("ui_scale", 1.0)
         
         selected_lang_idx = self.lang_row.get_selected()
-        lang_codes = ["en", "ru", "es", "de", "fr", "zh_CN", "pt_BR", "tr", "kk"]
-        new_lang = lang_codes[selected_lang_idx]
+        new_lang = self.lang_codes[selected_lang_idx]
         self.config["language"] = new_lang
 
-        self.config["backend"] = "wayland" if self.backend_dropdown.get_selected() == 0 else "x11"
-        self.config["db_path"] = self.db_entry.get_text()
+        new_backend = "wayland" if self.backend_dropdown.get_selected() == 0 else "x11"
+        self.config["backend"] = new_backend
+        
+        new_db_path = self.db_entry.get_text()
+        self.config["db_path"] = new_db_path
+        
         try:
-            self.config["ui_scale"] = round(float(self.scale_spin.get_value()), 2)
+            new_ui_scale = round(float(self.scale_spin.get_value()), 2)
+            self.config["ui_scale"] = new_ui_scale
         except (ValueError, TypeError):
             self.config["ui_scale"] = 1.0
+            new_ui_scale = 1.0
             
         fmt_settings = {key: switch.get_active() for key, switch in self.switches.items()}
         self.config["formatting"] = fmt_settings
-
-        # Palette is already updated in self.config["palette"]
 
         ConfigManager.save(self.config)
 
         if self.on_settings_change_callback:
             self.on_settings_change_callback()
-
-        if old_lang != new_lang:
+            
+        if (old_lang != new_lang or 
+            old_backend != new_backend or 
+            old_db_path != new_db_path or 
+            old_ui_scale != new_ui_scale):
             self.show_restart_dialog()
 
     def show_restart_dialog(self):
+        """Displays a dialog informing the user that a restart is required."""
         dialog = Adw.MessageDialog(
             transient_for=self.get_native(),
             heading=_("Restart Required"),
-            body=_("The language change will take full effect after you restart the application."),
+            body=_("Some changes require an application restart to take full effect."),
         )
         dialog.add_response("ok", _("OK"))
         dialog.connect("response", lambda d, r: d.close())

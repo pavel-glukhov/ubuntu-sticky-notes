@@ -1,6 +1,5 @@
 import json
 import os
-from config.config_manager import ConfigManager
 
 # ========================
 # Path Constants (System)
@@ -12,28 +11,46 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RESOURCES_DIR = os.path.join(BASE_DIR, "../resources")
 ICONS_DIR = os.path.join(RESOURCES_DIR, "icons")
 STYLE_CSS = os.path.join(RESOURCES_DIR, "style.css")
+LOCALE_DIR = os.path.join(BASE_DIR, "../locale")
 
 # Metadata
 APP_INFO_FILE = os.path.join(BASE_DIR, "../app_info.json")
 
 # Intervals and Settings
 AUTOSAVE_INTERVAL_MS = 2000
-STICKY_COLORS = ['#FFF59D', '#F8BBD0', '#C8E6C9', '#B3E5FC']
-TEXT_COLORS = ['#000000', '#424242', '#D32F2F', '#C2185B', '#7B1FA2', '#303F9F', '#1976D2', '#0288D1', '#0097A7', '#00796B', '#388E3C', '#689F38', '#AFB42B', '#FBC02D', '#FFA000', '#E64A19']
-FONT_SIZES = [8, 10, 12, 14, 16, 18, 20, 24, 32, 48, 72]
 
-# Supported Languages
-SUPPORTED_LANGUAGES = {
-    "English": "en",
-    "Русский": "ru",
-    "Español": "es",
-    "Deutsch": "de",
-    "Français": "fr",
-    "简体中文": "zh_CN",
-    "Português (Brasil)": "pt_BR",
-    "Türkçe": "tr",
-    "Қазақша": "kk"
+# Language Display Names Mapping
+LANGUAGE_NAMES = {
+    "en": "English",
+    "ru": "Русский",
+    "es": "Español",
+    "de": "Deutsch",
+    "fr": "Français",
+    "zh_CN": "简体中文",
+    "pt_BR": "Português (Brasil)",
+    "tr": "Türkçe",
+    "kk": "Қазақша"
 }
+
+def get_supported_languages():
+    """
+    Scans the locale directory for available languages and returns a dictionary
+    mapping display names to language codes.
+    Always includes 'en' (English) as the default.
+    """
+    languages = {"English": "en"}
+    
+    if os.path.exists(LOCALE_DIR):
+        for entry in os.listdir(LOCALE_DIR):
+            full_path = os.path.join(LOCALE_DIR, entry)
+            if os.path.isdir(full_path):
+                # Check if it looks like a locale dir (has LC_MESSAGES)
+                if os.path.exists(os.path.join(full_path, "LC_MESSAGES")):
+                    lang_code = entry
+                    display_name = LANGUAGE_NAMES.get(lang_code, lang_code)
+                    languages[display_name] = lang_code
+    
+    return languages
 
 
 def load_app_info(path: str = APP_INFO_FILE) -> dict:
@@ -41,24 +58,22 @@ def load_app_info(path: str = APP_INFO_FILE) -> dict:
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def get_app_paths() -> dict:
+def get_app_paths(user_config: dict) -> dict:
     """
     Returns a dictionary of all essential application paths.
     DB_PATH is dynamically retrieved from the user configuration.
+    Args:
+        user_config (dict): Pre-loaded user configuration.
     """
     app_info = load_app_info()
-    user_config = ConfigManager.load()
-
+    
     db_path = user_config.get("db_path")
 
     if not db_path:
-        data_dir = os.path.join(
-            os.path.expanduser("~"),
-            ".local",
-            "share",
-            app_info.get("service_name")
-        )
-        db_path = os.path.join(data_dir, "stickies.db")
+        # Import ConfigManager only if needed, to avoid circular dependency
+        from config.config_manager import ConfigManager
+        defaults = ConfigManager.get_defaults()
+        db_path = defaults.get("db_path")
 
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
@@ -66,7 +81,6 @@ def get_app_paths() -> dict:
         "APP_INFO": app_info,
         "DATA_DIR": os.path.dirname(db_path),
         "DB_PATH": db_path,
-        "CONFIG_PATH": os.path.expanduser("~/.config/ubuntu-sticky-notes/config.conf"),
         "ICONS_DIR": ICONS_DIR,
         "APP_ICON_PATH": os.path.join(ICONS_DIR, "app.png"),
         "STYLE_CSS": STYLE_CSS,

@@ -1,5 +1,5 @@
 from gi.repository import Gtk, Gdk, GLib
-from config.config import STICKY_COLORS, TEXT_COLORS, FONT_SIZES
+
 
 class StickyUI:
     """
@@ -52,7 +52,7 @@ class StickyUI:
         grid = Gtk.Grid(column_spacing=6, row_spacing=6)
         btn_size = int(22 * self.scale)
         
-        # Use palette from config
+        # Use palette from self.config
         palette = self.config.get("palette", [])
         
         for i, color in enumerate(palette):
@@ -94,7 +94,9 @@ class StickyUI:
         grid.set_margin_end(4)
 
         btn_size = int(18 * self.scale)
-        for i, color in enumerate(TEXT_COLORS):
+        # Use text_colors from self.config
+        text_colors = self.config.get("text_colors", [])
+        for i, color in enumerate(text_colors):
             b = Gtk.Button()
             b.set_size_request(btn_size, btn_size)
             cp = Gtk.CssProvider()
@@ -113,7 +115,9 @@ class StickyUI:
         popover = Gtk.Popover()
         scrolled = Gtk.ScrolledWindow(max_content_height=200, propagate_natural_height=True)
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        for size in FONT_SIZES:
+        # Use font_sizes from self.config
+        font_sizes = self.config.get("font_sizes", [])
+        for size in font_sizes:
             b = Gtk.Button(label=str(size), has_frame=False)
             b.add_css_class("format-btn-tiny")
             b.connect("clicked", lambda _, s=size: (self.apply_font_size(s), popover.popdown()))
