@@ -16,9 +16,6 @@ class NotesDB:
         self.conn = sqlite3.connect(path)
         self.conn.row_factory = sqlite3.Row
         self._create_table()
-        # Ensure default setting for always_on_top exists
-        if self.get_setting("always_on_top") is None:
-            self.set_setting("always_on_top", "0")
 
     def close(self):
         """Closes the database connection."""
@@ -46,14 +43,6 @@ class NotesDB:
                                   always_on_top INTEGER DEFAULT 0,
                                   is_open INTEGER DEFAULT 0,
                                   is_pinned INTEGER DEFAULT 0
-                              )
-                              """)
-
-            self.conn.execute("""
-                              CREATE TABLE IF NOT EXISTS settings
-                              (
-                                  key TEXT PRIMARY KEY,
-                                  value TEXT
                               )
                               """)
 
@@ -197,32 +186,6 @@ class NotesDB:
         """
         with self.conn:
             self.conn.execute("DELETE FROM notes WHERE id=?", (note_id,))
-
-    def get_setting(self, key: str) -> str | None:
-        """
-        Retrieves a setting value from the settings table.
-        Args:
-            key (str): The key of the setting to retrieve.
-        Returns:
-            str | None: The value of the setting, or None if not found.
-        """
-        cur = self.conn.execute("SELECT value FROM settings WHERE key=?", (key,))
-        row = cur.fetchone()
-        return row["value"] if row else None
-
-    def set_setting(self, key: str, value: str):
-        """
-        Sets or updates a setting value in the settings table.
-        Args:
-            key (str): The key of the setting.
-            value (str): The value to set for the setting.
-        """
-        with self.conn:
-            self.conn.execute(
-                "INSERT INTO settings(key, value) VALUES(?, ?) "
-                "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
-                (key, value)
-            )
 
     def update_color(self, note_id: int, color: str):
         """
