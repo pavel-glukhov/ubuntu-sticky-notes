@@ -48,18 +48,14 @@ class NoteCard(Gtk.Box):
         self._update_pin_icon()
         header.append(self.pin_button)
         
-        # --- Robust content decoding ---
         initial_content_raw = note["content"] or ""
         segments = []
         try:
-            # Try decoding from hex-encoded JSON (new format)
             segments = json.loads(bytes.fromhex(initial_content_raw).decode('utf-8'))
         except (ValueError, TypeError, json.JSONDecodeError):
             try:
-                # Try decoding as plain JSON (intermediate format if any)
                 segments = json.loads(initial_content_raw)
             except (ValueError, TypeError, json.JSONDecodeError):
-                # Fallback to plain text
                 segments = [{"text": initial_content_raw, "tags": []}]
 
         markup_text = self._generate_markup(segments)
@@ -120,7 +116,6 @@ class NoteCard(Gtk.Box):
         for seg in segments:
             text = seg.get("text", "")
             lines_in_seg = text.split('\n')
-            # Limit to 5 lines for card preview
             if line_count >= 5:
                 break
             if line_count + len(lines_in_seg) - 1 >= 5:

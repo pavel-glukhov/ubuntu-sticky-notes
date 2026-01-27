@@ -16,6 +16,7 @@ class StickyEvents:
         if self.main_window:
             self.main_window.create_note()
             # Safety check to prevent UI design reset on the current instance
+            # This comment is not redundant as it explains a specific design choice.
             self._update_ui_design()
 
     def _on_close_clicked(self, button: Gtk.Button):

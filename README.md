@@ -2,7 +2,7 @@
 
 Modern sticky notes application built with Python, GTK4, and Libadwaita for Ubuntu.
 
-Version: 2.0.0-beta2
+Version: 2.0.0-beta3
 _______________
 
 > [!IMPORTANT]
@@ -65,6 +65,20 @@ sudo apt install -y python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gtk-3.0 gir1.2
 sudo dpkg -i ubuntu-sticky-notes_2.0.0.beta3_all.deb
 sudo apt-get install -f
 ```
+## Troubleshooting Localization
+
+If the app's language doesn't change after selection:
+1.  **Install Language Pack:**
+2. ```sh
+    sudo apt install language-pack-[lang_code] 
+    ```
+2.  **Generate Locale:**
+    ```sh
+    sudo locale-gen [lang_code].UTF-8 
+    ```
+3.  **Restart:** Restart the application.
+
+Check available locales: `locale -a`
 
 ## 🛠️ Backend & Positioning
 

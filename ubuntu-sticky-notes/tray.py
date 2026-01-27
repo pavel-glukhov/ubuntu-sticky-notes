@@ -6,7 +6,7 @@ import gettext
 import builtins
 
 # --- Translation Setup ---
-APP_ID_GETTEXT = 'ubuntu-sticky-notes' # Reverted to match .mo filename
+APP_ID_GETTEXT = 'ubuntu.sticky.notes'
 current_dir = os.path.dirname(os.path.abspath(__file__))
 LOCALE_DIR = os.path.join(current_dir, 'locale')
 
@@ -62,7 +62,6 @@ def main():
     """Main function to set up and run the tray application."""
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    # --- Callbacks ---
     def on_show_main(_):
         """Callback for 'Open Main Window' menu item."""
         print("show_main", flush=True)

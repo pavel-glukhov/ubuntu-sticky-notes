@@ -6,8 +6,16 @@ CONF_PATH = os.path.join(CONF_DIR, "config.json")
 
 
 class ConfigManager:
+    """
+    Manages the application configuration, including loading, saving, and providing defaults.
+    """
     @staticmethod
     def get_defaults():
+        """
+        Returns the default configuration dictionary.
+        Returns:
+            dict: The default configuration.
+        """
         return {
             "backend": "wayland",
             "db_path": os.path.expanduser("~/.local/share/ubuntu-sticky-notes/notes.db"),
@@ -34,6 +42,12 @@ class ConfigManager:
 
     @classmethod
     def load(cls):
+        """
+        Loads the configuration from the config file.
+        If the file doesn't exist or is invalid, returns the default configuration.
+        Returns:
+            dict: The loaded configuration.
+        """
         defaults = cls.get_defaults()
         
         if not os.path.exists(CONF_PATH):
@@ -79,6 +93,11 @@ class ConfigManager:
 
     @staticmethod
     def save(config_dict):
+        """
+        Saves the given configuration dictionary to the config file.
+        Args:
+            config_dict (dict): The configuration to save.
+        """
         try:
             os.makedirs(CONF_DIR, exist_ok=True)
             with open(CONF_PATH, "w", encoding="utf-8") as f:

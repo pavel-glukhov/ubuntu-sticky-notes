@@ -18,14 +18,12 @@ class StickyActions:
         if not row:
             return
 
-        # Block saving signals during initial data load
         self._loading = True
 
         content = row["content"] or ""
         self.buffer.set_text("")
 
         try:
-            # Decode hex-encoded JSON content and apply tags
             segments = json.loads(bytes.fromhex(content).decode('utf-8'))
             iter_pos = self.buffer.get_start_iter()
             for seg in segments:
@@ -35,10 +33,9 @@ class StickyActions:
                 else:
                     self.buffer.insert(iter_pos, text)
         except Exception:
-            # Fallback for legacy plain text format
-            self.buffer.set_text(content.replace("<br>", "\n"))
+            segments = [{"text": content.replace("<br>", "\n"), "tags": []}] # Fallback for legacy plain text format
+            self.buffer.set_text(segments[0]["text"])
 
-        # Restore window state: color and dimensions
         self.apply_color(row["color"] or "#FFF59D")
         self.saved_width = row['w'] or 300
         self.saved_height = row['h'] or 380
@@ -51,7 +48,6 @@ class StickyActions:
         Args:
             force (bool): If True, bypasses the _is_destroying check.
         """
-        # Prevent saving if window is being destroyed or already destroyed, unless forced
         if not force and (getattr(self, '_is_destroying', False) or not self.get_native()):
             return False
 
@@ -59,9 +55,7 @@ class StickyActions:
             return True
 
         try:
-            # Get serialized segments (JSON object)
             serialized_segments = self._serialize_buffer()
-            # Encode to hex string for DB storage
             hex_data = json.dumps(serialized_segments).encode('utf-8').hex()
 
             w = self.get_width() if self.get_visible() else self.saved_width
@@ -138,24 +132,19 @@ class StickyActions:
         Returns:
             bool: True to indicate the close request has been handled.
         """
-        # Mark as destroying to prevent further saves
         self._is_destroying = True
         
-        # Perform one last save, forcing it to bypass the _is_destroying check
         try:
             self.save(force=True)
         except Exception as e:
             print(f"ERROR: Save error on close: {e}")
         
-        # Stop the auto-save timer if it exists
         if hasattr(self, 'save_timer_id') and self.save_timer_id:
             GLib.source_remove(self.save_timer_id)
             self.save_timer_id = None
 
-        # Notify main window that we are closing
         if self.main_window:
             self.main_window.on_sticky_closed(self.note_id)
 
-        # Explicitly destroy the window to stop timers and free resources
         self.destroy()
-        return True # Indicate that the close request has been handled
+        return True

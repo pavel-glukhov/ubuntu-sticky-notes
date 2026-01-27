@@ -39,8 +39,12 @@ class StickyUI:
 
         self.main_box.append(self.header_box)
 
-    def setup_main_menu(self, btn):
-        """Constructs the Popover menu for note colors and print actions."""
+    def setup_main_menu(self, btn: Gtk.MenuButton):
+        """
+        Constructs the Popover menu for note colors and print actions.
+        Args:
+            btn (Gtk.MenuButton): The menu button to attach the popover to.
+        """
         popover = Gtk.Popover()
         main_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=int(4 * self.scale))
         main_vbox.add_css_class("menu-box")
@@ -52,7 +56,6 @@ class StickyUI:
         grid = Gtk.Grid(column_spacing=6, row_spacing=6)
         btn_size = int(22 * self.scale)
         
-        # Use palette from self.config
         palette = self.config.get("palette", [])
         
         for i, color in enumerate(palette):
@@ -84,8 +87,12 @@ class StickyUI:
         popover.set_child(main_vbox)
         btn.set_popover(popover)
 
-    def setup_text_color_popover(self, btn):
-        """Creates the text color selection grid popover."""
+    def setup_text_color_popover(self, btn: Gtk.MenuButton):
+        """
+        Creates the text color selection grid popover.
+        Args:
+            btn (Gtk.MenuButton): The menu button to attach the popover to.
+        """
         popover = Gtk.Popover()
         grid = Gtk.Grid(column_spacing=2, row_spacing=2)
         grid.set_margin_top(4)
@@ -94,7 +101,6 @@ class StickyUI:
         grid.set_margin_end(4)
 
         btn_size = int(18 * self.scale)
-        # Use text_colors from self.config
         text_colors = self.config.get("text_colors", [])
         for i, color in enumerate(text_colors):
             b = Gtk.Button()
@@ -110,12 +116,15 @@ class StickyUI:
         popover.set_child(grid)
         btn.set_popover(popover)
 
-    def setup_font_size_popover(self, btn):
-        """Creates the font size selection list popover."""
+    def setup_font_size_popover(self, btn: Gtk.MenuButton):
+        """
+        Creates the font size selection list popover.
+        Args:
+            btn (Gtk.MenuButton): The menu button to attach the popover to.
+        """
         popover = Gtk.Popover()
         scrolled = Gtk.ScrolledWindow(max_content_height=200, propagate_natural_height=True)
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        # Use font_sizes from self.config
         font_sizes = self.config.get("font_sizes", [])
         for size in font_sizes:
             b = Gtk.Button(label=str(size), has_frame=False)
@@ -126,8 +135,12 @@ class StickyUI:
         popover.set_child(scrolled)
         btn.set_popover(popover)
 
-    def apply_color(self, hex_color):
-        """Applies a background color to the sticky note."""
+    def apply_color(self, hex_color: str):
+        """
+        Applies a background color to the sticky note.
+        Args:
+            hex_color (str): The hexadecimal color string.
+        """
         self.current_color = hex_color
         self._update_ui_design()
         if self.main_window:

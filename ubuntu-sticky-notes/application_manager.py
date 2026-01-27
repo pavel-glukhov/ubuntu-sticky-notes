@@ -15,7 +15,18 @@ from views.main_view.main_view import MainWindow
 _ = builtins._
 
 class ApplicationManager:
+    """
+    Manages the core application logic, UI setup, tray process, and inter-process communication.
+    This class encapsulates responsibilities previously held by StickyApp to improve modularity.
+    """
     def __init__(self, app_instance: Adw.Application, db_instance, config_instance):
+        """
+        Initializes the ApplicationManager.
+        Args:
+            app_instance (Adw.Application): The main Adw.Application instance.
+            db_instance: The NotesDB database controller instance.
+            config_instance (dict): The application's configuration dictionary.
+        """
         self.app = app_instance
         self.db = db_instance
         self.config = config_instance
@@ -23,7 +34,9 @@ class ApplicationManager:
         self.tray_process = None
 
     def setup_ui_settings(self):
-        """Applies UI scaling and loads CSS."""
+        """
+        Applies UI scaling, loads CSS, and sets up icon themes based on configuration.
+        """
         try:
             raw_scale = self.config.get("ui_scale", 1.0)
             scale = float(str(raw_scale)[:4])
@@ -46,8 +59,12 @@ class ApplicationManager:
             icon_theme.add_search_path(icons_dir)
             Gtk.Window.set_default_icon_name("app")
 
-    def _apply_ui_scale(self, scale):
-        """Applies UI scaling by setting DPI and custom CSS."""
+    def _apply_ui_scale(self, scale: float):
+        """
+        Applies UI scaling by setting DPI and custom CSS.
+        Args:
+            scale (float): The scaling factor for the UI.
+        """
         try:
             new_dpi = int(96 * scale * 1024)
             settings = Gtk.Settings.get_default()
@@ -77,7 +94,7 @@ class ApplicationManager:
         print(f"SYSTEM: UI Scale applied: {scale}")
 
     def _load_css(self):
-        """Loads custom CSS styles."""
+        """Loads custom CSS styles from the application's resource directory."""
         paths = get_app_paths(user_config=self.config)
         css_path = paths.get("STYLE_CSS")
 
@@ -101,13 +118,22 @@ class ApplicationManager:
             self.main_window.connect("close-request", self.on_main_window_close_request)
         self.main_window.present()
 
-    def on_main_window_close_request(self, window):
-        """Hides the main window instead of closing it (minimize to tray)."""
+    def on_main_window_close_request(self, window: Gtk.Window):
+        """
+        Handles the close request for the main window, typically hiding it to the tray.
+        Args:
+            window (Gtk.Window): The main window instance.
+        Returns:
+            bool: True to indicate the close request has been handled.
+        """
         window.set_visible(False)
         return True
 
     def start_tray_subprocess(self):
-        """Starts the GTK3 tray icon as a separate process to avoid library conflicts."""
+        """
+        Starts the GTK3 tray icon as a separate process to avoid library conflicts.
+        Communicates with the main application via stdout/stderr.
+        """
         script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tray.py")
         env = os.environ.copy()
         
@@ -129,8 +155,13 @@ class ApplicationManager:
         threading.Thread(target=self._monitor_tray_output, args=(self.tray_process.stdout, "TRAY"), daemon=True).start()
         threading.Thread(target=self._monitor_tray_output, args=(self.tray_process.stderr, "TRAY_ERROR"), daemon=True).start()
 
-    def _monitor_tray_output(self, pipe, prefix):
-        """Monitors commands or errors from the tray process."""
+    def _monitor_tray_output(self, pipe, prefix: str):
+        """
+        Monitors stdout/stderr from the tray process for commands or errors.
+        Args:
+            pipe: The pipe to read from (stdout or stderr).
+            prefix (str): A prefix for log messages (e.g., "TRAY", "TRAY_ERROR").
+        """
         if not pipe:
             return
         try:
@@ -154,16 +185,19 @@ class ApplicationManager:
             print(f"DEBUG: Tray monitor thread terminated: {e}")
 
     def show_main_window(self):
+        """Makes the main application window visible and brings it to the foreground."""
         if self.main_window:
             self.main_window.set_visible(True)
             self.main_window.present()
 
     def open_all_stickers(self):
+        """Opens all existing sticky notes from the database as individual windows."""
         notes = self.db.all_notes(full=False)
         for note in notes:
             self.main_window.open_note(note['id'])
 
     def show_about_dialog(self):
+        """Displays the application's 'About' dialog."""
         if not self.main_window: return
 
         paths = get_app_paths(user_config=self.config)
@@ -190,7 +224,9 @@ class ApplicationManager:
         dialog.present()
 
     def quit_app_manager(self):
-        """Safely shuts down the tray process and prepares for app quit."""
+        """
+        Safely terminates the tray process and closes all open sticky note windows.
+        """
         if self.tray_process:
             self.tray_process.terminate()
         

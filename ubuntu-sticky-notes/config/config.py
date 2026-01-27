@@ -32,11 +32,13 @@ LANGUAGE_NAMES = {
     "kk": "Қазақша"
 }
 
-def get_supported_languages():
+def get_supported_languages() -> dict:
     """
     Scans the locale directory for available languages and returns a dictionary
     mapping display names to language codes.
     Always includes 'en' (English) as the default.
+    Returns:
+        dict: A dictionary where keys are display names and values are language codes.
     """
     languages = {"English": "en"}
     
@@ -44,7 +46,6 @@ def get_supported_languages():
         for entry in os.listdir(LOCALE_DIR):
             full_path = os.path.join(LOCALE_DIR, entry)
             if os.path.isdir(full_path):
-                # Check if it looks like a locale dir (has LC_MESSAGES)
                 if os.path.exists(os.path.join(full_path, "LC_MESSAGES")):
                     lang_code = entry
                     display_name = LANGUAGE_NAMES.get(lang_code, lang_code)
@@ -54,7 +55,13 @@ def get_supported_languages():
 
 
 def load_app_info(path: str = APP_INFO_FILE) -> dict:
-    """Loads application metadata from a JSON file."""
+    """
+    Loads application metadata from a JSON file.
+    Args:
+        path (str, optional): Path to the app_info.json file. Defaults to APP_INFO_FILE.
+    Returns:
+        dict: The application metadata.
+    """
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -64,6 +71,8 @@ def get_app_paths(user_config: dict) -> dict:
     DB_PATH is dynamically retrieved from the user configuration.
     Args:
         user_config (dict): Pre-loaded user configuration.
+    Returns:
+        dict: A dictionary containing paths and backend info.
     """
     app_info = load_app_info()
     

@@ -1,14 +1,10 @@
-import json
-import gi
 from gi.repository import Gtk, Gdk, GLib, Pango
 
-# Import project-specific mixins
 from .sticky_formatting import StickyFormatting
 from .sticky_actions import StickyActions
 from .sticky_ui import StickyUI
 from .sticky_events import StickyEvents
-# Removed direct import of STICKY_COLORS, TEXT_COLORS, FONT_SIZES
-# from config.config import STICKY_COLORS, TEXT_COLORS, FONT_SIZES
+
 
 class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, StickyEvents):
     """
@@ -16,6 +12,13 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
     Inherits from multiple mixins to separate concerns (UI, Events, Actions, Formatting).
     """
     def __init__(self, db, note_id=None, main_window=None):
+        """
+        Initializes the StickyWindow.
+        Args:
+            db: The database controller instance.
+            note_id (int, optional): The ID of the note. Defaults to None.
+            main_window (MainWindow, optional): Reference to the main application window. Defaults to None.
+        """
         super().__init__()
 
         # 1. State and Data Initialization
@@ -80,6 +83,11 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         return "X11" in display.__class__.__name__
 
     def _update_ui_design(self, hex_color=None):
+        """
+        Updates the visual design of the sticky note, including background color and CSS.
+        Args:
+            hex_color (str, optional): The new background color in hex format. Defaults to None.
+        """
         if hex_color:
             self.current_color = hex_color.strip()
         scale = self.scale
@@ -174,7 +182,11 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         pass
 
     def reload_config(self, new_config):
-        """Reloads configuration and updates UI elements."""
+        """
+        Reloads configuration and updates UI elements.
+        Args:
+            new_config (dict): The new configuration dictionary.
+        """
         self.config = new_config
         # Re-setup header to update the menu with new palette
         if hasattr(self, 'header_box'):

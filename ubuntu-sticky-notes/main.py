@@ -1,6 +1,5 @@
 import sys
 import os
-from datetime import datetime
 import gettext
 import locale
 import builtins
@@ -14,7 +13,6 @@ if current_dir not in sys.path:
 
 # --- Translation Setup ---
 APP_INFO = load_app_info()
-# Use 'ubuntu.sticky.notes' as the domain for gettext to match .mo filenames
 APP_ID = 'ubuntu.sticky.notes' 
 LOCALE_DIR = os.path.join(current_dir, 'locale')
 
@@ -36,19 +34,6 @@ try:
     config = ConfigManager.load()
     lang_code = config.get("language", "en")
     
-    # Debug: Check locale directory content
-    # print(f"DEBUG: LOCALE_DIR = {LOCALE_DIR}")
-    # if os.path.exists(LOCALE_DIR):
-    #     print(f"DEBUG: LOCALE_DIR content: {os.listdir(LOCALE_DIR)}")
-    #     lang_dir = os.path.join(LOCALE_DIR, lang_code, 'LC_MESSAGES')
-    #     if os.path.exists(lang_dir):
-    #          print(f"DEBUG: {lang_code} LC_MESSAGES content: {os.listdir(lang_dir)}")
-    #     else:
-    #          print(f"DEBUG: {lang_dir} does not exist")
-    # else:
-    #     print("DEBUG: LOCALE_DIR does not exist")
-
-    # Debug: Check if .mo file exists
     mo_path = os.path.join(LOCALE_DIR, lang_code, 'LC_MESSAGES', f'{APP_ID}.mo')
     if os.path.exists(mo_path):
         print(f"DEBUG: Found translation file at: {mo_path}")
@@ -59,7 +44,7 @@ try:
     full_locale = LOCALE_MAP.get(lang_code, f"{lang_code}.UTF-8")
     os.environ["LANG"] = full_locale
     os.environ["LC_ALL"] = full_locale
-    os.environ["LANGUAGE"] = lang_code # Some systems prioritize this
+    os.environ["LANGUAGE"] = lang_code 
 
     try:
         locale.setlocale(locale.LC_ALL, full_locale)
@@ -67,11 +52,10 @@ try:
         print(f"WARNING: Locale {full_locale} not supported by system. Falling back.")
 
     translation = gettext.translation(APP_ID, localedir=LOCALE_DIR, languages=[lang_code], fallback=True)
-    translation.install() # Install globally
+    translation.install()
     builtins._ = translation.gettext
     
     print(f"SYSTEM: Language set to '{lang_code}' (Locale: {full_locale})")
-    # print(f"DEBUG: Testing translation for 'Settings': {_('Settings')}") # Test translation immediately
 
 except FileNotFoundError:
     builtins._ = lambda s: s

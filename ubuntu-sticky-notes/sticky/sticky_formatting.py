@@ -61,7 +61,6 @@ class StickyFormatting:
         if res:
             start, end = res
             
-            # Clear existing color tags to prevent overlaps
             text_colors = self.config.get("text_colors", [])
             for color in text_colors:
                 self.buffer.remove_tag_by_name(f"text_color_{color}", start, end)
@@ -82,7 +81,6 @@ class StickyFormatting:
         if res:
             start, end = res
 
-            # Clear existing font tags
             font_sizes = self.config.get("font_sizes", [])
             for s in font_sizes:
                 self.buffer.remove_tag_by_name(f"font_size_{s}", start, end)
@@ -103,7 +101,6 @@ class StickyFormatting:
         BULLET_CHAR = " • "
         res = self.buffer.get_selection_bounds()
 
-        # Default to cursor position if no selection exists
         start, end = res if res else (
             self.buffer.get_iter_at_mark(self.buffer.get_insert()),
             self.buffer.get_iter_at_mark(self.buffer.get_insert())
@@ -111,7 +108,6 @@ class StickyFormatting:
         if not res:
             end = start.copy()
 
-        # Align to line boundaries
         start.set_line_offset(0)
         if not end.ends_line():
             end.forward_to_line_end()
@@ -119,13 +115,11 @@ class StickyFormatting:
         text = self.buffer.get_text(start, end, False)
         lines = text.split('\n')
 
-        # Process lines to add/remove bullets
         new_lines = [
             line[len(BULLET_CHAR):] if line.startswith(BULLET_CHAR)
             else f"{BULLET_CHAR}{line}" for line in lines
         ]
 
-        # Use atomic user action for Undo/Redo support
         self.buffer.begin_user_action()
         self.buffer.delete(start, end)
         self.buffer.insert(start, '\n'.join(new_lines))
