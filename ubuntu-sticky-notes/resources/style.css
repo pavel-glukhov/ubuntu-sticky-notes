@@ -1,22 +1,49 @@
-/* Базовое окно всегда прозрачное для поддержки теней и скруглений */
-/* Возвращаем базовый вид окна */
+/**
+ * @class window.sticky-window
+ * @brief Styles the main window of a sticky note.
+ *
+ * This rule sets the background color to a classic yellow, reminiscent of physical sticky notes,
+ * and applies a border-radius to create rounded corners for a softer, more modern look.
+ */
 window.sticky-window {
-    background-color: #FFF59D; /* Наш классический желтый */
+    background-color: #FFF59D; /* Our classic yellow */
     border-radius: 12px;
 }
 
-/* Убираем все внешние тени и маргины, которые делали его прозрачным */
+/**
+ * @class .sticky-main-area
+ * @brief Defines the main content area within the sticky note window.
+ *
+ * This rule removes any default margins and sets the background to transparent.
+ * This is crucial for ensuring that the main area fits snugly within the rounded corners
+ * of the parent `window.sticky-window` and doesn't have any unwanted visual artifacts.
+ */
 .sticky-main-area {
     margin: 0;
     background: transparent;
 }
 
-/* Заголовок */
+/**
+ * @class .header-panel
+ * @brief Styles the header section of the sticky note.
+ *
+ * The header contains controls like 'add new' and 'close'. This rule gives it a subtle
+ * background color to distinguish it from the main text area and adds a bottom border
+ * for a clean separation.
+ */
 .header-panel {
     background: rgba(0,0,0,0.05);
     border-bottom: 1px solid rgba(0,0,0,0.08);
 }
 
+/**
+ * @class .header-btn
+ * @brief Styles the buttons within the header panel.
+ *
+ * This rule sets a minimum size for the buttons to ensure they are easily clickable.
+ * It removes the default border and background, making them appear flat and integrated
+ * into the header. A slight border-radius is applied for a softer look.
+ */
 .header-btn {
     min-width: 28px;
     min-height: 28px;
@@ -25,33 +52,77 @@ window.sticky-window {
     border-radius: 6px;
 }
 
+/**
+ * @class .header-btn:hover
+ * @brief Provides visual feedback when hovering over header buttons.
+ *
+ * When the user hovers over a header button, this rule applies a subtle background
+ * color to indicate that the button is interactive.
+ */
 .header-btn:hover {
     background-color: rgba(0,0,0,0.1);
 }
 
-/* Текстовая область */
+/**
+ * @class .sticky-text-edit
+ * @brief Styles the container for the main text view.
+ *
+ * This rule adds padding around the text editing area, ensuring that the text
+ * doesn't sit right up against the edges of the sticky note window, improving readability.
+ */
 .sticky-text-edit {
     padding: 4px 12px;
 }
 
+/**
+ * @class textview text
+ * @brief Styles the actual text within the text view.
+ *
+ * This rule sets the background of the text itself to transparent to inherit the
+ * note's yellow background. It also defines the default font size for the note's content.
+ */
 textview text {
     background-color: transparent;
     font-size: 15px;
 }
-/* Убеждаемся, что всё внутри стикера прозрачное */
+
+/**
+ * @class .sticky-text-edit, textview, textview text
+ * @brief Ensures a consistent transparent background for all text-related elements.
+ *
+ * This is a reset rule to guarantee that the text view container, the text view itself,
+ * and the text do not have any unwanted backgrounds or borders, allowing the main
+ * window's background color to show through.
+ */
 .sticky-text-edit,
 textview,
 textview text {
     background-color: transparent;
     border: none;
 }
-/* Убираем рамки у прокрутки */
+
+/**
+ * @class scrolledwindow
+ * @brief Styles the scrollable container that wraps the text view.
+ *
+ * When the text content exceeds the visible area of the note, a scrollbar appears.
+ * This rule ensures that the container for this scrollable area has no background or
+ * border, making it blend seamlessly with the rest of the note.
+ */
 scrolledwindow {
     background-color: transparent;
     border: none;
 }
 
-/* Панель форматирования */
+/**
+ * @class .format-bar
+ * @brief Styles the formatting toolbar at the bottom of the note.
+ *
+ * This toolbar contains options for text formatting (e.g., bold, italic, color).
+ * The rule gives it a distinct background color, a top border for separation,
+ * and rounds the bottom corners to match the main window's curvature. Padding is
+ * added to give the buttons inside some space.
+ */
 .format-bar {
     background-color: rgba(0, 0, 0, 0.03);
     border-top: 1px solid rgba(0, 0, 0, 0.08);
@@ -60,7 +131,14 @@ scrolledwindow {
     padding: 6px;
 }
 
-/* Исправление двойной кнопки и лишних рамок */
+/**
+ * @class .format-btn, menubutton.format-btn button
+ * @brief General styling for buttons within the formatting bar.
+ *
+ * This rule targets both standard buttons and buttons inside a `menubutton` widget
+ * (like the color picker). It removes default borders, backgrounds, and shadows
+ * for a clean, flat appearance. It also sets padding and a default text color.
+ */
 .format-btn,
 menubutton.format-btn button {
     border: none;
@@ -70,13 +148,26 @@ menubutton.format-btn button {
     color: #444;
 }
 
+/**
+ * @class .format-btn:hover, menubutton.format-btn button:hover
+ * @brief Provides hover feedback for formatting buttons.
+ *
+ * When hovering over any button in the format bar, this rule applies a subtle
+ * background color and a slight border-radius to indicate interactivity.
+ */
 .format-btn:hover,
 menubutton.format-btn button:hover {
     background-color: rgba(0, 0, 0, 0.08);
     border-radius: 4px;
 }
 
-/* Поповер выбора цвета */
+/**
+ * @class popover > contents
+ * @brief Styles the popover that appears for the color selection.
+ *
+ * This rule styles the main container of the popover. It adds rounded corners,
+ * padding, a modern box-shadow for depth, and a subtle border.
+ */
 popover > contents {
     border-radius: 12px;
     padding: 8px;
@@ -84,17 +175,38 @@ popover > contents {
     border: 1px solid rgba(0,0,0,0.1);
 }
 
+/**
+ * @class popover grid
+ * @brief Styles the grid layout within the color picker popover.
+ *
+ * The color swatches are arranged in a grid. This rule removes any default
+ * borders from the grid container itself to ensure a clean look inside the popover.
+ */
 popover grid {
     border: none;
 }
 
-/* Убираем фокусные рамки вокруг кнопок */
+/**
+ * @class button:focus, button:active
+ * @brief Removes the default focus outline from all buttons.
+ *
+ * By default, browsers and GTK add an outline to focused or active buttons.
+ * This rule removes that outline for a cleaner, more custom look, relying on
+ * the `:hover` styles for visual feedback.
+ */
 button:focus, button:active {
     outline: none;
     box-shadow: none;
 }
 
-/* Делаем скроллбар менее заметным (как на стикерах) */
+/**
+ * @class scrolledwindow scrollbar
+ * @brief Styles the scrollbar to be subtle and unobtrusive.
+ *
+ * This makes the scrollbar semi-transparent by default, so it doesn't distract
+ * from the note's content. It becomes fully opaque on hover, making it easy to
+ * see and interact with when needed. A smooth transition is applied to the opacity change.
+ */
 scrolledwindow scrollbar {
     opacity: 0.3;
     transition: opacity 200ms;
@@ -103,11 +215,26 @@ scrolledwindow scrollbar:hover {
     opacity: 1;
 }
 
+/**
+ * @class .note-card
+ * @brief Sets the minimum size for a note card in the main overview window.
+ *
+ * This rule ensures that each note preview in the main window has a consistent
+ * minimum size, creating a uniform grid layout.
+ */
 .note-card {
     min-width: 150px;
     min-height: 150px;
 }
 
+/**
+ * @class .note-card label
+ * @brief Styles the text preview within a note card.
+ *
+ * This rule sets a smaller font size and reduced line height for the text snippet
+ * shown in the note card preview, allowing more content to be displayed in a
+ * small area.
+ */
 .note-card label {
     font-size: 10px;
     line-height: 1.1;

@@ -71,7 +71,11 @@ class NotesDB:
             if "is_pinned" not in columns:
                 self.conn.execute("ALTER TABLE notes ADD COLUMN is_pinned INTEGER DEFAULT 0")
 
-    def add(self, title: str = None, content: str = "", x: int = 300, y: int = 200, w: int = 260, h: int = 200, color: str = "#FFF59D", always_on_top: int = 0) -> int:
+    def add(self, title: str = None, content: str = "",
+            x: int = 300, y: int = 200,
+            w: int = 260, h: int = 200,
+            color: str = "#FFF59D",
+            always_on_top: int = 0) -> int:
         """
         Adds a new note to the database.
         Args:
@@ -92,12 +96,16 @@ class NotesDB:
             title = f"Sticker {count + 1}"
         with self.conn:
             cur = self.conn.execute(
-                "INSERT INTO notes(title, content, x, y, w, h, color, always_on_top) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO notes(title, content, x, y, w, h, color, always_on_top) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 (title, content, x, y, w, h, color, always_on_top)
             )
             return cur.lastrowid
 
-    def update(self, note_id: int, content: str, x: int, y: int, w: int, h: int, color: str, always_on_top: int = 0):
+    def update(self, note_id: int, content: str,
+               x: int, y: int, w: int,
+               h: int, color: str,
+               always_on_top: int = 0):
         """
         Updates an existing note's properties in the database.
         Args:
@@ -225,13 +233,3 @@ class NotesDB:
         """
         with self.conn:
             self.conn.execute("UPDATE notes SET title = ? WHERE id = ?", (title, note_id))
-
-    def set_always_on_top(self, note_id: int, state: int):
-        """
-        Sets the 'always on top' status for a specific note.
-        Args:
-            note_id (int): The ID of the note.
-            state (int): The status (0 for normal, 1 for always on top).
-        """
-        with self.conn:
-            self.conn.execute("UPDATE notes SET always_on_top = ? WHERE id = ?", (state, note_id))

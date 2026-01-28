@@ -64,7 +64,8 @@ class ConfigManager:
             
             config = defaults.copy()
             # Deep update for formatting dict
-            if 'formatting' in loaded_config and isinstance(loaded_config['formatting'], dict):
+            if ('formatting' in loaded_config
+                    and isinstance(loaded_config['formatting'], dict)):
                 config['formatting'].update(loaded_config['formatting'])
                 loaded_config['formatting'] = config['formatting']
             
@@ -74,21 +75,25 @@ class ConfigManager:
                 config["formatting"] = defaults["formatting"]
             
             # Ensure palette exists and is a list
-            if "palette" not in config or not isinstance(config["palette"], list):
+            if ("palette" not in config
+                    or not isinstance(config["palette"], list)):
                 config["palette"] = defaults["palette"]
             
             # Ensure text_colors exists and is a list
-            if "text_colors" not in config or not isinstance(config["text_colors"], list):
+            if ("text_colors" not in config
+                    or not isinstance(config["text_colors"], list)):
                 config["text_colors"] = defaults["text_colors"]
             
             # Ensure font_sizes exists and is a list
-            if "font_sizes" not in config or not isinstance(config["font_sizes"], list):
+            if ("font_sizes" not in config
+                    or not isinstance(config["font_sizes"], list)):
                 config["font_sizes"] = defaults["font_sizes"]
 
             return config
 
         except (json.JSONDecodeError, OSError) as e:
-            print(f"WARNING: Error loading config file '{CONF_PATH}'. Resetting to defaults. Error: {e}")
+            print(f"WARNING: Error loading config file "
+                  f"'{CONF_PATH}'. Resetting to defaults. Error: {e}")
             return defaults
 
     @staticmethod

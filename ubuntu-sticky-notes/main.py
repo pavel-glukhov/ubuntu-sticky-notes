@@ -4,7 +4,7 @@ import gettext
 import locale
 import builtins
 import gi
-from config.config import load_app_info
+from config.config import load_app_info, LOCALE_MAP
 
 # --- Basic Setup ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
