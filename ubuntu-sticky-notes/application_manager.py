@@ -115,6 +115,7 @@ class ApplicationManager:
             self.main_window = MainWindow(self.db, application=self.app)
             self.main_window.connect("close-request", self.on_main_window_close_request)
         self.main_window.present()
+        self.restore_open_stickers() # Restore previously open stickers
 
     def on_main_window_close_request(self, window: Gtk.Window):
         """
@@ -193,6 +194,12 @@ class ApplicationManager:
         notes = self.db.all_notes(full=False)
         for note in notes:
             self.main_window.open_note(note['id'])
+
+    def restore_open_stickers(self):
+        """Restores sticky notes that were open in the previous session."""
+        open_note_ids = self.db.get_open_notes()
+        for note_id in open_note_ids:
+            self.main_window.open_note(note_id)
 
     def show_about_dialog(self):
         """Displays the application's 'About' dialog."""

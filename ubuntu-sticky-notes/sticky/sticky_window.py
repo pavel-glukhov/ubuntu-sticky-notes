@@ -1,3 +1,5 @@
+import json
+import gi
 from gi.repository import Gtk, Gdk, GLib, Pango
 
 from .sticky_formatting import StickyFormatting
@@ -31,7 +33,19 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         self.scale = 1.0
         self.current_color = "#FFF59D"
         self.default_font_size = 12
-        self.saved_width, self.saved_height = 300, 380
+        
+        # Load saved position and size from DB
+        if self.note_id:
+            note_data = self.db.get(self.note_id)
+            if note_data:
+                self.saved_x = note_data['x'] if note_data['x'] is not None else 300
+                self.saved_y = note_data['y'] if note_data['y'] is not None else 300
+                self.saved_width = note_data['w'] if note_data['w'] is not None else 300
+                self.saved_height = note_data['h'] if note_data['h'] is not None else 380
+            else:
+                self.saved_x, self.saved_y, self.saved_width, self.saved_height = 300, 300, 300, 380
+        else:
+            self.saved_x, self.saved_y, self.saved_width, self.saved_height = 300, 300, 300, 380
 
         # 2. Style Management
         self.window_css_provider = Gtk.CssProvider()
@@ -43,7 +57,15 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         # 3. Window Configuration
         self.set_decorated(False)
         self.add_css_class("sticky-window")
-
+        
+        # Apply saved position and size
+        self.set_default_size(self.saved_width, self.saved_height)
+        # Note: set_default_size sets the size, but for position we might need to wait for realization or use other methods depending on backend.
+        # Gtk4 doesn't have a simple move() for toplevels in the same way, especially on Wayland.
+        # We will try to set it, but it might be ignored by the compositor on Wayland.
+        # For X11 backend it might work if we use a Gdk.Surface method after mapping, but Gtk.Window doesn't expose move() directly in Gtk4.
+        # We'll rely on the window manager for placement mostly, but save what we can.
+        
         # 4. UI Hierarchy Construction
         self.overlay = Gtk.Overlay()
         self.set_child(self.overlay)
@@ -74,6 +96,10 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         """Connects core window and buffer signals."""
         self.connect("close-request", self._on_close_requested)
         self.connect("map", self._on_map)
+        # Track size changes
+        self.connect("notify::default-width", self._on_configure_event)
+        self.connect("notify::default-height", self._on_configure_event)
+        
         self.buffer.connect("notify::cursor-position", self.on_cursor_moved)
         self.buffer.connect("changed", self._on_buffer_changed)
 
@@ -81,6 +107,16 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         """Determines if the application is running under the X11 backend."""
         display = Gdk.Display.get_default()
         return "X11" in display.__class__.__name__
+
+    def _on_configure_event(self, *args):
+        """
+        Called when the window size changes.
+        Updates the internal state with the new dimensions.
+        """
+        self.saved_width = self.get_default_size()[0]
+        self.saved_height = self.get_default_size()[1]
+        # Position tracking in GTK4 is limited, especially on Wayland.
+        # We rely on the save() method to try and get the surface position if possible.
 
     def _update_ui_design(self, hex_color=None):
         """

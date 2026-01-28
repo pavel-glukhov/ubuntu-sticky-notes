@@ -58,6 +58,8 @@ class StickyActions:
             serialized_segments = self._serialize_buffer()
             hex_data = json.dumps(serialized_segments).encode('utf-8').hex()
 
+            # Get current window geometry
+            x, y = self.get_position()
             w = self.get_width() if self.get_visible() else self.saved_width
             h = self.get_height() if self.get_visible() else self.saved_height
 
@@ -65,12 +67,13 @@ class StickyActions:
                 self.db.update(
                     self.note_id,
                     hex_data,
-                    0, 0,
+                    x, y,
                     w, h,
                     self.current_color,
                     1 if getattr(self, 'is_pinned', False) else 0
                 )
                 self.saved_width, self.saved_height = w, h
+                self.saved_x, self.saved_y = x, y
 
         except Exception as e:
             print(f"ERROR: Save error: {e}")
@@ -99,24 +102,14 @@ class StickyActions:
         return segments
 
     def on_print_clicked(self, _):
-        """
-        Initializes a print operation for the note.
-        Args:
-            _: The widget that triggered the action (ignored).
-        """
+        """Initializes a print operation for the note."""
         print_op = Gtk.PrintOperation()
         print_op.connect("draw-page", self._draw_page)
         print_op.set_n_pages(1)
         print_op.run(Gtk.PrintOperationAction.PRINT_DIALOG, self)
 
     def _draw_page(self, operation, context, page_nr):
-        """
-        Renders the buffer content for printing.
-        Args:
-            operation (Gtk.PrintOperation): The print operation.
-            context (Gtk.PrintContext): The print context.
-            page_nr (int): The page number.
-        """
+        """Renders the buffer content for printing."""
         cr = context.get_cairo_context()
         layout = context.create_pango_layout()
         start, end = self.buffer.get_bounds()
