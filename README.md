@@ -46,7 +46,7 @@ A refreshed interface that follows current GNOME / Adwaita design guidelines for
 
 ## Download:
 You can download the beta deb package here:
-https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta3/ubuntu.sticky.notes_2.0.0.beta3_all.deb
+https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/tag/v2.0.0-beta3
 ______________________________________________________________________________________
 
 ## Installation:
