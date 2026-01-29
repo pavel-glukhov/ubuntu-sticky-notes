@@ -55,14 +55,14 @@ To install version 2.0.0-beta3, run the following commands in your terminal:
 
 ```bash
 # 1. Download the package
-curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta3/ubuntu.sticky.notes_2.0.0.beta3_all.deb
+curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta3/ubuntu.sticky.notes_2.0.0-beta3_all.deb
 
 # 2. Update and install system dependencies (GTK4 & Libadwaita)
 sudo apt update
-sudo apt install -y python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gtk-3.0 gir1.2-ayatanaappindicator3-0.1
+sudo apt install -y python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gtk-3.0 gir1.2-ayatanaappindicator3-0.1 gettext
 
 # 3. Install the package
-sudo dpkg -i ubuntu-sticky-notes_2.0.0.beta3_all.deb
+sudo dpkg -i ubuntu.sticky.notes_2.0.0-beta3_all.deb
 sudo apt-get install -f
 ```
 ## Troubleshooting Localization
