@@ -1,7 +1,9 @@
 from gi.repository import Gtk, Gdk, GLib
 import builtins
 
-_ = builtins
+# Ensure _ is available even if not injected by main.py
+if not hasattr(builtins, "_"):
+    builtins._ = lambda s: s
 
 class StickyUI:
     """
@@ -51,7 +53,8 @@ class StickyUI:
         main_vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=int(4 * self.scale))
         main_vbox.add_css_class("menu-box")
 
-        lbl_color = Gtk.Label(label=_("Color"), xalign=0)
+        # Use builtins._ explicitly to avoid shadowing issues
+        lbl_color = Gtk.Label(label=builtins._("Color"), xalign=0)
         lbl_color.add_css_class("menu-label")
         main_vbox.append(lbl_color)
 
@@ -79,7 +82,7 @@ class StickyUI:
 
         box_print = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         box_print.append(Gtk.Image.new_from_icon_name("printer-symbolic"))
-        box_print.append(Gtk.Label(label=_("Print note")))
+        box_print.append(Gtk.Label(label=builtins._("Print note")))
         btn_print = Gtk.Button(has_frame=False)
         btn_print.set_child(box_print)
         btn_print.add_css_class("menu-row-btn")
