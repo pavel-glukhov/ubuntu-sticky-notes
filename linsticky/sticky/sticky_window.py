@@ -1,6 +1,12 @@
-import json
+"""
+The main window for an individual sticky note.
+
+This module defines the `StickyWindow` class, which is the core component for
+displaying and interacting with a single note. It integrates multiple mixins
+for handling UI, events, actions, and text formatting to keep the code modular.
+"""
 import gi
-from gi.repository import Gtk, Gdk, GLib, Pango
+from gi.repository import Gtk, Gdk, GLib, Adw
 
 from .sticky_formatting import StickyFormatting
 from .sticky_actions import StickyActions
@@ -8,33 +14,38 @@ from .sticky_ui import StickyUI
 from .sticky_events import StickyEvents
 
 
-class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, StickyEvents):
+class StickyWindow(Adw.Window, StickyFormatting, StickyActions, StickyUI, StickyEvents):
     """
-    Main Window class for a single sticky note.
-    Inherits from multiple mixins to separate concerns (UI, Events, Actions, Formatting).
+    Represents a single sticky note window.
+
+    This class inherits from `Adw.Window` to ensure proper integration with the
+    GNOME desktop environment and its theming, which is crucial for a consistent
+    look and feel in both DEB and Snap packages. It combines functionality from
+    various mixins to manage its behavior.
     """
     def __init__(self, db, note_id=None, main_window=None):
         """
-        Initializes the StickyWindow.
+        Initializes the sticky note window.
+
         Args:
             db: The database controller instance.
-            note_id (int, optional): The ID of the note. Defaults to None.
-            main_window (MainWindow, optional): Reference to the main application window. Defaults to None.
+            note_id: The ID of the note to display.
+            main_window: A reference to the main application window.
         """
         super().__init__()
 
-        # 1. State and Data Initialization
+        # --- Core State Initialization ---
         self.db = db
         self.note_id = note_id
         self.main_window = main_window
-        self.config = getattr(main_window, 'config', {}) # Get initial config from main_window
+        self.config = getattr(main_window, 'config', {})
         self._loading = True
-        self._is_destroying = False # Flag to prevent operations during destruction
+        self._is_destroying = False
         self.scale = 1.0
         self.current_color = "#FFF59D"
         self.default_font_size = 12
         
-        # Load saved position and size from DB
+        # --- Load Geometry ---
         if self.note_id:
             note_data = self.db.get(self.note_id)
             if note_data:
@@ -47,111 +58,114 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
         else:
             self.saved_x, self.saved_y, self.saved_width, self.saved_height = 300, 300, 300, 380
 
-        # 2. Style Management
-        self.window_css_provider = Gtk.CssProvider()
-        self.get_style_context().add_provider(
-            self.window_css_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
-
-        # 3. Window Configuration
-        self.set_decorated(False)
-        self.add_css_class("sticky-window")
-        
-        # Apply saved position and size
+        # --- UI Construction ---
         self.set_default_size(self.saved_width, self.saved_height)
-        # Note: set_default_size sets the size, but for position we might need to wait for realization or use other methods depending on backend.
-        # Gtk4 doesn't have a simple move() for toplevels in the same way, especially on Wayland.
-        # We will try to set it, but it might be ignored by the compositor on Wayland.
-        # For X11 backend it might work if we use a Gdk.Surface method after mapping, but Gtk.Window doesn't expose move() directly in Gtk4.
-        # We'll rely on the window manager for placement mostly, but save what we can.
-        
-        # 4. UI Hierarchy Construction
         self.overlay = Gtk.Overlay()
-        self.set_child(self.overlay)
+        self.set_content(self.overlay)
+        
         self.main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.main_box.add_css_class("sticky-main-area")
         self.overlay.set_child(self.main_box)
 
+        # --- Style and Final UI Setup ---
+        self.apply_styles()
         self.setup_header()
-        self.setup_text_area()
+        self.setup_text_area() # This now also sets up the key controller
         self.setup_tags()
         self.setup_formatting_bar()
         self.setup_resize_handle()
 
-        # 5. Database Load and Signal Connectivity
+        # --- Data Loading and Signal Connection ---
         self.load_from_db()
         self._loading = False
         self._connect_main_signals()
 
-        # 6. Persistence Controllers
+        # --- Event and Persistence Controllers ---
         focus_ctrl = Gtk.EventControllerFocus()
         focus_ctrl.connect("leave", lambda *_: self.save())
         self.add_controller(focus_ctrl)
         
-        # Keyboard shortcuts controller
-        key_ctrl = Gtk.EventControllerKey()
-        key_ctrl.connect("key-pressed", self._on_key_pressed)
-        self.add_controller(key_ctrl)
-        
-        # Store timer ID to remove it later
         self.save_timer_id = GLib.timeout_add_seconds(2, self.save)
 
+    def apply_styles(self):
+        """
+        Applies custom CSS globally to ensure it overrides system themes.
+        
+        Compatibility Note:
+        Using `Gtk.StyleContext.add_provider_for_display` is the most reliable
+        way to apply custom styles that work consistently across different themes
+        and packaging formats (DEB/Snap). It ensures our styles have high enough
+        priority to override defaults provided by Adwaita.
+        """
+        css_provider = Gtk.CssProvider()
+        # This CSS makes the default Adw.Window background transparent,
+        # allowing our custom-colored `main_box` to be visible.
+        css = "window.background.sticky-window { background-color: transparent; }"
+        css_provider.load_from_data(css.encode('utf-8'))
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+        self.add_css_class("sticky-window")
+        self._update_ui_design()
+
     def _connect_main_signals(self):
-        """Connects core window and buffer signals."""
+        """Connects core signals for the window and its text buffer."""
         self.connect("close-request", self._on_close_requested)
         self.connect("map", self._on_map)
-        # Track size changes
         self.connect("notify::default-width", self._on_configure_event)
         self.connect("notify::default-height", self._on_configure_event)
-        
         self.buffer.connect("notify::cursor-position", self.on_cursor_moved)
         self.buffer.connect("changed", self._on_buffer_changed)
 
-    def is_x11(self):
-        """Determines if the application is running under the X11 backend."""
-        display = Gdk.Display.get_default()
-        return "X11" in display.__class__.__name__
-
     def _on_configure_event(self, *args):
-        """
-        Called when the window size changes.
-        Updates the internal state with the new dimensions.
-        """
+        """Updates the internal state with the new window dimensions for saving."""
         self.saved_width = self.get_default_size()[0]
         self.saved_height = self.get_default_size()[1]
-        # Position tracking in GTK4 is limited, especially on Wayland.
-        # We rely on the save() method to try and get the surface position if possible.
 
     def _update_ui_design(self, hex_color=None):
         """
-        Updates the visual design of the sticky note, including background color and CSS.
-        Args:
-            hex_color (str, optional): The new background color in hex format. Defaults to None.
+        Updates the background color of the note.
+        
+        This method dynamically creates a CSS class for the specified color
+        and applies it to the main content box of the note.
         """
         if hex_color:
             self.current_color = hex_color.strip()
-        scale = self.scale
-        css = f"""
-        window.sticky-window {{ background-color: {self.current_color}; border-radius: 12px; border: 1px solid rgba(0,0,0,0.1); }}
-        .header-btn-subtle, .format-btn-tiny {{ background-color: transparent; border-radius: 4px; color: rgba(0,0,0,0.7); }}
-        .header-btn-subtle:hover, .format-btn-tiny:hover {{ background-color: rgba(0,0,0,0.1); }}
-        .compact-header {{ min-height: {int(22 * scale)}px; }}
-        .sticky-text-edit, .sticky-text-edit text, textview, text {{ background-color: transparent; color: #000000; }}
-        .resize-handle {{ background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%); min-width: {int(16 * scale)}px; min-height: {int(16 * scale)}px; }}
-        """
-        clean_css = "\n".join([line.strip() for line in css.split('\n') if line.strip()])
-        self.window_css_provider.load_from_data(clean_css.encode('utf-8'))
+        
+        bg_color = self.current_color or "#FFF59D"
+        
+        # Remove any previously applied color classes to avoid conflicts.
+        for c in self.main_box.get_css_classes():
+            if c.startswith("note-color-"):
+                self.main_box.remove_css_class(c)
+        
+        color_class = f'note-color-{bg_color.replace("#", "")}'
+        self.main_box.add_css_class(color_class)
+        
+        style_provider = Gtk.CssProvider()
+        style_provider.load_from_data(f"""
+        .sticky-main-area.{color_class} {{
+            background-color: {bg_color};
+            border-radius: 12px;
+        }}
+        """.encode('utf-8'))
+        
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(),
+            style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
     def setup_formatting_bar(self):
-        """Configures the bottom toolbar with formatting buttons based on user preferences."""
-        if hasattr(self, 'format_bar'):
-            while child := self.format_bar.get_first_child():
-                self.format_bar.remove(child)
-        else:
-            self.format_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-            self.format_bar.add_css_class("compact-format-bar")
-            self.main_box.append(self.format_bar)
+        """Constructs or reconstructs the bottom text formatting toolbar."""
+        if hasattr(self, 'format_bar') and self.format_bar.get_parent():
+            self.main_box.remove(self.format_bar)
+
+        self.format_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        self.format_bar.add_css_class("compact-format-bar")
+        self.main_box.append(self.format_bar)
 
         scale = self.scale
         icon_size = int(18 * scale)
@@ -203,7 +217,7 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
             self.format_bar.append(self.btn_font_size)
 
     def on_cursor_moved(self, buffer, pspec):
-        """Updates the font size label in the UI based on the cursor's current text tags."""
+        """Updates the font size indicator in the UI based on the cursor's position."""
         if not hasattr(self, 'btn_font_size'):
             return
         cursor_iter = buffer.get_iter_at_mark(buffer.get_insert())
@@ -218,23 +232,16 @@ class StickyWindow(Gtk.Window, StickyFormatting, StickyActions, StickyUI, Sticky
                     pass
         self.btn_font_size.set_label(str(current_size))
 
-    def update_pin_ui(self):
-        """Placeholder for updating the 'Pinned' status icon in the UI."""
-        pass
-
-    def reload_config(self, new_config):
+    def reload_config(self, new_config: dict):
         """
-        Reloads configuration and updates UI elements.
+        Reloads the window's configuration and rebuilds UI components accordingly.
+
         Args:
-            new_config (dict): The new configuration dictionary.
+            new_config: The new configuration dictionary.
         """
         self.config = new_config
-        # Re-setup header to update the menu with new palette
         if hasattr(self, 'header_box'):
             self.main_box.remove(self.header_box)
         self.setup_header()
-        # Re-insert header at the top
         self.main_box.reorder_child_after(self.header_box, None)
-        
-        # Also update formatting bar if needed (e.g. if buttons visibility changed)
         self.setup_formatting_bar()

@@ -1,102 +1,122 @@
-import json
+"""
+Text Formatting Logic for StickyWindow.
+
+This module provides a mixin class that handles all text formatting operations
+within a sticky note's text buffer, such as applying bold/italic, changing
+colors, adjusting font sizes, and toggling bulleted lists.
+"""
 from gi.repository import Gtk, Pango
 
 
 class StickyFormatting:
     """
-    Mixin class for StickyWindow handling text buffer formatting,
-    including styles, colors, font sizes, and list toggles.
+    A mixin for `StickyWindow` that manages text formatting tags and actions.
     """
 
     def setup_tags(self):
         """
-        Initializes the GtkTextTagTable with standard styles and dynamic
-        color/size tags based on the application configuration.
+        Initializes the Gtk.TextTagTable with both standard style tags and
+        dynamic tags for colors and font sizes based on the application config.
         """
         self.tag_table = self.buffer.get_tag_table()
 
-        # Standard text styles
+        # --- Standard Text Style Tags ---
         self.buffer.create_tag("bold", weight=Pango.Weight.BOLD)
         self.buffer.create_tag("italic", style=Pango.Style.ITALIC)
         self.buffer.create_tag("underline", underline=Pango.Underline.SINGLE)
         self.buffer.create_tag("strikethrough", strikethrough=True)
 
-        # Dynamic color tags
+        # --- Dynamic Tags from Configuration ---
+        # Create a tag for each color in the palette.
         text_colors = self.config.get("text_colors", [])
         for color in text_colors:
             self.buffer.create_tag(f"text_color_{color}", foreground=color)
 
-        # Dynamic font size tags (using Pango.SCALE for correct rendering)
+        # Create a tag for each font size, converting points to Pango units.
         font_sizes = self.config.get("font_sizes", [])
         for size in font_sizes:
             self.buffer.create_tag(f"font_size_{size}", size=size * Pango.SCALE)
 
     def apply_format(self, tag_name: str):
         """
-        Toggles a basic format tag (bold, italic, etc.) on the selected text range.
-        Args:
-            tag_name (str): The name of the tag to apply/remove.
-        """
-        res = self.buffer.get_selection_bounds()
-        if res:
-            start, end = res
-            tag = self.tag_table.lookup(tag_name)
+        Toggles a standard format tag (e.g., "bold") on the selected text.
 
-            if start.has_tag(tag):
-                self.buffer.remove_tag(tag, start, end)
-            else:
-                self.buffer.apply_tag(tag, start, end)
+        Args:
+            tag_name: The name of the tag to apply or remove.
+        """
+        bounds = self.buffer.get_selection_bounds()
+        if not bounds:
+            return
+            
+        start, end = bounds
+        tag = self.tag_table.lookup(tag_name)
+        if start.has_tag(tag):
+            self.buffer.remove_tag(tag, start, end)
+        else:
+            self.buffer.apply_tag(tag, start, end)
 
         self.text_view.grab_focus()
-        self._on_buffer_changed(self.buffer) # Force update
+        self._on_buffer_changed(self.buffer)
 
     def apply_text_color(self, hex_color: str):
         """
-        Applies a foreground color tag to the selection.
-        Removes any existing color tags in the range before applying the new one.
-        Args:
-            hex_color (str): The hexadecimal color string to apply.
-        """
-        res = self.buffer.get_selection_bounds()
-        if res:
-            start, end = res
-            
-            text_colors = self.config.get("text_colors", [])
-            for color in text_colors:
-                self.buffer.remove_tag_by_name(f"text_color_{color}", start, end)
+        Applies a specific foreground color to the selected text.
+        
+        It first removes any other color tags from the selection to ensure only
+        one color is applied at a time.
 
-            self.buffer.apply_tag_by_name(f"text_color_{hex_color}", start, end)
+        Args:
+            hex_color: The color to apply, in hexadecimal format (e.g., "#RRGGBB").
+        """
+        bounds = self.buffer.get_selection_bounds()
+        if not bounds:
+            return
+            
+        start, end = bounds
+        # Remove all existing color tags from the selection first.
+        for color in self.config.get("text_colors", []):
+            self.buffer.remove_tag_by_name(f"text_color_{color}", start, end)
+        
+        # Apply the new color tag.
+        self.buffer.apply_tag_by_name(f"text_color_{hex_color}", start, end)
 
         self.text_view.grab_focus()
-        self._on_buffer_changed(self.buffer) # Force update
+        self._on_buffer_changed(self.buffer)
 
     def apply_font_size(self, size: int):
         """
-        Applies a font size tag to the selection and updates the UI button label.
-        Removes existing font size tags in the range before applying the new one.
+        Applies a specific font size to the selected text.
+
+        It removes any other font size tags from the selection before applying
+        the new one.
+
         Args:
-            size (int): The font size to apply.
+            size: The font size to apply.
         """
-        res = self.buffer.get_selection_bounds()
-        if res:
-            start, end = res
-
-            font_sizes = self.config.get("font_sizes", [])
-            for s in font_sizes:
-                self.buffer.remove_tag_by_name(f"font_size_{s}", start, end)
-
-            self.buffer.apply_tag_by_name(f"font_size_{size}", start, end)
+        bounds = self.buffer.get_selection_bounds()
+        if not bounds:
+            return
+            
+        start, end = bounds
+        # Remove all existing font size tags from the selection.
+        for s in self.config.get("font_sizes", []):
+            self.buffer.remove_tag_by_name(f"font_size_{s}", start, end)
+        
+        # Apply the new size tag.
+        self.buffer.apply_tag_by_name(f"font_size_{size}", start, end)
 
         if hasattr(self, 'btn_font_size'):
             self.btn_font_size.set_label(str(size))
 
         self.text_view.grab_focus()
-        self._on_buffer_changed(self.buffer) # Force update
+        self._on_buffer_changed(self.buffer)
 
     def toggle_bullet_list(self):
         """
-        Toggles bullet points for the selected lines.
-        Prepends a bullet character if missing, or removes it if present.
+        Toggles bullet points for the currently selected lines.
+        
+        If a line starts with a bullet, it's removed. Otherwise, a bullet is added.
+        This operation is performed on all lines within the selection.
         """
         BULLET_CHAR = " • "
         res = self.buffer.get_selection_bounds()
@@ -126,4 +146,4 @@ class StickyFormatting:
         self.buffer.end_user_action()
 
         self.text_view.grab_focus()
-        self._on_buffer_changed(self.buffer) # Force update
+        self._on_buffer_changed(self.buffer)
