@@ -1,0 +1,226 @@
+# Spanish translations for PACKAGE package.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-31 23:09+0500\n"
+"PO-Revision-Date: 2026-01-31 23:09+0500\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# linsticky/application_manager.py:214
+#, python-brace-format
+msgid "© {year} {author}"
+msgstr "© {year} {author}"
+
+# linsticky/application_manager.py:223
+msgid "A simple and fast sticky notes app."
+msgstr "Una aplicación de notas adhesivas simple y rápida."
+
+# linsticky/tray.py:89
+msgid "Open Main Window"
+msgstr "Abrir ventana principal"
+
+# linsticky/tray.py:93
+msgid "Open All Notes"
+msgstr "Abrir todas las notas"
+
+# linsticky/tray.py:99
+msgid "About"
+msgstr "Acerca de"
+
+# linsticky/tray.py:103
+msgid "Quit"
+msgstr "Salir"
+
+# linsticky/sticky/sticky_ui.py:54
+msgid "Color"
+msgstr "Color"
+
+# linsticky/sticky/sticky_ui.py:82
+msgid "Print note"
+msgstr "Imprimir nota"
+
+# linsticky/views/trash_view.py:27
+# linsticky/views/settings_view.py:35
+msgid "<<- Back"
+msgstr "<<- Volver"
+
+# linsticky/views/trash_view.py:31
+msgid "Trash Bin"
+msgstr "Papelera"
+
+# linsticky/views/trash_view.py:51
+# linsticky/views/trash_view.py:143
+# linsticky/views/trash_view.py:148
+msgid "Empty Trash"
+msgstr "Vaciar papelera"
+
+# linsticky/views/trash_view.py:83
+msgid "Trash is empty"
+msgstr "La papelera está vacía"
+
+# linsticky/views/trash_view.py:114
+msgid "Restore Note"
+msgstr "Restaurar nota"
+
+# linsticky/views/trash_view.py:120
+msgid "Delete Permanently"
+msgstr "Eliminar permanentemente"
+
+# linsticky/views/trash_view.py:144
+msgid ""
+"Are you sure you want to permanently delete all items in the trash? This "
+"action cannot be undone."
+msgstr ""
+"¿Está seguro de que desea eliminar permanentemente todos los elementos de la "
+"papelera? Esta acción no se puede deshacer."
+
+# linsticky/views/trash_view.py:147
+msgid "Cancel"
+msgstr "Cancelar"
+
+# linsticky/views/main_view/note_card.py:84
+msgid "Pin Note"
+msgstr "Fijar nota"
+
+# linsticky/views/main_view/note_card.py:84
+msgid "Unpin Note"
+msgstr "Desfijar nota"
+
+# linsticky/views/main_view/main_view.py:23
+msgid "LinSticky"
+msgstr "LinSticky"
+
+# linsticky/views/main_view/main_view.py:71
+msgid "Search..."
+msgstr "Buscar..."
+
+# linsticky/views/main_view/main_view.py:304
+msgid "Move to Trash"
+msgstr "Mover a la papelera"
+
+# linsticky/views/settings_view.py:39
+msgid "Settings"
+msgstr "Configuración"
+
+# linsticky/views/settings_view.py:56
+msgid "Language"
+msgstr "Idioma"
+
+# linsticky/views/settings_view.py:56
+msgid "Requires app restart to take effect"
+msgstr "Requiere reiniciar la aplicación para aplicarse"
+
+# linsticky/views/settings_view.py:82
+msgid "Display Backend"
+msgstr "Backend de visualización"
+
+# linsticky/views/settings_view.py:82
+msgid "Wayland (Default) or X11 (For sticker positioning)"
+msgstr "Wayland (predeterminado) o X11 (para la posición de las notas)"
+
+# linsticky/views/settings_view.py:89
+msgid "Interface Scale"
+msgstr "Escala de la interfaz"
+
+# linsticky/views/settings_view.py:89
+msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
+msgstr "Aumentar el tamaño de los elementos de la interfaz y las fuentes (p. ej., 1.25 = 125%)"
+
+# linsticky/views/settings_view.py:100
+msgid "Database Path"
+msgstr "Ruta de la base de datos"
+
+# linsticky/views/settings_view.py:111
+msgid "Color Palette"
+msgstr "Paleta de colores"
+
+# linsticky/views/settings_view.py:111
+msgid "Customize sticker colors"
+msgstr "Personalizar colores de las notas"
+
+# linsticky/views/settings_view.py:132
+msgid "Reset Palette"
+msgstr "Restablecer paleta"
+
+# linsticky/views/settings_view.py:133
+msgid "Reset"
+msgstr "Restablecer"
+
+# linsticky/views/settings_view.py:141
+msgid "Formatting Buttons"
+msgstr "Botones de formato"
+
+# linsticky/views/settings_view.py:141
+msgid "Choose which buttons to show on stickers"
+msgstr "Elija qué botones mostrar en las notas"
+
+# linsticky/views/settings_view.py:144
+msgid "Bold (B)"
+msgstr "Negrita (B)"
+
+# linsticky/views/settings_view.py:144
+msgid "Italic (I)"
+msgstr "Cursiva (I)"
+
+# linsticky/views/settings_view.py:145
+msgid "Underline (U)"
+msgstr "Subrayado (U)"
+
+# linsticky/views/settings_view.py:145
+msgid "Strikethrough (S)"
+msgstr "Tachado (S)"
+
+# linsticky/views/settings_view.py:146
+msgid "Bullet List"
+msgstr "Lista con viñetas"
+
+# linsticky/views/settings_view.py:147
+msgid "Text Color"
+msgstr "Color del texto"
+
+# linsticky/views/settings_view.py:147
+msgid "Font Size"
+msgstr "Tamaño de fuente"
+
+# linsticky/views/settings_view.py:161
+msgid "Save Settings"
+msgstr "Guardar configuración"
+
+# linsticky/views/settings_view.py:164
+msgid "Some changes may require a restart to apply."
+msgstr "Algunos cambios pueden requerir un reinicio para aplicarse."
+
+# linsticky/views/settings_view.py:192
+msgid "Select Color"
+msgstr "Seleccionar color"
+
+# linsticky/views/settings_view.py:256
+msgid "Select Database File"
+msgstr "Seleccionar archivo de base de datos"
+
+# linsticky/views/settings_view.py:257
+msgid "Database files"
+msgstr "Archivos de base de datos"
+
+# linsticky/views/settings_view.py:321
+msgid "Restart Required"
+msgstr "Reinicio requerido"
+
+# linsticky/views/settings_view.py:322
+msgid "Some changes require an application restart to take full effect."
+msgstr "Algunos cambios requieren reiniciar la aplicación para surtir efecto completo."
+
+# linsticky/views/settings_view.py:324
+msgid "OK"
+msgstr "OK"

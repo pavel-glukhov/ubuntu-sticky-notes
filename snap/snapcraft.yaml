@@ -1,0 +1,47 @@
+name: linsticky
+base: core22 # Используем базу Ubuntu 22.04 (стабильная для GTK4)
+version: '2.0.0-beta3'
+summary: Modern sticky notes application built with Python, GTK4, and Libadwaita.
+description: |
+  A simple and modern sticky notes application for Linux.
+  Features include rich text support, pinning notes, custom colors, and a tray icon.
+
+grade: devel # 'stable'
+confinement: strict
+
+extensions: [gnome]
+
+parts:
+  app-source:
+    plugin: dump
+    source: .
+    # Исключаем файлы разработки и виртуальное окружение, чтобы не раздувать пакет
+    stage:
+      - -build_deb_package.sh
+      - -.venv
+      - -.idea
+      - -.git
+      - -__pycache__
+    organize:
+      linsticky: lib/linsticky
+
+  dependencies:
+    plugin: nil
+    stage-packages:
+      - python3-gi
+      - python3-cairo
+      - gir1.2-gtk-4.0
+      - gir1.2-adw-1
+      - gir1.2-ayatanaappindicator3-0.1
+      - libcairo2
+
+apps:
+  linsticky:
+    command: usr/bin/python3 $SNAP/lib/linsticky/main.py
+    extensions: [gnome]
+    common-id: linsticky
+    plugs:
+      - home
+      - unity7
+      - gsettings
+      - network

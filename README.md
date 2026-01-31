@@ -1,6 +1,6 @@
-# Ubuntu Sticky Notes
+# LinSticky
 
-Modern sticky notes application built with Python, GTK4, and Libadwaita for Ubuntu.
+Modern sticky notes application built with Python, GTK4, and Libadwaita for Linux.
 
 Version: 2.0.0-beta3
 _______________
@@ -14,11 +14,11 @@ _______________
 > Existing stickers **will not be migrated automatically**, so please **save or export any important text in advance** before installing this version.  
 >  
 > If you are looking for a **stable version**, please use the original **PyQt6 version (v1.4.1)** available in the  
-> 👉 [legacy branch](https://github.com/pavel-glukhov/ubuntu-sticky-notes/tree/legacy).
+> 👉 [legacy branch](https://github.com/pavel-glukhov/linsticky/tree/legacy).
 
 
 
-![example of app](https://github.com/pavel-glukhov/ubuntu-sticky-notes/blob/gtk/pic/example_2.0.0.png)
+![example of app](https://github.com/pavel-glukhov/linsticky/blob/gtk/pic/example_2.0.0.png)
 
 ## ✨ Features
 
@@ -46,7 +46,7 @@ A refreshed interface that follows current GNOME / Adwaita design guidelines for
 
 ## Download:
 You can download the beta deb package here:
-https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/tag/v2.0.0-beta3
+https://github.com/pavel-glukhov/linsticky/releases/tag/v2.0.0-beta3
 ______________________________________________________________________________________
 
 ## Installation:
@@ -55,14 +55,14 @@ To install version 2.0.0-beta3, run the following commands in your terminal:
 
 ```bash
 # 1. Download the package
-curl -O -L https://github.com/pavel-glukhov/ubuntu-sticky-notes/releases/download/v2.0.0-beta3/ubuntu.sticky.notes_2.0.0-beta3_all.deb
+curl -O -L https://github.com/pavel-glukhov/linsticky/releases/download/v2.0.0-beta3/linsticky_2.0.0-beta3_all.deb
 
 # 2. Update and install system dependencies (GTK4 & Libadwaita)
 sudo apt update
 sudo apt install -y python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gtk-3.0 gir1.2-ayatanaappindicator3-0.1 gettext
 
 # 3. Install the package
-sudo dpkg -i ubuntu.sticky.notes_2.0.0-beta3_all.deb
+sudo dpkg -i linsticky_2.0.0-beta3_all.deb
 sudo apt-get install -f
 ```
 ## Troubleshooting Localization
@@ -90,8 +90,8 @@ open Settings within the app, switch the backend to X11, and restart the applica
 If you want to build the package from source:
 ```bash
 # Clone the repository
-git clone [https://github.com/pavel-glukhov/ubuntu-sticky-notes.git](https://github.com/pavel-glukhov/ubuntu-sticky-notes.git)
-cd ubuntu-sticky-notes
+git clone [https://github.com/pavel-glukhov/linsticky.git](https://github.com/pavel-glukhov/linsticky.git)
+cd linsticky
 
 # Make the script executable
 chmod +x build_deb_package.sh
@@ -100,7 +100,7 @@ chmod +x build_deb_package.sh
 ./build_deb_package.sh
 
 # Install the generated package
-sudo apt install ./ubuntu-sticky-notes_<VERSION>_all.deb
+sudo apt install ./linsticky_<VERSION>_all.deb
 ```
 
 ## Credits

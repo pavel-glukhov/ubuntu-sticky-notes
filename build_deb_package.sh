@@ -1,21 +1,21 @@
 #!/bin/bash
 # =========================================================
-# Script to create a Debian package for Ubuntu Sticky Notes
+# Script to create a Debian package for LinSticky
 # =========================================================
 
 set -e
 
-PACKAGE_DIR="ubuntu_sticky_notes_deb"
+PACKAGE_DIR="linsticky_deb"
 DEBIAN_DIR="$PACKAGE_DIR/DEBIAN"
 USR_BIN_DIR="$PACKAGE_DIR/usr/local/bin"
 USR_SHARE_DIR="$PACKAGE_DIR/usr/share"
 APPLICATIONS_DIR="$USR_SHARE_DIR/applications"
-APP_DIR="$USR_SHARE_DIR/ubuntu-sticky-notes"
+APP_DIR="$USR_SHARE_DIR/linsticky"
 METAINFO_DIR="$USR_SHARE_DIR/metainfo"
-APP_INFO_JSON="ubuntu-sticky-notes/app_info.json"
-APP_EXEC="ubuntu-sticky-notes"
-APP_MAIN_SCRIPT="/usr/share/ubuntu-sticky-notes/main.py"
-ICON_PATH="/usr/share/ubuntu-sticky-notes/resources/icons/app.png"
+APP_INFO_JSON="linsticky/app_info.json"
+APP_EXEC="linsticky"
+APP_MAIN_SCRIPT="/usr/share/linsticky/main.py"
+ICON_PATH="/usr/share/linsticky/resources/icons/app.png"
 
 # ----------------------
 # Create necessary directories if they don't exist
@@ -25,9 +25,9 @@ for dir in "$DEBIAN_DIR" "$USR_BIN_DIR" "$APPLICATIONS_DIR" "$APP_DIR" "$METAINF
 done
 
 # ----------------------
-# Copy all application files to /usr/share/ubuntu-sticky-notes
+# Copy all application files to /usr/share/linsticky
 # ----------------------
-cp -r ubuntu-sticky-notes/* "$APP_DIR/"
+cp -r linsticky/* "$APP_DIR/"
 
 # ----------------------
 # Read application info from JSON

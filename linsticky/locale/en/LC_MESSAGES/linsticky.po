@@ -1,0 +1,227 @@
+# English translations for PACKAGE package.
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-31 23:09+0500\n"
+"PO-Revision-Date: 2026-01-31 23:09+0500\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+# linsticky/application_manager.py:214
+#, python-brace-format
+msgid "© {year} {author}"
+msgstr "© {year} {author}"
+
+# linsticky/application_manager.py:223
+msgid "A simple and fast sticky notes app."
+msgstr "A simple and fast sticky notes app."
+
+# linsticky/tray.py:89
+msgid "Open Main Window"
+msgstr "Open Main Window"
+
+# linsticky/tray.py:93
+msgid "Open All Notes"
+msgstr "Open All Notes"
+
+# linsticky/tray.py:99
+msgid "About"
+msgstr "About"
+
+# linsticky/tray.py:103
+msgid "Quit"
+msgstr "Quit"
+
+# linsticky/sticky/sticky_ui.py:54
+msgid "Color"
+msgstr "Color"
+
+# linsticky/sticky/sticky_ui.py:82
+msgid "Print note"
+msgstr "Print note"
+
+# linsticky/views/trash_view.py:27
+# linsticky/views/settings_view.py:35
+msgid "<<- Back"
+msgstr "<<- Back"
+
+# linsticky/views/trash_view.py:31
+msgid "Trash Bin"
+msgstr "Trash Bin"
+
+# linsticky/views/trash_view.py:51
+# linsticky/views/trash_view.py:143
+# linsticky/views/trash_view.py:148
+msgid "Empty Trash"
+msgstr "Empty Trash"
+
+# linsticky/views/trash_view.py:83
+msgid "Trash is empty"
+msgstr "Trash is empty"
+
+# linsticky/views/trash_view.py:114
+msgid "Restore Note"
+msgstr "Restore Note"
+
+# linsticky/views/trash_view.py:120
+msgid "Delete Permanently"
+msgstr "Delete Permanently"
+
+# linsticky/views/trash_view.py:144
+msgid ""
+"Are you sure you want to permanently delete all items in the trash? This "
+"action cannot be undone."
+msgstr ""
+"Are you sure you want to permanently delete all items in the trash? This "
+"action cannot be undone."
+
+# linsticky/views/trash_view.py:147
+msgid "Cancel"
+msgstr "Cancel"
+
+# linsticky/views/main_view/note_card.py:84
+msgid "Pin Note"
+msgstr "Pin Note"
+
+# linsticky/views/main_view/note_card.py:84
+msgid "Unpin Note"
+msgstr "Unpin Note"
+
+# linsticky/views/main_view/main_view.py:23
+msgid "LinSticky"
+msgstr "LinSticky"
+
+# linsticky/views/main_view/main_view.py:71
+msgid "Search..."
+msgstr "Search..."
+
+# linsticky/views/main_view/main_view.py:304
+msgid "Move to Trash"
+msgstr "Move to Trash"
+
+# linsticky/views/settings_view.py:39
+msgid "Settings"
+msgstr "Settings"
+
+# linsticky/views/settings_view.py:56
+msgid "Language"
+msgstr "Language"
+
+# linsticky/views/settings_view.py:56
+msgid "Requires app restart to take effect"
+msgstr "Requires app restart to take effect"
+
+# linsticky/views/settings_view.py:82
+msgid "Display Backend"
+msgstr "Display Backend"
+
+# linsticky/views/settings_view.py:82
+msgid "Wayland (Default) or X11 (For sticker positioning)"
+msgstr "Wayland (Default) or X11 (For sticker positioning)"
+
+# linsticky/views/settings_view.py:89
+msgid "Interface Scale"
+msgstr "Interface Scale"
+
+# linsticky/views/settings_view.py:89
+msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
+msgstr "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
+
+# linsticky/views/settings_view.py:100
+msgid "Database Path"
+msgstr "Database Path"
+
+# linsticky/views/settings_view.py:111
+msgid "Color Palette"
+msgstr "Color Palette"
+
+# linsticky/views/settings_view.py:111
+msgid "Customize sticker colors"
+msgstr "Customize sticker colors"
+
+# linsticky/views/settings_view.py:132
+msgid "Reset Palette"
+msgstr "Reset Palette"
+
+# linsticky/views/settings_view.py:133
+msgid "Reset"
+msgstr "Reset"
+
+# linsticky/views/settings_view.py:141
+msgid "Formatting Buttons"
+msgstr "Formatting Buttons"
+
+# linsticky/views/settings_view.py:141
+msgid "Choose which buttons to show on stickers"
+msgstr "Choose which buttons to show on stickers"
+
+# linsticky/views/settings_view.py:144
+msgid "Bold (B)"
+msgstr "Bold (B)"
+
+# linsticky/views/settings_view.py:144
+msgid "Italic (I)"
+msgstr "Italic (I)"
+
+# linsticky/views/settings_view.py:145
+msgid "Underline (U)"
+msgstr "Underline (U)"
+
+# linsticky/views/settings_view.py:145
+msgid "Strikethrough (S)"
+msgstr "Strikethrough (S)"
+
+# linsticky/views/settings_view.py:146
+msgid "Bullet List"
+msgstr "Bullet List"
+
+# linsticky/views/settings_view.py:147
+msgid "Text Color"
+msgstr "Text Color"
+
+# linsticky/views/settings_view.py:147
+msgid "Font Size"
+msgstr "Font Size"
+
+# linsticky/views/settings_view.py:161
+msgid "Save Settings"
+msgstr "Save Settings"
+
+# linsticky/views/settings_view.py:164
+msgid "Some changes may require a restart to apply."
+msgstr "Some changes may require a restart to apply."
+
+# linsticky/views/settings_view.py:192
+msgid "Select Color"
+msgstr "Select Color"
+
+# linsticky/views/settings_view.py:256
+msgid "Select Database File"
+msgstr "Select Database File"
+
+# linsticky/views/settings_view.py:257
+msgid "Database files"
+msgstr "Database files"
+
+# linsticky/views/settings_view.py:321
+msgid "Restart Required"
+msgstr "Restart Required"
+
+# linsticky/views/settings_view.py:322
+msgid "Some changes require an application restart to take full effect."
+msgstr "Some changes require an application restart to take full effect."
+
+# linsticky/views/settings_view.py:324
+msgid "OK"
+msgstr "OK"
