@@ -90,7 +90,7 @@ open Settings within the app, switch the backend to X11, and restart the applica
 If you want to build the package from source:
 ```bash
 # Clone the repository
-git clone [https://github.com/pavel-glukhov/linsticky.git](https://github.com/pavel-glukhov/linsticky.git)
+git clone https://github.com/pavel-glukhov/linsticky.git
 cd linsticky
 
 # Make the script executable
