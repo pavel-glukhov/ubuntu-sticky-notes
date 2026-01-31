@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=LinSticky
+Comment=Modern sticky notes application for Linux
+Exec=linsticky
+Icon=io.linsticky.app
+Terminal=false
+Type=Application
+Categories=Utility;Productivity;GNOME;GTK;
+StartupNotify=true
+StartupWMClass=io.linsticky.app

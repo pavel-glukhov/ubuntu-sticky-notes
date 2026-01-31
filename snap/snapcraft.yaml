@@ -1,45 +1,81 @@
 name: linsticky
-base: core22 # Используем базу Ubuntu 22.04 (стабильная для GTK4)
-version: '2.0.0-beta3'
-summary: Modern sticky notes application built with Python, GTK4, and Libadwaita.
+base: core24
+version: '2.0.1'
+summary: Modern sticky notes application.
 description: |
-  A simple and modern sticky notes application for Linux.
-  Features include rich text support, pinning notes, custom colors, and a tray icon.
+  ✨ Features
 
-grade: devel # 'stable'
+  📝 **Smart Sticky Notes**
+  Experience a clutter-free environment. Create and manage your thoughts with a sleek, minimalist interface optimized for maximum focus and efficiency.
+
+  📌 **Pinned Notes**
+  Never lose track of what matters. Keep your high-priority tasks and essential information anchored at the top for instant access.
+
+  🎨 **Custom Color Palette**
+  Bring color to your productivity. Organize by category or mood using a curated selection of vibrant colors that integrate beautifully with your desktop.
+
+  ✍️ **Rich Text Preservation**
+  Your formatting, stayed put. Bold, italics, and lists are saved exactly as you typed them, ensuring your data remains structured and readable.
+
+  🖥️ **Modern GNOME Experience**
+  Built with Python, GTK4, and Libadwaita. Enjoy an application that feels like a natural part of your Linux desktop, featuring smooth animations and adaptive design.
+
+  🌍 **Global by Design**
+  Fully localized for a global audience. Seamlessly switch between English, Русский, Қазақша, and 6 other major languages.
+
+grade: devel
 confinement: strict
+icon: linsticky/resources/icons/app.png
 
-extensions: [gnome]
+keywords:
+  - notes
+  - sticky
+  - post-it
+  - todo
+  - gtk4
+  - adwaita
+  - productivity
+  - utilities
 
 parts:
-  app-source:
+  linsticky:
     plugin: dump
+    desktop: snap/gui/io.linsticky.app.desktop
     source: .
-    # Исключаем файлы разработки и виртуальное окружение, чтобы не раздувать пакет
     stage:
       - -build_deb_package.sh
+      - -compile_translations.sh
+      - -create_translation.sh
+      - -generate_translations.sh
+      - -update_translation.sh
+      - -linsticky_2.0.0-beta3_all.deb
+      - -linsticky_deb
+      - -parts
+      - -prime
+      - -stage
       - -.venv
       - -.idea
       - -.git
       - -__pycache__
-    organize:
-      linsticky: lib/linsticky
-
-  dependencies:
-    plugin: nil
     stage-packages:
+      - python3
       - python3-gi
       - python3-cairo
-      - gir1.2-gtk-4.0
       - gir1.2-adw-1
       - gir1.2-ayatanaappindicator3-0.1
-      - libcairo2
+
+    override-prime: |
+      craftctl default
+      mkdir -p $CRAFT_PRIME/usr/bin
+      if [ ! -f "$CRAFT_PRIME/usr/bin/python3" ]; then
+        ln -s /usr/bin/python3 $CRAFT_PRIME/usr/bin/python3
+      fi
 
 apps:
   linsticky:
-    command: usr/bin/python3 $SNAP/lib/linsticky/main.py
-    extensions: [gnome]
-    common-id: linsticky
+    command: usr/bin/python3 $SNAP/linsticky/main.py
+    extensions:
+      - gnome
     plugs:
       - home
       - unity7
