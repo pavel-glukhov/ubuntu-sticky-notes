@@ -1,25 +1,22 @@
+"""
+Application-wide Constants and Path Definitions.
+
+This module centralizes the definition of paths, metadata, and other constants
+used throughout the application.
+"""
 import json
 import os
 
-# ========================
-# Path Constants (System)
-# ========================
-# Path to the directory where config.py is located (project root)
+# --- Path Constants ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Resource Paths
 RESOURCES_DIR = os.path.join(BASE_DIR, "../resources")
 ICONS_DIR = os.path.join(RESOURCES_DIR, "icons")
 STYLE_CSS = os.path.join(RESOURCES_DIR, "style.css")
 LOCALE_DIR = os.path.join(BASE_DIR, "../locale")
-
-# Metadata
 APP_INFO_FILE = os.path.join(BASE_DIR, "../app_info.json")
 
-# Intervals and Settings
-AUTOSAVE_INTERVAL_MS = 2000
-
-# Language Display Names Mapping
+# --- Language and Locale Mappings ---
+# Maps language codes to their native display names for UI elements.
 LANGUAGE_NAMES = {
     "en": "English",
     "ru": "Русский",
@@ -32,6 +29,7 @@ LANGUAGE_NAMES = {
     "kk": "Қазақша"
 }
 
+# Maps language codes to their full locale identifiers for system-level setup.
 LOCALE_MAP = {
     "en": "en_US.UTF-8",
     "ru": "ru_RU.UTF-8",
@@ -46,57 +44,68 @@ LOCALE_MAP = {
 
 def get_supported_languages() -> dict:
     """
-    Scans the locale directory for available languages and returns a dictionary
-    mapping display names to language codes.
-    Always includes 'en' (English) as the default.
+    Scans the locale directory to find available translations.
+
     Returns:
-        dict: A dictionary where keys are display names and values are language codes.
+        A dictionary mapping language display names to their corresponding codes.
+        Always includes English as a default.
     """
     languages = {"English": "en"}
-    
-    if os.path.exists(LOCALE_DIR):
-        for entry in os.listdir(LOCALE_DIR):
-            full_path = os.path.join(LOCALE_DIR, entry)
-            if os.path.isdir(full_path):
-                if os.path.exists(os.path.join(full_path, "LC_MESSAGES")):
-                    lang_code = entry
-                    display_name = LANGUAGE_NAMES.get(lang_code, lang_code)
-                    languages[display_name] = lang_code
-    
+    if not os.path.exists(LOCALE_DIR):
+        return languages
+        
+    for entry in os.listdir(LOCALE_DIR):
+        if os.path.isdir(os.path.join(LOCALE_DIR, entry, "LC_MESSAGES")):
+            lang_code = entry
+            display_name = LANGUAGE_NAMES.get(lang_code, lang_code)
+            languages[display_name] = lang_code
     return languages
 
+def load_app_info() -> dict:
+    """
+    Loads application metadata (version, author, etc.) from app_info.json.
 
-def load_app_info(path: str = APP_INFO_FILE) -> dict:
-    """
-    Loads application metadata from a JSON file.
-    Args:
-        path (str, optional): Path to the app_info.json file. Defaults to APP_INFO_FILE.
     Returns:
-        dict: The application metadata.
+        A dictionary containing the application's metadata.
     """
-    with open(path, "r", encoding="utf-8") as f:
+    with open(APP_INFO_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
 def get_app_paths(user_config: dict) -> dict:
     """
-    Returns a dictionary of all essential application paths.
-    DB_PATH is dynamically retrieved from the user configuration.
+    Resolves and returns a dictionary of essential application paths.
+
+    This function ensures that the directory for the database exists, creating it
+    if necessary. It includes a fallback to a temporary directory if the primary
+    location is not writable, which is crucial for robustness in restricted
+    environments like Snap.
+
     Args:
-        user_config (dict): Pre-loaded user configuration.
+        user_config: The pre-loaded user configuration dictionary.
+
     Returns:
-        dict: A dictionary containing paths and backend info.
+        A dictionary containing key application paths.
     """
     app_info = load_app_info()
-    
     db_path = user_config.get("db_path")
 
     if not db_path:
-        # Import ConfigManager only if needed, to avoid circular dependency
-        from config.config_manager import ConfigManager
+        # Avoid circular import by importing ConfigManager only when needed.
+        from .config_manager import ConfigManager
         defaults = ConfigManager.get_defaults()
         db_path = defaults.get("db_path")
 
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    # Ensure the database directory exists.
+    try:
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    except OSError as e:
+        print(f"CRITICAL: Failed to create database directory at {os.path.dirname(db_path)}: {e}")
+        # Fallback to a temporary directory to prevent crashing.
+        import tempfile
+        fallback_dir = os.path.join(tempfile.gettempdir(), "linsticky_fallback")
+        os.makedirs(fallback_dir, exist_ok=True)
+        db_path = os.path.join(fallback_dir, "notes.db")
+        print(f"SYSTEM: Using temporary fallback database at: {db_path}")
 
     return {
         "APP_INFO": app_info,

@@ -1,3 +1,22 @@
+"""
+Standalone GTK3 Tray Icon Process.
+
+This script runs in a separate process to provide a system tray icon for the
+main GTK4 application. It communicates with the main process via standard
+input/output (IPC).
+
+Compatibility Note:
+This separation is a critical workaround for ensuring compatibility. The main
+application uses GTK4 and Libadwaita for a modern UI, while the system tray
+icon functionality often relies on libraries like AyatanaAppIndicator or
+AppIndicator3, which are fundamentally tied to GTK3. Running them in the same
+process would lead to library version conflicts and instability.
+
+This approach is robust for both DEB and Snap packages.
+- DEB: System dependencies for GTK3 and GTK4 can coexist.
+- Snap: The `gnome` extension provides both GTK3 and GTK4 runtimes,
+  allowing this multi-process architecture to work seamlessly.
+"""
 import sys
 import os
 import signal
@@ -6,6 +25,7 @@ import gettext
 import builtins
 
 # --- Translation Setup ---
+# The language code is passed from the main process via an environment variable.
 APP_ID_GETTEXT = 'linsticky'
 current_dir = os.path.dirname(os.path.abspath(__file__))
 LOCALE_DIR = os.path.join(current_dir, 'locale')
@@ -14,12 +34,13 @@ try:
     lang_code = os.environ.get('STICKY_NOTES_LANG', 'en')
     translation = gettext.translation(APP_ID_GETTEXT, localedir=LOCALE_DIR, languages=[lang_code], fallback=True)
     builtins._ = translation.gettext
-except FileNotFoundError:
-    builtins._ = lambda s: s
 except Exception as e:
     print(f"Tray translation setup failed: {e}", file=sys.stderr)
     builtins._ = lambda s: s
 
+# --- Indicator Library Import ---
+# Try to import AyatanaAppIndicator first, as it's the modern standard.
+# Fallback to the older AppIndicator3 for compatibility with older systems.
 try:
     gi.require_version('Gtk', '3.0')
     gi.require_version('AyatanaAppIndicator3', '0.1')
@@ -29,63 +50,53 @@ except (ValueError, ImportError):
         gi.require_version('AppIndicator3', '0.1')
         from gi.repository import AppIndicator3 as AppIndicator
     except (ValueError, ImportError) as e:
-        print(f"CRITICAL: AyatanaAppIndicator/AppIndicator not found: {e}", file=sys.stderr)
+        print(f"CRITICAL: No suitable AppIndicator library found: {e}", file=sys.stderr)
         sys.exit(1)
 
 from gi.repository import Gtk as Gtk3
 
+APP_ID = "linsticky-tray"
 
-APP_ID = "stickynotes-tray"
-
-
-def get_custom_icon():
+def get_custom_icon_path() -> tuple[str | None, str | None]:
     """
-    Determines the path and name of the custom application icon.
-    Searches in common locations relative to the script.
+    Locates the application's icon directory.
+    
     Returns:
-        tuple: (icon_dir, icon_name) if found, otherwise (None, None).
+        A tuple containing the icon directory path and the icon name, or (None, None).
     """
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    possible_paths = [
-        os.path.join(base_dir, "resources", "icons"),
-        os.path.join(base_dir, "..", "resources", "icons")
-    ]
-    for icon_dir in possible_paths:
-        icon_dir = os.path.abspath(icon_dir)
-        full_path = os.path.join(icon_dir, "app.png")
-        if os.path.exists(full_path):
-            return icon_dir, "app"
+    icon_dir = os.path.join(base_dir, "resources", "icons")
+    if os.path.exists(os.path.join(icon_dir, "app.png")):
+        return os.path.abspath(icon_dir), "app"
     return None, None
 
-
 def main():
-    """Main function to set up and run the tray application."""
+    """Sets up and runs the GTK3 tray icon application."""
+    # Ensure Ctrl+C in the terminal can kill this process.
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    def on_show_main(_):
-        """Callback for 'Open Main Window' menu item."""
-        sys.stdout.write("show_main\n")
+    def send_command(command: str):
+        """Sends a command to the main application process via stdout."""
+        sys.stdout.write(f"{command}\n")
         sys.stdout.flush()
+
+    # --- Menu Item Callbacks ---
+    def on_show_main(_):
+        send_command("show_main")
 
     def on_open_all(_):
-        """Callback for 'Open All Notes' menu item."""
-        sys.stdout.write("open_all\n")
-        sys.stdout.flush()
+        send_command("open_all")
 
     def on_about(_):
-        """Callback for 'About' menu item."""
-        sys.stdout.write("about\n")
-        sys.stdout.flush()
+        send_command("about")
 
     def on_quit(_):
-        """Callback for 'Quit' menu item. Exits the tray application."""
-        sys.stdout.write("quit\n")
-        sys.stdout.flush()
+        send_command("quit")
         Gtk3.main_quit()
 
-    # --- Menu (Gtk.Menu) ---
+    # --- Menu Construction ---
     menu = Gtk3.Menu()
-
+    
     item_main = Gtk3.MenuItem(label=_("Open Main Window"))
     item_main.connect("activate", on_show_main)
     menu.append(item_main)
@@ -106,29 +117,20 @@ def main():
 
     menu.show_all()
 
-    # --- Icon Setup ---
-    icon_dir, icon_name = get_custom_icon()
-
-    if icon_dir and icon_name:
-        indicator = AppIndicator.Indicator.new(
-            APP_ID,
-            icon_name,
-            AppIndicator.IndicatorCategory.APPLICATION_STATUS
-        )
+    # --- Indicator Setup ---
+    icon_dir, icon_name = get_custom_icon_path()
+    indicator = AppIndicator.Indicator.new(
+        APP_ID,
+        icon_name or "accessories-text-editor",  # Fallback icon
+        AppIndicator.IndicatorCategory.APPLICATION_STATUS
+    )
+    if icon_dir:
         indicator.set_icon_theme_path(icon_dir)
-    else:
-        # Fallback to a generic icon if custom icon is not found
-        indicator = AppIndicator.Indicator.new(
-            APP_ID,
-            "accessories-text-editor",
-            AppIndicator.IndicatorCategory.APPLICATION_STATUS
-        )
 
     indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE)
     indicator.set_menu(menu)
 
     Gtk3.main()
-
 
 if __name__ == "__main__":
     main()
