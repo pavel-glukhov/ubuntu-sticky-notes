@@ -18,142 +18,142 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 # linsticky/application_manager.py:214
-#: /home/gluk/PycharmProjects/linsticky/linsticky/application_manager.py:224
+# /linsticky/application_manager.py:224
 #, python-brace-format
 msgid "© {year} {author}"
 msgstr "© {year} {author}"
 
 # linsticky/application_manager.py:223
-#: /home/gluk/PycharmProjects/linsticky/linsticky/application_manager.py:233
+# /linsticky/application_manager.py:233
 msgid "A simple and fast sticky notes app."
 msgstr "Um aplicativo simples e rápido de notas adesivas."
 
 # linsticky/tray.py:89
-#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:100
+# /linsticky/tray.py:100
 msgid "Open Main Window"
 msgstr "Abrir janela principal"
 
 # linsticky/tray.py:93
-#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:104
+# /linsticky/tray.py:104
 msgid "Open All Notes"
 msgstr "Abrir todas as notas"
 
 # linsticky/tray.py:99
-#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:110
+# /linsticky/tray.py:110
 msgid "About"
 msgstr "Sobre"
 
 # linsticky/tray.py:103
-#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:114
+# /linsticky/tray.py:114
 msgid "Quit"
 msgstr "Sair"
 
 # linsticky/sticky/sticky_ui.py:54
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/sticky_ui.py:61
+# /linsticky/sticky/sticky_ui.py:61
 msgid "Color"
 msgstr "Cor"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/sticky_ui.py:85
+# /linsticky/sticky/sticky_ui.py:85
 msgid "Customize"
 msgstr "Personalizar"
 
 # linsticky/sticky/sticky_ui.py:82
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/sticky_ui.py:93
+# /linsticky/sticky/sticky_ui.py:93
 msgid "Print note"
 msgstr "Imprimir nota"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:17
+# /linsticky/sticky/customization_dialog.py:17
 msgid "Customization"
 msgstr "Personalização"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:38
+# /linsticky/sticky/customization_dialog.py:38
 msgid "Toolbar Options"
 msgstr "Opções da barra de ferramentas"
 
 # linsticky/views/settings_view.py:144
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:46
+# /linsticky/sticky/customization_dialog.py:46
 #, fuzzy
 msgid "Bold"
 msgstr "Negrito (B)"
 
 # linsticky/views/settings_view.py:144
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:47
+# /linsticky/sticky/customization_dialog.py:47
 #, fuzzy
 msgid "Italic"
 msgstr "Itálico (I)"
 
 # linsticky/views/settings_view.py:145
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:48
+# /linsticky/sticky/customization_dialog.py:48
 #, fuzzy
 msgid "Underline"
 msgstr "Sublinhado (U)"
 
 # linsticky/views/settings_view.py:145
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:49
+# /linsticky/sticky/customization_dialog.py:49
 #, fuzzy
 msgid "Strikethrough"
 msgstr "Tachado (S)"
 
 # linsticky/views/settings_view.py:146
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:50
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:146
+# /linsticky/sticky/customization_dialog.py:50
+# /linsticky/views/settings_view.py:146
 msgid "Bullet List"
 msgstr "Lista com marcadores"
 
 # linsticky/views/settings_view.py:147
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:51
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:147
+# /linsticky/sticky/customization_dialog.py:51
+# /linsticky/views/settings_view.py:147
 msgid "Text Color"
 msgstr "Cor do texto"
 
 # linsticky/views/settings_view.py:147
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:52
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:147
+# /linsticky/sticky/customization_dialog.py:52
+# /linsticky/views/settings_view.py:147
 msgid "Font Size"
 msgstr "Tamanho da fonte"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:77
+# /linsticky/sticky/customization_dialog.py:77
 msgid "Save & Apply"
 msgstr "Salvar e aplicar"
 
 # linsticky/views/trash_view.py:27
 # linsticky/views/settings_view.py:35
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:27
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:35
+# /linsticky/views/trash_view.py:27
+# /linsticky/views/settings_view.py:35
 msgid "<<- Back"
 msgstr "<<- Voltar"
 
 # linsticky/views/trash_view.py:31
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:31
+# /linsticky/views/trash_view.py:31
 msgid "Trash Bin"
 msgstr "Lixeira"
 
 # linsticky/views/trash_view.py:51
 # linsticky/views/trash_view.py:143
 # linsticky/views/trash_view.py:148
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:51
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:143
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:148
+# /linsticky/views/trash_view.py:51
+# /linsticky/views/trash_view.py:143
+# /linsticky/views/trash_view.py:148
 msgid "Empty Trash"
 msgstr "Esvaziar lixeira"
 
 # linsticky/views/trash_view.py:83
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:83
+# /linsticky/views/trash_view.py:83
 msgid "Trash is empty"
 msgstr "A lixeira está vazia"
 
 # linsticky/views/trash_view.py:114
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:114
+# /linsticky/views/trash_view.py:114
 msgid "Restore Note"
 msgstr "Restaurar nota"
 
 # linsticky/views/trash_view.py:120
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:120
+# /linsticky/views/trash_view.py:120
 msgid "Delete Permanently"
 msgstr "Excluir permanentemente"
 
 # linsticky/views/trash_view.py:144
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:144
+# /linsticky/views/trash_view.py:144
 msgid ""
 "Are you sure you want to permanently delete all items in the trash? This "
 "action cannot be undone."
@@ -162,163 +162,163 @@ msgstr ""
 "Esta ação não pode ser desfeita."
 
 # linsticky/views/trash_view.py:147
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:147
+# /linsticky/views/trash_view.py:147
 msgid "Cancel"
 msgstr "Cancelar"
 
 # linsticky/views/main_view/note_card.py:84
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/note_card.py:84
+# /linsticky/views/main_view/note_card.py:84
 msgid "Pin Note"
 msgstr "Fixar nota"
 
 # linsticky/views/main_view/note_card.py:84
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/note_card.py:84
+# /linsticky/views/main_view/note_card.py:84
 msgid "Unpin Note"
 msgstr "Desafixar nota"
 
 # linsticky/views/main_view/main_view.py:23
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/main_view.py:23
+# /linsticky/views/main_view/main_view.py:23
 msgid "LinSticky"
 msgstr "LinSticky"
 
 # linsticky/views/main_view/main_view.py:71
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/main_view.py:71
+# /linsticky/views/main_view/main_view.py:71
 msgid "Search..."
 msgstr "Pesquisar..."
 
 # linsticky/views/main_view/main_view.py:304
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/main_view.py:310
+# /linsticky/views/main_view/main_view.py:310
 msgid "Move to Trash"
 msgstr "Mover para a lixeira"
 
 # linsticky/views/settings_view.py:39
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:39
+# /linsticky/views/settings_view.py:39
 msgid "Settings"
 msgstr "Configurações"
 
 # linsticky/views/settings_view.py:56
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:56
+# /linsticky/views/settings_view.py:56
 msgid "Language"
 msgstr "Idioma"
 
 # linsticky/views/settings_view.py:56
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:56
+# /linsticky/views/settings_view.py:56
 msgid "Requires app restart to take effect"
 msgstr "Requer reinicialização do aplicativo para entrar em vigor"
 
 # linsticky/views/settings_view.py:82
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:82
+# /linsticky/views/settings_view.py:82
 msgid "Display Backend"
 msgstr "Backend de exibição"
 
 # linsticky/views/settings_view.py:82
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:82
+# /linsticky/views/settings_view.py:82
 msgid "Wayland (Default) or X11 (For sticker positioning)"
 msgstr "Wayland (padrão) ou X11 (para posicionamento dos adesivos)"
 
 # linsticky/views/settings_view.py:89
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:89
+# /linsticky/views/settings_view.py:89
 msgid "Interface Scale"
 msgstr "Escala da interface"
 
 # linsticky/views/settings_view.py:89
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:89
+# /linsticky/views/settings_view.py:89
 msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
 msgstr "Aumentar elementos da interface e fontes (ex.: 1.25 = 125%)"
 
 # linsticky/views/settings_view.py:100
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:100
+# /linsticky/views/settings_view.py:100
 msgid "Database Path"
 msgstr "Caminho do banco de dados"
 
 # linsticky/views/settings_view.py:111
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:111
+# /linsticky/views/settings_view.py:111
 msgid "Color Palette"
 msgstr "Paleta de cores"
 
 # linsticky/views/settings_view.py:111
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:111
+# /linsticky/views/settings_view.py:111
 msgid "Customize sticker colors"
 msgstr "Personalizar cores dos adesivos"
 
 # linsticky/views/settings_view.py:132
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:132
+# /linsticky/views/settings_view.py:132
 msgid "Reset Palette"
 msgstr "Redefinir paleta"
 
 # linsticky/views/settings_view.py:133
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:133
+# /linsticky/views/settings_view.py:133
 msgid "Reset"
 msgstr "Redefinir"
 
 # linsticky/views/settings_view.py:141
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:141
+# /linsticky/views/settings_view.py:141
 msgid "Formatting Buttons"
 msgstr "Botões de formatação"
 
 # linsticky/views/settings_view.py:141
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:141
+# /linsticky/views/settings_view.py:141
 msgid "Choose which buttons to show on stickers"
 msgstr "Escolha quais botões mostrar nos adesivos"
 
 # linsticky/views/settings_view.py:144
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:144
+# /linsticky/views/settings_view.py:144
 msgid "Bold (B)"
 msgstr "Negrito (B)"
 
 # linsticky/views/settings_view.py:144
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:144
+# /linsticky/views/settings_view.py:144
 msgid "Italic (I)"
 msgstr "Itálico (I)"
 
 # linsticky/views/settings_view.py:145
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:145
+# /linsticky/views/settings_view.py:145
 msgid "Underline (U)"
 msgstr "Sublinhado (U)"
 
 # linsticky/views/settings_view.py:145
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:145
+# /linsticky/views/settings_view.py:145
 msgid "Strikethrough (S)"
 msgstr "Tachado (S)"
 
 # linsticky/views/settings_view.py:161
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:161
+# /linsticky/views/settings_view.py:161
 msgid "Save Settings"
 msgstr "Salvar configurações"
 
 # linsticky/views/settings_view.py:164
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:164
+# /linsticky/views/settings_view.py:164
 msgid "Some changes may require a restart to apply."
 msgstr "Algumas alterações podem exigir reinicialização para serem aplicadas."
 
 # linsticky/views/settings_view.py:192
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:192
+# /linsticky/views/settings_view.py:192
 msgid "Select Color"
 msgstr "Selecionar cor"
 
 # linsticky/views/settings_view.py:256
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:256
+# /linsticky/views/settings_view.py:256
 msgid "Select Database File"
 msgstr "Selecionar arquivo de banco de dados"
 
 # linsticky/views/settings_view.py:257
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:257
+# /linsticky/views/settings_view.py:257
 msgid "Database files"
 msgstr "Arquivos de banco de dados"
 
 # linsticky/views/settings_view.py:321
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:321
+# /linsticky/views/settings_view.py:321
 msgid "Restart Required"
 msgstr "Reinicialização necessária"
 
 # linsticky/views/settings_view.py:322
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:322
+# /linsticky/views/settings_view.py:322
 msgid "Some changes require an application restart to take full effect."
 msgstr ""
 "Algumas alterações exigem a reinicialização do aplicativo para terem efeito "
 "completo."
 
 # linsticky/views/settings_view.py:324
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:324
+# /linsticky/views/settings_view.py:324
 msgid "OK"
 msgstr "OK"

@@ -16,244 +16,244 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/application_manager.py:224
+# /linsticky/application_manager.py:224
 #, python-brace-format
 msgid "© {year} {author}"
 msgstr "© {year} {author}"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/application_manager.py:233
+# /linsticky/application_manager.py:233
 msgid "A simple and fast sticky notes app."
 msgstr "一个简单快速的便签应用。"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:100
+# /linsticky/tray.py:100
 msgid "Open Main Window"
 msgstr "打开主窗口"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:104
+# /linsticky/tray.py:104
 msgid "Open All Notes"
 msgstr "打开所有便签"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:110
+# /linsticky/tray.py:110
 msgid "About"
 msgstr "关于"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:114
+# /linsticky/tray.py:114
 msgid "Quit"
 msgstr "退出"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/sticky_ui.py:61
+# /linsticky/sticky/sticky_ui.py:61
 msgid "Color"
 msgstr "颜色"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/sticky_ui.py:85
+# /linsticky/sticky/sticky_ui.py:85
 msgid "Customize"
 msgstr "自定义"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/sticky_ui.py:93
+# /linsticky/sticky/sticky_ui.py:93
 msgid "Print note"
 msgstr "打印便签"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:17
+# /linsticky/sticky/customization_dialog.py:17
 msgid "Customization"
 msgstr "自定义"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:38
+# /linsticky/sticky/customization_dialog.py:38
 msgid "Toolbar Options"
 msgstr "工具栏选项"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:46
+# /linsticky/sticky/customization_dialog.py:46
 msgid "Bold"
 msgstr "加粗"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:47
+# /linsticky/sticky/customization_dialog.py:47
 msgid "Italic"
 msgstr "斜体"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:48
+# /linsticky/sticky/customization_dialog.py:48
 msgid "Underline"
 msgstr "下划线"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:49
+# /linsticky/sticky/customization_dialog.py:49
 msgid "Strikethrough"
 msgstr "删除线"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:50
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:146
+# /linsticky/sticky/customization_dialog.py:50
+# /linsticky/views/settings_view.py:146
 msgid "Bullet List"
 msgstr "项目符号列表"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:51
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:147
+# /linsticky/sticky/customization_dialog.py:51
+# /linsticky/views/settings_view.py:147
 msgid "Text Color"
 msgstr "文字颜色"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:52
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:147
+# /linsticky/sticky/customization_dialog.py:52
+# /linsticky/views/settings_view.py:147
 msgid "Font Size"
 msgstr "字体大小"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:77
+# /linsticky/sticky/customization_dialog.py:77
 msgid "Save & Apply"
 msgstr "保存并应用"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:27
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:35
+# /linsticky/views/trash_view.py:27
+# /linsticky/views/settings_view.py:35
 msgid "<<- Back"
 msgstr "<<- 返回"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:31
+# /linsticky/views/trash_view.py:31
 msgid "Trash Bin"
 msgstr "回收站"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:51
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:143
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:148
+# /linsticky/views/trash_view.py:51
+# /linsticky/views/trash_view.py:143
+# /linsticky/views/trash_view.py:148
 msgid "Empty Trash"
 msgstr "清空回收站"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:83
+# /linsticky/views/trash_view.py:83
 msgid "Trash is empty"
 msgstr "回收站为空"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:114
+# /linsticky/views/trash_view.py:114
 msgid "Restore Note"
 msgstr "恢复便签"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:120
+# /linsticky/views/trash_view.py:120
 msgid "Delete Permanently"
 msgstr "永久删除"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:144
+# /linsticky/views/trash_view.py:144
 msgid ""
 "Are you sure you want to permanently delete all items in the trash? This "
 "action cannot be undone."
 msgstr ""
 "您确定要永久删除回收站中的所有项目吗？此操作无法撤销。"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:147
+# /linsticky/views/trash_view.py:147
 msgid "Cancel"
 msgstr "取消"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/note_card.py:84
+# /linsticky/views/main_view/note_card.py:84
 msgid "Pin Note"
 msgstr "固定便签"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/note_card.py:84
+# /linsticky/views/main_view/note_card.py:84
 msgid "Unpin Note"
 msgstr "取消固定便签"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/main_view.py:23
+# /linsticky/views/main_view/main_view.py:23
 msgid "LinSticky"
 msgstr "LinSticky"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/main_view.py:71
+# /linsticky/views/main_view/main_view.py:71
 msgid "Search..."
 msgstr "搜索…"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/main_view.py:310
+# /linsticky/views/main_view/main_view.py:310
 msgid "Move to Trash"
 msgstr "移至回收站"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:39
+# /linsticky/views/settings_view.py:39
 msgid "Settings"
 msgstr "设置"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:56
+# /linsticky/views/settings_view.py:56
 msgid "Language"
 msgstr "语言"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:56
+# /linsticky/views/settings_view.py:56
 msgid "Requires app restart to take effect"
 msgstr "需要重启应用才能生效"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:82
+# /linsticky/views/settings_view.py:82
 msgid "Display Backend"
 msgstr "显示后端"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:82
+# /linsticky/views/settings_view.py:82
 msgid "Wayland (Default) or X11 (For sticker positioning)"
 msgstr "Wayland（默认）或 X11（用于便签定位）"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:89
+# /linsticky/views/settings_view.py:89
 msgid "Interface Scale"
 msgstr "界面缩放"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:89
+# /linsticky/views/settings_view.py:89
 msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
 msgstr "放大界面元素和字体（例如 1.25 = 125%）"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:100
+# /linsticky/views/settings_view.py:100
 msgid "Database Path"
 msgstr "数据库路径"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:111
+# /linsticky/views/settings_view.py:111
 msgid "Color Palette"
 msgstr "颜色调色板"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:111
+# /linsticky/views/settings_view.py:111
 msgid "Customize sticker colors"
 msgstr "自定义便签颜色"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:132
+# /linsticky/views/settings_view.py:132
 msgid "Reset Palette"
 msgstr "重置调色板"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:133
+# /linsticky/views/settings_view.py:133
 msgid "Reset"
 msgstr "重置"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:141
+# /linsticky/views/settings_view.py:141
 msgid "Formatting Buttons"
 msgstr "格式化按钮"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:141
+# /linsticky/views/settings_view.py:141
 msgid "Choose which buttons to show on stickers"
 msgstr "选择在便签上显示哪些按钮"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:144
+# /linsticky/views/settings_view.py:144
 msgid "Bold (B)"
 msgstr "加粗 (B)"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:144
+# /linsticky/views/settings_view.py:144
 msgid "Italic (I)"
 msgstr "斜体 (I)"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:145
+# /linsticky/views/settings_view.py:145
 msgid "Underline (U)"
 msgstr "下划线 (U)"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:145
+# /linsticky/views/settings_view.py:145
 msgid "Strikethrough (S)"
 msgstr "删除线 (S)"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:161
+# /linsticky/views/settings_view.py:161
 msgid "Save Settings"
 msgstr "保存设置"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:164
+# /linsticky/views/settings_view.py:164
 msgid "Some changes may require a restart to apply."
 msgstr "某些更改可能需要重启才能生效。"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:192
+# /linsticky/views/settings_view.py:192
 msgid "Select Color"
 msgstr "选择颜色"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:256
+# /linsticky/views/settings_view.py:256
 msgid "Select Database File"
 msgstr "选择数据库文件"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:257
+# /linsticky/views/settings_view.py:257
 msgid "Database files"
 msgstr "数据库文件"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:321
+# /linsticky/views/settings_view.py:321
 msgid "Restart Required"
 msgstr "需要重启"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:322
+# /linsticky/views/settings_view.py:322
 msgid "Some changes require an application restart to take full effect."
 msgstr "某些更改需要重启应用程序才能完全生效。"
 
-#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:324
+# /linsticky/views/settings_view.py:324
 msgid "OK"
 msgstr "确定"
