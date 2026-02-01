@@ -123,6 +123,7 @@ class MainWindow(Adw.ApplicationWindow):
         Args:
             btn (Gtk.Button): The clicked button.
         """
+        self.settings_view.refresh_ui_from_config()
         self.stack.set_visible_child_name("settings")
 
     def on_show_trash(self, btn: Gtk.Button):

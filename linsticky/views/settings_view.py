@@ -165,6 +165,24 @@ class SettingsView(Gtk.Box):
         footer.append(self.lbl_hint)
         self.append(footer)
 
+    def refresh_ui_from_config(self):
+        """
+        Reloads configuration from disk and updates UI elements to reflect external changes.
+        This ensures synchronization if settings were changed via the sticker customization dialog.
+        """
+        self.config = ConfigManager.load()
+        
+        # Update formatting switches
+        current_fmt = self.config.get("formatting", {})
+        for key, switch in self.switches.items():
+            switch.set_active(current_fmt.get(key, True))
+            
+        # Update palette buttons if needed (simplified check)
+        current_palette = self.config.get("palette", [])
+        for i, btn in enumerate(self.palette_buttons):
+            if i < len(current_palette):
+                self._set_button_color(btn, current_palette[i])
+
     def _set_button_color(self, btn, color):
         """
         Applies the given color to a Gtk.Button's background using CSS.

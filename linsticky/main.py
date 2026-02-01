@@ -6,6 +6,7 @@ This script handles the complete application lifecycle, including:
 - Initializing internationalization (i18n) with gettext.
 - Selecting the GDK backend (Wayland or X11).
 - Defining and running the main Adw.Application class.
+- Ensuring single instance execution via a lock file.
 """
 import sys
 import os
@@ -13,6 +14,7 @@ import gettext
 import locale
 import builtins
 import signal
+import fcntl
 import gi
 
 # Ensure the project's root directory is in the Python path
@@ -92,6 +94,7 @@ class StickyApp(Adw.Application):
         self.config = ConfigManager.load()
         self.db = NotesDB(path=self.config.get("db_path"))
         self.app_manager = ApplicationManager(self, self.db, self.config)
+        self.lock_file = None
         
         # Register signal handlers for graceful shutdown (e.g., from systemctl or kill).
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, self._on_signal_quit, None)
@@ -125,16 +128,53 @@ class StickyApp(Adw.Application):
         self.app_manager.quit_app_manager()
         if self.db:
             self.db.close()
+        
+        # Release the lock file
+        if self.lock_file:
+            try:
+                fcntl.flock(self.lock_file, fcntl.LOCK_UN)
+                self.lock_file.close()
+                os.remove(self.lock_file.name)
+            except Exception as e:
+                print(f"WARNING: Failed to release lock file: {e}")
+                
         self.quit()
 
+def acquire_lock():
+    """
+    Attempts to acquire a file lock to ensure only one instance is running.
+    Returns the file object if successful, or None if locked.
+    """
+    # Determine lock file path based on environment
+    if "SNAP_USER_DATA" in os.environ:
+        lock_path = os.path.join(os.environ["SNAP_USER_DATA"], ".linsticky.lock")
+    else:
+        lock_path = os.path.expanduser("~/.config/linsticky/.linsticky.lock")
+        os.makedirs(os.path.dirname(lock_path), exist_ok=True)
+
+    try:
+        lock_file = open(lock_path, 'w')
+        # Try to acquire an exclusive lock without blocking
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return lock_file
+    except IOError:
+        return None
 
 if __name__ == "__main__":
     # Set application metadata for the desktop environment.
-    # GLib.set_prgname is crucial for window managers (especially on X11) to correctly
-    # associate the .desktop file with the running process (using StartupWMClass).
     APP_INFO = load_app_info()
     GLib.set_prgname(APP_INFO.get('service_name'))
     GLib.set_application_name(APP_INFO.get('app_name'))
     
+    # Try to acquire lock before starting the app
+    lock = acquire_lock()
+    if not lock:
+        print("INFO: Another instance is already running. Exiting.")
+        # In a perfect world, we would send a signal to the existing instance here,
+        # but Adw.Application handles activation via DBus automatically if configured correctly.
+        # Since we are here, it means either DBus is not working or we want to enforce strict single instance.
+        sys.exit(0)
+    
     app = StickyApp()
+    app.lock_file = lock # Store lock to release it on exit
     sys.exit(app.run(sys.argv))

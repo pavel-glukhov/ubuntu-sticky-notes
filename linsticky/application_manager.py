@@ -66,7 +66,9 @@ class ApplicationManager:
         if os.path.exists(icons_dir):
             icon_theme = Gtk.IconTheme.get_for_display(display)
             icon_theme.add_search_path(icons_dir)
-            Gtk.Window.set_default_icon_name("app")
+            # Use the full application ID for the icon name to avoid conflicts
+            # and ensure consistency with the .desktop file.
+            Gtk.Window.set_default_icon_name("io.linsticky.app")
 
     def _apply_ui_scale(self, scale: float):
         """
@@ -149,6 +151,11 @@ class ApplicationManager:
         if "GDK_BACKEND" in env:
             del env["GDK_BACKEND"]
 
+        # FIX FOR SNAP: Force default theme to avoid "colors.css" warning in logs.
+        # This prevents GTK3 from trying to load user themes that don't exist in the snap sandbox.
+        if "SNAP" in os.environ:
+            env["GTK_THEME"] = "Adwaita"
+
         self.tray_process = subprocess.Popen(
             [sys.executable, script_path],
             stdout=subprocess.PIPE,
@@ -221,19 +228,23 @@ class ApplicationManager:
         author = app_info.get("author", "Unknown")
         email = app_info.get("email")
         developers = [f"{author} <{email}>"] if email else [author]
-        copyright_text = _("© {year} {author}").format(year=datetime.now().year, author=author)
+        # Create a custom content area for the license info
+        content_area = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        
+        # Add license info as a label instead of using license_type
+        license_label = Gtk.Label(label="License: MIT")
+        license_label.add_css_class("caption")
+        content_area.append(license_label)
 
         dialog = Adw.AboutWindow(
             transient_for=self.main_window if self.main_window.get_visible() else None,
             application_name=app_info.get("app_name"),
             version=app_info.get("version"),
             developer_name=author,
-            license_type=Gtk.License.MIT_X11,
             website=app_info.get("website"),
-            comments=_("A simple and fast sticky notes app."),
+            comments=f'{app_info.get("description")}\n\n{app_info.get("license")}',
             application_icon="app",
             developers=developers,
-            copyright=copyright_text
         )
         dialog.present()
 

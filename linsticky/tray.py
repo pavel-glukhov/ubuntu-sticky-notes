@@ -33,7 +33,7 @@ def _load_local_app_info():
         info_path = os.path.join(base_dir, "app_info.json")
         with open(info_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-            return data.get('service_name', 'linsticky')
+            return data.get('service_name', None)
     except Exception:
         return 'linsticky'
 
