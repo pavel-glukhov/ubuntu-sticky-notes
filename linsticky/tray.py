@@ -20,13 +20,25 @@ This approach is robust for both DEB and Snap packages.
 import sys
 import os
 import signal
+import json
 import gi
 import gettext
 import builtins
 
+# --- Helper to load app info without external dependencies ---
+def _load_local_app_info():
+    """Loads service name from app_info.json relative to this script."""
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        info_path = os.path.join(base_dir, "app_info.json")
+        with open(info_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get('service_name', 'linsticky')
+    except Exception:
+        return 'linsticky'
+
 # --- Translation Setup ---
-# The language code is passed from the main process via an environment variable.
-APP_ID_GETTEXT = 'linsticky'
+APP_ID_GETTEXT = _load_local_app_info()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 LOCALE_DIR = os.path.join(current_dir, 'locale')
 
@@ -55,7 +67,7 @@ except (ValueError, ImportError):
 
 from gi.repository import Gtk as Gtk3
 
-APP_ID = "linsticky-tray"
+APP_ID = f"{APP_ID_GETTEXT}-tray"
 
 def get_custom_icon_path() -> tuple[str | None, str | None]:
     """
