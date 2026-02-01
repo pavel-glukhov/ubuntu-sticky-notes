@@ -4,7 +4,6 @@ version: '2.0.1'
 summary: Modern sticky notes application.
 description: |
   ✨ Features
-
   📝 **Smart Sticky Notes**
   Experience a clutter-free environment. Create and manage your thoughts with a sleek, minimalist interface optimized for maximum focus and efficiency.
 
@@ -12,35 +11,24 @@ description: |
   Never lose track of what matters. Keep your high-priority tasks and essential information anchored at the top for instant access.
 
   🎨 **Custom Color Palette**
-  Bring color to your productivity. Organize by category or mood using a curated selection of vibrant colors that integrate beautifully with your desktop.
+  Bring color to your productivity. Personalize your workflow.
 
   ✍️ **Rich Text Preservation**
-  Your formatting, stayed put. Bold, italics, and lists are saved exactly as you typed them, ensuring your data remains structured and readable.
+  Bold, italics, and lists are saved exactly as you typed them.
 
   🖥️ **Modern GNOME Experience**
-  Built with Python, GTK4, and Libadwaita. Enjoy an application that feels like a natural part of your Linux desktop, featuring smooth animations and adaptive design.
+  Built with Python, GTK4, and Libadwaita.
 
   🌍 **Global by Design**
-  Fully localized for a global audience. Seamlessly switch between English, Русский, Қазақша, and 6 other major languages.
+  Fully localized: English, Русский, Қазақша, and more.
 
 grade: devel
 confinement: strict
 icon: linsticky/resources/icons/app.png
 
-keywords:
-  - notes
-  - sticky
-  - post-it
-  - todo
-  - gtk4
-  - adwaita
-  - productivity
-  - utilities
-
 parts:
   linsticky:
     plugin: dump
-    desktop: snap/gui/io.linsticky.app.desktop
     source: .
     stage:
       - -build_deb_package.sh
@@ -71,11 +59,20 @@ parts:
         ln -s /usr/bin/python3 $CRAFT_PRIME/usr/bin/python3
       fi
 
+slots:
+  dbus-linsticky:
+    interface: dbus
+    bus: session
+    name: io.linsticky.app
+
 apps:
   linsticky:
     command: usr/bin/python3 $SNAP/linsticky/main.py
+    desktop: snap/gui/io.linsticky.app.desktop
     extensions:
       - gnome
+    slots:
+      - dbus-linsticky
     plugs:
       - home
       - unity7
