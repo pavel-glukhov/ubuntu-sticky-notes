@@ -5,7 +5,7 @@
     "author": "Pavel Glukhov",
     "email": "glukhov.p@gmail.com",
     "website": "https://github.com/pavel-glukhov/linsticky",
-    "description": "LinSticky is a lightweight desktop application for creating and managing sticky notes. Notes can be customized with colors, moved to trash and restored.",
+    "description": "Lightweight and elegant sticky notes for your Linux desktop.",
     "license": "MIT License",
     "architecture": "all",
     "dependencies": [
