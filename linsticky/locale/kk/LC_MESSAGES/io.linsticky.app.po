@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-31 23:09+0500\n"
+"POT-Creation-Date: 2026-02-01 14:11+0500\n"
 "PO-Revision-Date: 2026-01-31 23:09+0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,209 +17,306 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 # linsticky/application_manager.py:214
+#: /home/gluk/PycharmProjects/linsticky/linsticky/application_manager.py:224
 #, python-brace-format
 msgid "© {year} {author}"
 msgstr "© {year} {author}"
 
 # linsticky/application_manager.py:223
+#: /home/gluk/PycharmProjects/linsticky/linsticky/application_manager.py:233
 msgid "A simple and fast sticky notes app."
 msgstr "Қарапайым әрі жылдам стикер жазбалар қолданбасы."
 
 # linsticky/tray.py:89
+#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:100
 msgid "Open Main Window"
 msgstr "Негізгі терезені ашу"
 
 # linsticky/tray.py:93
+#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:104
 msgid "Open All Notes"
 msgstr "Барлық жазбаларды ашу"
 
 # linsticky/tray.py:99
+#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:110
 msgid "About"
 msgstr "Қосымша туралы"
 
 # linsticky/tray.py:103
+#: /home/gluk/PycharmProjects/linsticky/linsticky/tray.py:114
 msgid "Quit"
 msgstr "Шығу"
 
 # linsticky/sticky/sticky_ui.py:54
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/sticky_ui.py:61
 msgid "Color"
 msgstr "Түс"
 
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/sticky_ui.py:85
+msgid "Customize"
+msgstr "Баптау"
+
 # linsticky/sticky/sticky_ui.py:82
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/sticky_ui.py:93
 msgid "Print note"
 msgstr "Жазбаны басып шығару"
 
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:17
+msgid "Customization"
+msgstr "Баптау"
+
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:38
+msgid "Toolbar Options"
+msgstr "Құралдар тақтасының параметрлері"
+
+# linsticky/views/settings_view.py:144
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:46
+#, fuzzy
+msgid "Bold"
+msgstr "Қалың (B)"
+
+# linsticky/views/settings_view.py:144
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:47
+#, fuzzy
+msgid "Italic"
+msgstr "Көлбеу (I)"
+
+# linsticky/views/settings_view.py:145
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:48
+#, fuzzy
+msgid "Underline"
+msgstr "Асты сызылған (U)"
+
+# linsticky/views/settings_view.py:145
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:49
+#, fuzzy
+msgid "Strikethrough"
+msgstr "Сызылған (S)"
+
+# linsticky/views/settings_view.py:146
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:50
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:146
+msgid "Bullet List"
+msgstr "Маркерленген тізім"
+
+# linsticky/views/settings_view.py:147
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:51
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:147
+msgid "Text Color"
+msgstr "Мәтін түсі"
+
+# linsticky/views/settings_view.py:147
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:52
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:147
+msgid "Font Size"
+msgstr "Қаріп өлшемі"
+
+#: /home/gluk/PycharmProjects/linsticky/linsticky/sticky/customization_dialog.py:77
+msgid "Save & Apply"
+msgstr "Сақтау және қолдану"
+
 # linsticky/views/trash_view.py:27
 # linsticky/views/settings_view.py:35
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:27
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:35
 msgid "<<- Back"
 msgstr "<<- Артқа"
 
 # linsticky/views/trash_view.py:31
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:31
 msgid "Trash Bin"
 msgstr "Себет"
 
 # linsticky/views/trash_view.py:51
 # linsticky/views/trash_view.py:143
 # linsticky/views/trash_view.py:148
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:51
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:143
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:148
 msgid "Empty Trash"
 msgstr "Себетті тазалау"
 
 # linsticky/views/trash_view.py:83
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:83
 msgid "Trash is empty"
 msgstr "Себет бос"
 
 # linsticky/views/trash_view.py:114
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:114
 msgid "Restore Note"
 msgstr "Жазбаны қалпына келтіру"
 
 # linsticky/views/trash_view.py:120
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:120
 msgid "Delete Permanently"
 msgstr "Мүлдем жою"
 
 # linsticky/views/trash_view.py:144
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:144
 msgid ""
 "Are you sure you want to permanently delete all items in the trash? This "
 "action cannot be undone."
 msgstr ""
-"Себеттегі барлық элементтерді біржола жойғыңыз келетініне сенімдісіз бе? "
-"Бұл әрекетті қайтару мүмкін емес."
+"Себеттегі барлық элементтерді біржола жойғыңыз келетініне сенімдісіз бе? Бұл "
+"әрекетті қайтару мүмкін емес."
 
 # linsticky/views/trash_view.py:147
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/trash_view.py:147
 msgid "Cancel"
 msgstr "Бас тарту"
 
 # linsticky/views/main_view/note_card.py:84
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/note_card.py:84
 msgid "Pin Note"
 msgstr "Жазбаны бекіту"
 
 # linsticky/views/main_view/note_card.py:84
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/note_card.py:84
 msgid "Unpin Note"
 msgstr "Жазбаны бекітуден шығару"
 
 # linsticky/views/main_view/main_view.py:23
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/main_view.py:23
 msgid "LinSticky"
 msgstr "LinSticky"
 
 # linsticky/views/main_view/main_view.py:71
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/main_view.py:71
 msgid "Search..."
 msgstr "Іздеу..."
 
 # linsticky/views/main_view/main_view.py:304
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/main_view/main_view.py:310
 msgid "Move to Trash"
 msgstr "Себетке жіберу"
 
 # linsticky/views/settings_view.py:39
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:39
 msgid "Settings"
 msgstr "Параметрлер"
 
 # linsticky/views/settings_view.py:56
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:56
 msgid "Language"
 msgstr "Тіл"
 
 # linsticky/views/settings_view.py:56
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:56
 msgid "Requires app restart to take effect"
 msgstr "Күшіне енуі үшін қолданбаны қайта іске қосу қажет"
 
 # linsticky/views/settings_view.py:82
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:82
 msgid "Display Backend"
 msgstr "Көрсету бэкенді"
 
 # linsticky/views/settings_view.py:82
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:82
 msgid "Wayland (Default) or X11 (For sticker positioning)"
 msgstr "Wayland (әдепкі) немесе X11 (жазбаларды орналастыру үшін)"
 
 # linsticky/views/settings_view.py:89
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:89
 msgid "Interface Scale"
 msgstr "Интерфейс масштабы"
 
 # linsticky/views/settings_view.py:89
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:89
 msgid "Upscale UI elements and fonts (e.g. 1.25 = 125%)"
 msgstr "Интерфейс элементтері мен қаріптерін үлкейту (мыс., 1.25 = 125%)"
 
 # linsticky/views/settings_view.py:100
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:100
 msgid "Database Path"
 msgstr "Дерекқор жолы"
 
 # linsticky/views/settings_view.py:111
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:111
 msgid "Color Palette"
 msgstr "Түстер палитрасы"
 
 # linsticky/views/settings_view.py:111
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:111
 msgid "Customize sticker colors"
 msgstr "Жазбалардың түстерін баптау"
 
 # linsticky/views/settings_view.py:132
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:132
 msgid "Reset Palette"
 msgstr "Палитраны қалпына келтіру"
 
 # linsticky/views/settings_view.py:133
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:133
 msgid "Reset"
 msgstr "Қалпына келтіру"
 
 # linsticky/views/settings_view.py:141
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:141
 msgid "Formatting Buttons"
 msgstr "Пішімдеу батырмалары"
 
 # linsticky/views/settings_view.py:141
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:141
 msgid "Choose which buttons to show on stickers"
 msgstr "Жазбаларда қай батырмаларды көрсету керегін таңдаңыз"
 
 # linsticky/views/settings_view.py:144
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:144
 msgid "Bold (B)"
 msgstr "Қалың (B)"
 
 # linsticky/views/settings_view.py:144
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:144
 msgid "Italic (I)"
 msgstr "Көлбеу (I)"
 
 # linsticky/views/settings_view.py:145
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:145
 msgid "Underline (U)"
 msgstr "Асты сызылған (U)"
 
 # linsticky/views/settings_view.py:145
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:145
 msgid "Strikethrough (S)"
 msgstr "Сызылған (S)"
 
-# linsticky/views/settings_view.py:146
-msgid "Bullet List"
-msgstr "Маркерленген тізім"
-
-# linsticky/views/settings_view.py:147
-msgid "Text Color"
-msgstr "Мәтін түсі"
-
-# linsticky/views/settings_view.py:147
-msgid "Font Size"
-msgstr "Қаріп өлшемі"
-
 # linsticky/views/settings_view.py:161
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:161
 msgid "Save Settings"
 msgstr "Параметрлерді сақтау"
 
 # linsticky/views/settings_view.py:164
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:164
 msgid "Some changes may require a restart to apply."
 msgstr "Кейбір өзгерістерді қолдану үшін қайта іске қосу қажет болуы мүмкін."
 
 # linsticky/views/settings_view.py:192
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:192
 msgid "Select Color"
 msgstr "Түсті таңдау"
 
 # linsticky/views/settings_view.py:256
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:256
 msgid "Select Database File"
 msgstr "Дерекқор файлын таңдау"
 
 # linsticky/views/settings_view.py:257
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:257
 msgid "Database files"
 msgstr "Дерекқор файлдары"
 
 # linsticky/views/settings_view.py:321
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:321
 msgid "Restart Required"
 msgstr "Қайта іске қосу қажет"
 
 # linsticky/views/settings_view.py:322
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:322
 msgid "Some changes require an application restart to take full effect."
-msgstr "Кейбір өзгерістер толық күшіне енуі үшін қолданбаны қайта іске қосу қажет."
+msgstr ""
+"Кейбір өзгерістер толық күшіне енуі үшін қолданбаны қайта іске қосу қажет."
 
 # linsticky/views/settings_view.py:324
+#: /home/gluk/PycharmProjects/linsticky/linsticky/views/settings_view.py:324
 msgid "OK"
 msgstr "OK"
