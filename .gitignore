@@ -48,3 +48,15 @@ coverage.xml
 # DB
 stickies.db
 /parts/
+/linsticky_deb/
+/prime/
+/stage/
+/temp_mount/
+/compile_translations.sh
+/create_translation.sh
+/file.txt
+/generate_translations.sh
+/linsticky_2.0.0-beta3_all.deb
+/linsticky_2.0.0-beta3_amd64.snap
+/release_2.0.1
+/update_translation.sh
