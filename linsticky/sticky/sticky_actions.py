@@ -7,6 +7,7 @@ into a JSON structure suitable for database storage.
 """
 import json
 from gi.repository import Gtk, GLib, Pango, PangoCairo
+from .customization_dialog import CustomizationDialog
 
 
 class StickyActions:
@@ -130,6 +131,11 @@ class StickyActions:
         layout.set_text(self.buffer.get_text(start, end, False), -1)
         layout.set_width(int(context.get_width() * Pango.SCALE))
         PangoCairo.show_layout(cr, layout)
+
+    def on_customization_clicked(self, _):
+        """Opens the customization dialog."""
+        dialog = CustomizationDialog(self)
+        dialog.present()
 
     def _on_close_requested(self, window) -> bool:
         """

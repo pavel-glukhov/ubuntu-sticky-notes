@@ -104,6 +104,12 @@ class MainWindow(Adw.ApplicationWindow):
         Callback for when settings are changed in the SettingsView.
         Reloads the configuration and updates all open sticky note windows.
         """
+        self.reload_configuration()
+
+    def reload_configuration(self):
+        """
+        Reloads the configuration from disk and propagates changes to all open sticky notes.
+        """
         from config.config_manager import ConfigManager
         self.config = ConfigManager.load()
 

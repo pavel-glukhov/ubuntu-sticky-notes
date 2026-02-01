@@ -79,6 +79,15 @@ class StickyUI:
         sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL, margin_top=4, margin_bottom=4)
         main_vbox.append(sep)
 
+        # Customization Menu Item
+        box_custom = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        box_custom.append(Gtk.Image.new_from_icon_name("emblem-system-symbolic"))
+        box_custom.append(Gtk.Label(label=builtins._("Customize")))
+        btn_custom = Gtk.Button(child=box_custom, has_frame=False)
+        btn_custom.add_css_class("menu-row-btn")
+        btn_custom.connect("clicked", lambda _: (self.on_customization_clicked(None), popover.popdown()))
+        main_vbox.append(btn_custom)
+
         box_print = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         box_print.append(Gtk.Image.new_from_icon_name("printer-symbolic"))
         box_print.append(Gtk.Label(label=builtins._("Print note")))
